@@ -66,6 +66,11 @@ const MainMenuConfig: Array<MenuItem> = [
                         route:      '/modules/configuracion/usuariospermisos',
                         codigo:     '008',
                     },
+                    {
+                        heading:    'Folio Documento',
+                        route:      '/modules/configuracion/folioDocumento',
+                        codigo:     '041',
+                    },
                 ]
             }
         ]

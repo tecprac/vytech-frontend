@@ -342,6 +342,52 @@ const routes: Array<RouteRecordRaw> = [
                         },
                 ]
             },
+            // Item Configuración Folio Documentos
+            {
+                path: "/modules/configuracion/folioDocumento",
+                name: "foliodocumentos",
+                component: () => import(/* webpackChunkName: "foliodocumentos" */ "@/modules/configuracion/folioDocumento/layouts/FolioDocumentoLayout.vue"),
+                meta: {
+                    pageTitle: "Folio Documentos",
+                    breadcrumbs: ["Configuración","Folio Documento"],
+                    codigo: '041'
+                },
+                redirect: { name: 'foliodocumentolist'},
+                children:[
+                    {
+                        path: 'foliodocumentolist',
+                        name: 'foliodocumentolist',
+                        component: () => import(/* webpackChunkName: "foliodocumentolist" */ "@/modules/configuracion/folioDocumento/pages/ListPage.vue"),
+                        meta: {
+                            pageTitle: "Folio Documentos",
+                        }
+                    },
+                    {
+                        path: 'folio-nuevo/',
+                        name: 'folio-nuevo',
+                        component: () => import(/* webpackChunkName: "folionuevo" */ "@/modules/configuracion/folioDocumento/pages/NuevoPage.vue"),
+                        meta: {
+                            pageTitle: "Folio Documento Nuevo"
+                        }
+                    },
+                    {
+                        path: 'folio-edita/:id',
+                        name: 'folio-edita',
+                        component: () => import(/* webpackChunkName: "folioedita" */ "@/modules/configuracion/folioDocumento/pages/EditaPage.vue"),
+                        meta: {
+                            pageTitle: "Folio Documento Editar"
+                        }
+                    },
+                    {
+                        path: 'folio-consulta/:id',
+                        name: 'folio-consulta',
+                        component: () => import(/* webpackChunkName: "folioconsulta" */ "@/modules/configuracion/folioDocumento/pages/ConsultaPage.vue"),
+                        meta: {
+                            pageTitle: "Folio Documento Consulta"
+                        }
+                    },
+                ]
+            },
             // Menú Taller-Catalogos Marcas
             {
                 path: "/modules/taller/catalogos/marcas",
