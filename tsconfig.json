@@ -1,0 +1,23 @@
+{
+    "extends": "@vue/tsconfig/tsconfig.dom.json",
+    "include": ["env.d.ts", "src/**/*", "src/**/*.vue"],
+    "compilerOptions": {
+        "verbatimModuleSyntax": true,
+        "noImplicitAny": false,
+        "baseUrl": ".",
+        "paths": {
+            "@/*": ["./src/*"]
+        },
+        "allowJs": true,
+        "skipLibCheck": true,
+
+        /* Bundler mode */
+        "allowImportingTsExtensions": true,
+        "resolveJsonModule": true,
+        "isolatedModules": true,
+        "noEmit": true,
+
+        /* Linting */
+        "strict": true,
+    },
+}

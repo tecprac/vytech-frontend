@@ -1,0 +1,49 @@
+// Bootstrap contextual colors
+// Primary colors
+$primary:						#01ACC8 !default;
+$primary-active:				#04bdda !default;
+$primary-light: 				#E9F3FF !default;
+$primary-clarity: 				rgba(#01ACC8, 0.2) !default;
+$primary-inverse: 				$white !default; 
+
+// Secondary colors
+$secondary: 						$gray-200 !default;
+$secondary-active: 				$gray-400 !default;
+$secondary-light: 				#F9F9F9 !default;
+$secondary-clarity:				rgba(#F9F9F9, 0.2) !default; 
+$secondary-inverse:				$gray-800 !default; 
+
+// Light colors
+$light: 						$gray-100 !default;
+$light-active: 					$gray-200 !default;
+$light-light: 					#ffffff !default;
+$light-clarity: 				rgba($white, 0.2) !default;
+$light-inverse:					$gray-800 !default;
+
+// Success colors
+$success: 						#17C653 !default; 
+$success-active: 				#04B440 !default;
+$success-light: 				#DFFFEA !default;
+$success-clarity: 				rgba(#17C653, 0.2) !default;
+$success-inverse: 				$white !default;
+
+// Info colors
+$info: 							#1B84FF !default;
+$info-active: 					#056EE9 !default;
+$info-light: 					#E9F3FF !default;
+$info-clarity: 					rgba(#1B84FF, 0.2) !default;
+$info-inverse: 					$white !default; 
+
+// Warning colors
+$warning: 						#F6C000 !default; 
+$warning-active: 				#DEAD00 !default;
+$warning-light: 				#FFF8DD !default;
+$warning-clarity: 				rgba(#F6C000, 0.2) !default;
+$warning-inverse: 				$white !default;
+
+// Danger colors
+$danger: 						#F8285A !default; 
+$danger-active: 				#D81A48 !default;
+$danger-light: 					#FFEEF3 !default;
+$danger-clarity: 				rgba(#F8285A, 0.2) !default;
+$danger-inverse: 				$white !default;
