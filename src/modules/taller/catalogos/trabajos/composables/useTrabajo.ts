@@ -3,6 +3,9 @@ import { useQuery,useMutation } from '@tanstack/vue-query';
 import ApiService from "@/core/services/ApiService";
 import type { Trabajo } from '../interfaces/interfaces';
 import type { Division } from '@/modules/taller/catalogos/divisiones/interfaces/interfaces';
+import type { SatClaveProdServ } from '@/modules/sat/catalogos/claveprodserv/interfaces/interfaces';
+import type { SatClaveUnidad } from '@/modules/sat/catalogos/claveunidad/interfaces/interfaces';
+import type { SatObjetoImpuesto } from '@/modules/sat/catalogos/objetoimpuesto/interfaces/interfaces';
 import { useToast } from 'primevue/usetoast';
 
 const getregistro = async( id:number ):Promise<Trabajo> => {
@@ -12,12 +15,25 @@ const getregistro = async( id:number ):Promise<Trabajo> => {
         return data;
     } else {
         const newRegistro:Trabajo = {
-            id:             0,
-            descripcion:    '',
-            division_id:    0,
-            horasestandar:  0,
-            ficha_tecnica:  '',
-            activo:         true,
+            id:                 0,
+            descripcion:        '',
+            division_id:        0,
+            horasestandar:      0,
+            ficha_tecnica:      '',
+            codigo:             '',
+            costo_reposicion:   0,
+            margen_utilidad:    0,
+            precio:             0,
+            estatus:            'Activo',
+            descvariable:       false,
+            claveprodserv_id:   0,
+            claveunidad_id:     0,
+            objetoimpuesto_id:  0,
+            impiva:             16,
+            impiesps:           0,
+            retencion_isr:      0,
+            retencion_iva:      0,
+            activo:             true,
         }
         return newRegistro;
     }
@@ -45,11 +61,24 @@ const deleteRegistro =async ( registro:Trabajo ):Promise<Trabajo> => {
 const useTrabajo = ( id: number) => {
 
     const registro              = ref<Trabajo>({
-                                    id:             0,
-                                    descripcion:    '',
-                                    division_id:    0,
-                                    horasestandar:  0,
-                                    ficha_tecnica:  '',
+                                    id:                 0,
+                                    descripcion:        '',
+                                    division_id:        0,
+                                    horasestandar:      0,
+                                    ficha_tecnica:      '',
+                                    codigo:             '',
+                                    costo_reposicion:   0,
+                                    margen_utilidad:    0,
+                                    precio:             0,
+                                    estatus:            'Activo',
+                                    descvariable:       false,
+                                    claveprodserv_id:   0,
+                                    claveunidad_id:     0,
+                                    objetoimpuesto_id:  0,
+                                    impiva:             16,
+                                    impiesps:           0,
+                                    retencion_isr:      0,
+                                    retencion_iva:      0,
                                     activo:         true,
                                 });
     const MensajeError          = ref<string>('');
@@ -60,7 +89,34 @@ const useTrabajo = ( id: number) => {
                                     activo: true
                                 })
     const divisionesfiltradas   = ref<Division[]>([]);
-
+    const satprodservfiltrados  = ref<SatClaveProdServ[]>([]);
+    const selectedprodserv      = ref<SatClaveProdServ>({
+                                    id:                 0,
+                                    c_claveprodserv:    '',
+                                    descripcion:        '',
+                                    ini_vigencia:       null,
+                                    fin_vigencia:       null,
+                                    activo:             true,
+                                });
+    const satclaveunidadfiltradas = ref<SatClaveUnidad[]>([]);
+    const selectedclaveunidad   = ref<SatClaveUnidad>({
+                                    id:             0,
+                                    c_claveunidad:  '',
+                                    nombre:         '',
+                                    ini_vigencia:   null,
+                                    fin_vigencia:   null,
+                                    activo:         true
+                                });
+    const satobjetosimpuestos   = ref<SatObjetoImpuesto[]>([]);
+    const selectobjetoimpuesto  = ref<SatObjetoImpuesto>({
+                                    id:             0,
+                                    c_objetoimp:    '',
+                                    descripcion:    '',
+                                    ini_vigencia:   null,
+                                    fin_vigencia:   null,
+                                    activo:         true,
+                                });
+    
     const { isPending, data, isError } = useQuery({
         queryKey:    ['trabajo', id],
         queryFn:    () => getregistro(id),
@@ -68,19 +124,37 @@ const useTrabajo = ( id: number) => {
     });
 
     onMounted(async () => {
-        // isPending.value = true;
-        // if (registro.value.id > 0) {
-        //     const response = await ApiService.get2(`Divisiones/GetById/${id}`,null);
-        //     selecteddivisiones.value = <Division>response.data;
-        // }
-        // isPending.value = false;
+        satobjetosimpuestos.value.splice(0);
+
+        isPending.value = true;
+        const response = await ApiService.get2(`SatObjetoImp/listado`,null);
+        satobjetosimpuestos.value = <SatObjetoImpuesto[]>response.data;
+        const tempobjimp:SatObjetoImpuesto[] = satobjetosimpuestos.value.filter(item => item.c_objetoimp=='02');
+        if (tempobjimp) selectobjetoimpuesto.value = tempobjimp[0];
+        isPending.value = false;
     })
 
-    const buscarDivisiones = async(event:any) => {
+    const buscarDivisiones = async (event:any) => {
         if (event.query.trim().length) {
             const response = await ApiService.get2('Divisiones/SearchByField/descripcion/'+event.query,null)
             const marcas:Division[] = response.data;
             divisionesfiltradas.value = marcas;
+        } 
+    }
+
+    const buscarClaveProdServ = async (event:any) => {
+        if (event.query.trim().length) {
+            const response = await ApiService.get2('SatClaveProdServ/SearchByField/descripcion/'+event.query,null)
+            const marcas:SatClaveProdServ[] = response.data;
+            satprodservfiltrados.value = marcas;
+        } 
+    }
+
+    const buscarClaveUnidad = async (event:any) => {
+        if (event.query.trim().length) {
+            const response = await ApiService.get2('SatClaveUnidad/SearchByField/nombre/'+event.query,null)
+            const marcas:SatClaveUnidad[] = response.data;
+            satclaveunidadfiltradas.value = marcas;
         } 
     }
     
@@ -93,11 +167,24 @@ const useTrabajo = ( id: number) => {
                                                         life:       3500
                                                     })
                                                     registro.value = {
-                                                        id:             0,
-                                                        descripcion:    '',
-                                                        division_id:    0,
-                                                        horasestandar:  0,
-                                                        ficha_tecnica:  '',
+                                                        id:                 0,
+                                                        descripcion:        '',
+                                                        division_id:        0,
+                                                        horasestandar:      0,
+                                                        ficha_tecnica:      '',
+                                                        codigo:             '',
+                                                        costo_reposicion:   0,
+                                                        margen_utilidad:    0,
+                                                        precio:             0,
+                                                        estatus:            'Activo',
+                                                        descvariable:       false,
+                                                        claveprodserv_id:   0,
+                                                        claveunidad_id:     0,
+                                                        objetoimpuesto_id:  0,
+                                                        impiva:             16,
+                                                        impiesps:           0,
+                                                        retencion_isr:      0,
+                                                        retencion_iva:      0,
                                                         activo:         true,
                                                     }
                                                 },
@@ -155,7 +242,11 @@ const useTrabajo = ( id: number) => {
             registro.value = {...data.value};
             if (id > 0) {
                 const response = await ApiService.get2(`Divisiones/GetById/${registro.value.division_id}`,null);
-                selecteddivision.value = <Division>response.data;
+                selecteddivision.value  = <Division>response.data;
+                const resclaveprodserv  = await ApiService.get2(`SatClaveProdServ/GetById/${registro.value.claveprodserv_id}`,null);
+                selectedprodserv.value  = <SatClaveProdServ>resclaveprodserv.data;
+                const resclaveunidad    = await ApiService.get2(`SatClaveUnidad/GetById/${registro.value.claveunidad_id}`,null);
+                selectedclaveunidad.value  = <SatClaveUnidad>resclaveunidad.data;
             }
         }
             
@@ -171,6 +262,12 @@ const useTrabajo = ( id: number) => {
         MensajeError,
         selecteddivision,
         divisionesfiltradas,
+        satprodservfiltrados,
+        selectedprodserv,
+        satobjetosimpuestos,
+        selectobjetoimpuesto,
+        satclaveunidadfiltradas,
+        selectedclaveunidad,
         
         newRegistro:        dataMutationNew.mutate,
         updateRegistro:     dataMutationUpdate.mutate,
@@ -185,6 +282,8 @@ const useTrabajo = ( id: number) => {
         isDeletingSuccess:  computed( () => dataMutationDelete.isSuccess.value),
         isErrorDeleting:    computed( () => dataMutationDelete.isError.value),
         buscarDivisiones,
+        buscarClaveProdServ,
+        buscarClaveUnidad,
     }
 }
 

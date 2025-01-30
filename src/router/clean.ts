@@ -972,14 +972,6 @@ const routes: Array<RouteRecordRaw> = [
                             pageTitle: "Trabajo Consulta"
                         }
                     },
-                    {
-                        path: 'trabajo-elimina/:id',
-                        name: 'trabajo-elimina',
-                        component: () => import(/* webpackChunkName: "trabajoelimina" */ "@/modules/taller/catalogos/trabajos/pages/EliminaPage.vue"),
-                        meta: {
-                            pageTitle: "Trabajo Elimina"
-                        }
-                    },
                 ]
             },
             // Menú Taller-Catalogos Unidad
@@ -1078,6 +1070,52 @@ const routes: Array<RouteRecordRaw> = [
                         component: () => import(/* webpackChunkName: "clienteedita" */ "@/modules/administracion/catalogos/clientes/pages/EditaPage.vue"),
                         meta: {
                             pageTitle: "Cliente Editar"
+                        }
+                    },
+                ]
+            },
+            // Menú Administración-Catalogos Unidad Medida
+            {
+                path: "/modules/administracion/catalogos/unidadmedida",
+                name: "unidadmedida",
+                component: () => import(/* webpackChunkName: "unidadmedida" */ "@/modules/administracion/catalogos/unidadmedida/layouts/UnidadMedidaLayout.vue"),
+                meta: {
+                    pageTitle: "Unidades de Medida",
+                    breadcrumbs: ["Administración","Catalogos","Unidades de Medida"],
+                    codigo: '042'
+                },
+                redirect: { name: 'unidadmedidalist'},
+                children:[
+                    {
+                        path: 'unidadmedidalist',
+                        name: 'unidadmedidalist',
+                        component: () => import(/* webpackChunkName: "unidadmedidalist" */ "@/modules/administracion/catalogos/unidadmedida/pages/ListPage.vue"),
+                        meta: {
+                            pageTitle: "Unidades de Medida",
+                        }
+                    },
+                    {
+                        path: 'unidadmedida-nuevo/',
+                        name: 'unidadmedida-nuevo',
+                        component: () => import(/* webpackChunkName: "unidadmedidanuevo" */ "@/modules/administracion/catalogos/unidadmedida/pages/NuevoPage.vue"),
+                        meta: {
+                            pageTitle: "Unidades de Medida Nuevo"
+                        }
+                    },
+                    {
+                        path: 'cliente-consulta/:id',
+                        name: 'unidadmedida-consulta',
+                        component: () => import(/* webpackChunkName: "unidadmedidaconsulta" */ "@/modules/administracion/catalogos/unidadmedida/pages/ConsultaPage.vue"),
+                        meta: {
+                            pageTitle: "Unidades de Medida Consulta"
+                        }
+                    },
+                    {
+                        path: 'unidadmedida-edita/:id',
+                        name: 'unidadmedida-edita',
+                        component: () => import(/* webpackChunkName: "unidadmedidaedita" */ "@/modules/administracion/catalogos/unidadmedida/pages/EditaPage.vue"),
+                        meta: {
+                            pageTitle: "Unidades de Medida Editar"
                         }
                     },
                 ]

@@ -35,14 +35,24 @@ const {
     dialogMarca,
     tabActiva,
     file_img,
-
+    file_pdf,
+    file_pdf2,
+    file_pdf_pdf,
+    file_pdf_pdf2,
+    
     dataMutationNew,
     newRegistro,
     isAdding,
     isAddingSuccess,
     buscarEstados,
     subirArchivo,
-    selectFile
+    selectFile,
+    subirArchivoPDF,
+    selectFile_pdf,
+    selectFile_pdf2,
+    VisualizarPDF,
+    cerrarVisualizarPDF,
+
 } = useTecnico( 0 );
 
 watch( isAddingSuccess, () => {
@@ -57,6 +67,7 @@ watch(isError, () => {
 })
 
 const validarDatos = async (data:Tecnico ) => {
+    console.log(data);
     if (selectedestado.value.id == 0) {
         toast.add({
             severity:   'error',
@@ -101,7 +112,15 @@ const validarDatos = async (data:Tecnico ) => {
         toast.add({
             severity:   'error',
             summary:    'Verificar',
-            detail:     'El campo RFC no puede estar vacío',
+            detail:     'El campo CURP no puede estar vacío',
+            life:       3000
+        });
+        return;
+    } else if (data.pin.length > 4) {
+        toast.add({
+            severity:   'error',
+            summary:    'Verificar',
+            detail:     'El PIN debe ser de máximo 4 caracteres alfanumericos',
             life:       3000
         });
         return;
@@ -109,6 +128,9 @@ const validarDatos = async (data:Tecnico ) => {
     data.estado_id = selectedestado.value.id;
     await subirArchivo();
     data.imagen = registro.value.imagen;
+    data.file_pdf = await subirArchivoPDF(file_pdf.value,'pdf1');
+    data.file_pdf2 = await subirArchivoPDF(file_pdf2.value,'pdf2');
+    data.pin = data.pin.substring(0,4);
     newRegistro(data);
 }
 
@@ -157,13 +179,13 @@ const validarDatos = async (data:Tecnico ) => {
                         </InputText>
                     </div>
                 </div>
-                <div class="row mb-5">
+                <div class="row mb-2">
                     <div class="col-sm-4 fv-row">
                         <label class="required form-label fs-6 fw-semibold mb-2">
                             Fecha Nacimiento
                         </label>
                         <DatePicker v-model="registro.fecha_nacimiento"
-                            show-icon :show-on-focus="false">
+                            show-icon :show-on-focus="false" fluid>
                         </DatePicker>
                     </div>
                     <div class="col-sm-4 fv-row">
@@ -171,16 +193,25 @@ const validarDatos = async (data:Tecnico ) => {
                             RFC
                         </label>
                         <InputMask v-model="registro.rfc" mask="aaaa-999999-***"
-                            placeholder="????-000000-???" :unmask="true"
-                            class="form-control">
+                            placeholder="????-000000-???" :unmask="true" fluid>
                         </InputMask>
                     </div>
                     <div class="col-sm-4 fv-row">
                         <label class="required form-label fs-6 fw-semibold mb-2">
                             CURP
                         </label>
-                        <InputText v-model="registro.curp" maxlength="18"
-                            class="form-control">
+                        <InputText v-model="registro.curp" maxlength="18" fluid>
+                        </InputText>
+                    </div>
+                </div>
+                <div class="row mb-5">
+                    <div class="col-sm-4 fv-row">
+                        <label class="form-label fs-6 fw-semibold mb-2">
+                            NSS
+                            <i class="pi pi-info-circle" style="font-size: 1rem;"
+                                v-tooltip.top="'Numero de Seguridad Social'" />
+                        </label>
+                        <InputText v-model="registro.nss" maxlength="20" fluid>
                         </InputText>
                     </div>
                 </div>
@@ -344,10 +375,11 @@ const validarDatos = async (data:Tecnico ) => {
                                     <label class="form-label fs-6 fw-semibold mb-2">
                                         PIN
                                         <i class="pi pi-info-circle" style="font-size: 1rem;"
-                                            v-tooltip.top="'PIN secreto para validar la identidad del técnico '" />
+                                            v-tooltip.top="'PIN secreto para validar la identidad del técnico. Solo capture 4 caracteres '" />
                                     </label>
                                     <Password v-model="registro.pin" maxlength="4" toggle-mask
-                                        fluid>
+                                        fluid
+                                        medium-regex="^[A-Za-z0-9]{4}$" strong-regex="^[A-Za-z0-9]{4}$">
                                     </Password>
                                 </div>
                             </div>
@@ -392,6 +424,58 @@ const validarDatos = async (data:Tecnico ) => {
                                             <span>Arrastre y suelte aqui la imágen.</span>
                                         </template>
                                     </FileUpload>
+                                </div>
+                                <div class="row mt-3 mb-5">
+                                    <label for="file" class="col-form-label col-sm-2">
+                                        PDF
+                                        <i class="pi pi-info-circle" style="font-size: 1rem;"
+                                        v-tooltip.top="'Puede adjuntar un archivo pdf'" />
+                                    </label>
+                                    <div class="col-sm-4">
+                                        <FileUpload
+                                            ref="file_pdf_pdf"
+                                            :multiple="true"
+                                            name="pdf[]"
+                                            accept="application/pdf"
+                                            :max-file-size="5000000"
+                                            :file-limit="1"
+                                            invalid-file-size-message="El archivo no puede se mayor a 5Mb"
+                                            invalid-file-type-message="Solo puede subir archivo en formato PDF"
+                                            fluid
+                                            :show-upload-button="false"
+                                            custom-upload
+                                            @select="selectFile_pdf"
+                                        >
+                                            <template #empty>
+                                                <span>Arrastre y suelte aqui el archivo.</span>
+                                            </template>
+                                        </FileUpload>
+                                    </div>
+                                    <label for="file" class="col-form-label col-sm-2">
+                                        PDF 2
+                                        <i class="pi pi-info-circle" style="font-size: 1rem;"
+                                        v-tooltip.top="'Puede adjuntar un segundo archivo pdf'" />
+                                    </label>
+                                    <div class="col-sm-4">
+                                        <FileUpload
+                                            ref="file_pdf_pdf2"
+                                            :multiple="true"
+                                            name="pdf[]"
+                                            accept="application/pdf"
+                                            :max-file-size="5000000"
+                                            :file-limit="1"
+                                            invalid-file-size-message="El archivo no puede se mayor a 5Mb"
+                                            invalid-file-type-message="Solo puede subir archivo en formato PDF"
+                                            fluid
+                                            :show-upload-button="false"
+                                            custom-upload
+                                            @select="selectFile_pdf2"
+                                        >
+                                            <template #empty>
+                                                <span>Arrastre y suelte aqui el archivo.</span>
+                                            </template>
+                                        </FileUpload>
+                                    </div>
                                 </div>
                             </div>
                         </TabPanel>

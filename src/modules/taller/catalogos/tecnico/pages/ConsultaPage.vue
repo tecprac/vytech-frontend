@@ -19,6 +19,13 @@ import Tab from 'primevue/tab';
 import TabPanels from 'primevue/tabpanels';
 import TabPanel from 'primevue/tabpanel';
 import Image from 'primevue/image';
+import Dialog from 'primevue/dialog';
+import Divider from 'primevue/divider';
+import VuePdfEmbed from 'vue-pdf-embed'
+
+// optional styles
+import 'vue-pdf-embed/dist/styles/annotationLayer.css'
+import 'vue-pdf-embed/dist/styles/textLayer.css'
 
 const route = useRoute();
 const router = useRouter();
@@ -33,8 +40,13 @@ const {
     selectedestado,
     estadosfiltrados,
     tabActiva,
+    dialogPDFVisor,
+    pdfViewer,
+    pdfDocumento,
 
     buscarEstados,
+    VisualizarPDF,
+    cerrarVisualizarPDF,
 } = useTecnico( +route.params.id );
 
 watch( isUpdatingSuccess, () => {
@@ -93,13 +105,13 @@ watch(isError, () => {
                     </InputText>
                 </div>
             </div>
-            <div class="row mb-5">
+            <div class="row mb-2">
                 <div class="col-sm-4 fv-row">
                     <label class="required form-label fs-6 fw-semibold mb-2">
                         Fecha Nacimiento
                     </label>
                     <DatePicker v-model="registro.fecha_nacimiento" disabled
-                        show-icon :show-on-focus="false">
+                        show-icon :show-on-focus="false" fluid>
                     </DatePicker>
                 </div>
                 <div class="col-sm-4 fv-row">
@@ -120,6 +132,17 @@ watch(isError, () => {
                     </InputText>
                 </div>
             </div>
+            <div class="row mb-5">
+                    <div class="col-sm-4 fv-row">
+                        <label class="form-label fs-6 fw-semibold mb-2">
+                            NSS
+                            <i class="pi pi-info-circle" style="font-size: 1rem;"
+                                v-tooltip.top="'Numero de Seguridad Social'" />
+                        </label>
+                        <InputText v-model="registro.nss" maxlength="20" fluid disabled>
+                        </InputText>
+                    </div>
+                </div>
             <Tabs value="0" @update:value="(value:string | number) => { tabActiva = value.toString() }">
                 <TabList>
                     <Tab value="0" as="div" class="flex items-center gap-2" 
@@ -312,6 +335,33 @@ watch(isError, () => {
                                 <Image :src="imgURL" alt="Imagen Técnico" width="250" preview />
                             </div>
                         </div>
+                        <Divider />
+                        <div class="row mb-2">
+                            <div class="col-sm-2">
+                                <Button
+                                    v-if="registro.file_pdf"
+                                    label="Ver PDF 1"
+                                    @click="VisualizarPDF(registro.file_pdf)"
+                                    icon="pi pi-file-pdf"
+                                    severity="info"
+                                    size="small"
+                                    raised
+                                >
+                                </Button>
+                            </div>
+                            <div class="col-sm-2">
+                                <Button
+                                    v-if="registro.file_pdf2"
+                                    label="Ver PDF 2"
+                                    @click="VisualizarPDF(registro.file_pdf2)"
+                                    icon="pi pi-file-pdf"
+                                    severity="info"
+                                    size="small"
+                                    raised
+                                >
+                                </Button>
+                            </div>
+                        </div>
                     </TabPanel>
                 </TabPanels>
             </Tabs>
@@ -324,6 +374,52 @@ watch(isError, () => {
             </Button>
         </div>
     </div>
+    <Dialog
+        v-model:visible="dialogPDFVisor" 
+        modal
+        maximizable
+        :closable="false"
+        header="Visualización del Archivo PDF" 
+        :style="{width: '80vw'}"
+        :breakpoints="{ '960px': '75vw', '641px': '100vw' }"
+        @show="() => {console.log('Test')}"
+        :pt = " { 
+                    header: { class: 'bg-secondary' },
+                    content: { style: 'height: 660px'},
+                    footer: { class: 'bg-secondary' } 
+                }"
+    >
+        <VuePdfEmbed ref="pdfViewer" 
+            :annotation-layer="true" 
+            :text-layer="true" 
+            :source="pdfDocumento"
+            >
+        </VuePdfEmbed>
+        <template #footer>
+            <Button
+                raised
+                @click="() => { pdfViewer.download(registro.rfc) }"
+                severity="info"
+                label="Descargar PDF"
+                :pt="{
+                    root: { class: 'mt-2'}
+                }"
+            >
+
+            </Button>
+            <Button 
+                raised
+                @click="cerrarVisualizarPDF"
+                label="Cerrar"
+                severity="success"
+                icon="pi pi-times"
+                :pt="{
+                    root: { class: 'mt-2'}
+                }"
+            >
+            </Button>
+        </template>
+    </Dialog>
     <Toast/>
     <Toast group="uploadfile">
         <template #message="slotProps">

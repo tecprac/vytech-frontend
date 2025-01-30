@@ -340,23 +340,32 @@ const MainMenuConfig: Array<MenuItem> = [
                         seccion:    "ADMINISTRACION",
                         subseccion: "CATALOGOS",
                         sub:[
-                            {
-                                heading:    'Clientes',
-                                route:      '/modules/administracion/catalogos/clientes',
-                                codigo:     '040',
-                            }
+                                {
+                                    heading:    'Unidades de Peso y Medida',
+                                    route:      '/modules/administracion/catalogos/unidadmedida',
+                                    codigo:     '042',
+                                },
+                                {
+                                    heading:    'Clientes',
+                                    route:      '/modules/administracion/catalogos/clientes',
+                                    codigo:     '040',
+                                }
                         ]
                         
                     },
                     {
                         sectionTitle: "modules",
                         route:      "/administracion/modulos",
-                        pages:[]
+                        seccion:    "ADMINISTRACION",
+                        subseccion: "MODULOS",
+                        sub:[]
                     },
                     {
                         sectionTitle: "reports",
                         route:      "/administracion/reportes",
-                        pages:[]
+                        seccion:    "ADMINISTRACION",
+                        subseccion: "REPORTES",
+                        sub:[]
                     },
                 ],
             }

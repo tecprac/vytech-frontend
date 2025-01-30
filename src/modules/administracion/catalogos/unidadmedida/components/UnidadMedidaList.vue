@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { getAssetPath } from "@/core/helpers/assets";
-import type { Trabajo } from '../interfaces/interfaces';
+import type { UnidadMedida } from '../interfaces/interfaces';
 import { useAuthStore } from "@/stores/auth";
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
@@ -14,7 +14,7 @@ export interface Permisos {
 }
 
 interface Props {
-    registros:      Trabajo[],
+    registros:      UnidadMedida[],
     currentBuscar:  string,
 }
 
@@ -40,12 +40,6 @@ const tableHeader   = ref([
         class:          "text-start"
     },
     {
-        columnLabel:    'División',
-        columnField:    'talle_division',
-        sortEnabled:    true,
-        class:          "text-start"
-    },
-    {
         columnLabel:    'Estado',
         columnField:    'activo',
         sortEnabled:    true,
@@ -64,7 +58,7 @@ const store = useAuthStore();
 
 const permisos = ref<Permisos[]>([]);
 const sPermisos = ref<string>('');
-permisos.value = store.permisos.filter((element: any) => element.codigo == '020'); // Modulo Catalogos Trabajos
+permisos.value = store.permisos.filter((element: any) => element.codigo == '042'); // Administración->Catalogo->Unidad Medida
 permisos.value.forEach(element => {
      sPermisos.value += element.permiso+',';
 });
@@ -75,10 +69,10 @@ permisos.value.forEach(element => {
     <div class="card-header border-0 pt-6">
         <div class="card-toolbar">
             <div class="d-flex justify-content-end" data-kt-customer-table-toolbar="base">
-                <Button label='Nuevo Trabajo' severity="Primary" icon="pi pi-plus" raised
-                    @click="() => { router.push({name: 'trabajo-nuevo', params: {id: 0}}) }"
+                <Button label='Nueva Unidad Medida' severity="Primary" icon="pi pi-plus" raised
+                    @click="() => { router.push({name: 'unidadmedida-nuevo', params: {id: 0}}) }"
                     v-if="sPermisos.indexOf('Nuevo') >= 0 "
-                    v-tooltip-top="'Registrar nuevo Trabajo'">
+                    v-tooltip-top="'Registrar una nueva Unidad Medida'">
                 </Button>
             </div>
         </div>
@@ -89,7 +83,7 @@ permisos.value.forEach(element => {
                 </span>
                 <FloatLabel variant="on">
                     <InputText type="text" id="search" v-model="search" @input="emits('buscarChanged',search)" variant="filled" class="ms-10"></InputText>
-                    <label for="search" class="ms-10">Buscar en Trabajos</label>
+                    <label for="search" class="ms-10">Buscar en Unidad Medida</label>
                 </FloatLabel>
             </div>
         </div>
@@ -111,19 +105,16 @@ permisos.value.forEach(element => {
                             <template v-if="col.columnField === 'actions'">
                                 <Button severity="info" icon="pi pi-search" raised
                                     v-if="sPermisos.indexOf('Consultar') >= 0 "
-                                    @click="() => { router.push({name: 'trabajo-consulta', params: {id: item.id}}) }"
+                                    @click="() => { router.push({name: 'unidadmedida-consulta', params: {id: item.id}}) }"
                                     v-tooltip.top="{ value: 'Consultar', showDelay: 1000, hideDelay: 300}"
                                     class="me-3">
                                 </Button>
                                 <Button severity="warn" icon="pi pi-pencil" raised
                                     v-if="sPermisos.indexOf('Editar') >= 0 "
-                                    @click="() => { router.push({name: 'trabajo-edita', params: {id: item.id}}) }"
+                                    @click="() => { router.push({name: 'unidadmedida-edita', params: {id: item.id}}) }"
                                     v-tooltip.top="{ value: 'Editar', showDelay: 1000, hideDelay: 300}"
                                     class="me-3">
                                 </Button>
-                            </template>
-                            <template v-else-if="col.columnField=='talle_division'">
-                                {{  item[col.columnField]!['division']  }}
                             </template>
                             <template v-else-if="col.columnField=='activo'">
                                 {{  item[col.columnField] ? 'ACTIVO' : 'INACTIVO'  }}

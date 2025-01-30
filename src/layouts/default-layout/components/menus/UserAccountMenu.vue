@@ -47,7 +47,7 @@
                     <span
                         class="fs-8 rounded bg-light px-3 py-2 position-absolute translate-middle-y top-50 end-0">
                         {{ currentLangugeLocale.name }}
-                        <img class="w-15px h-15px rounded-1 ms-2" :src="currentLangugeLocale.flag" alt="Prodiesel"/>
+                        <img class="w-15px h-15px rounded-1 ms-2" :src="currentLangugeLocale.flag" alt="VYTechServices"/>
                     </span>
                 </span>
             </router-link>
@@ -64,7 +64,7 @@
                 >
                     <span class="symbol symbol-20px me-4">
                     <img class="rounded-1"
-                        :src="getAssetPath('media/flags/united-states.svg')" alt="Prodiesel" />
+                        :src="getAssetPath('media/flags/united-states.svg')" alt="VYTechServices" />
                     </span>
                     English
                 </a>
@@ -78,7 +78,7 @@
                         class="menu-link d-flex px-5"
                         :class="{ active: currentLanguage === 'es' }">
                         <span class="symbol symbol-20px me-4">
-                            <img class="rounded-1" :src="getAssetPath('media/flags/mexico.svg')" alt="Prodiesel" />
+                            <img class="rounded-1" :src="getAssetPath('media/flags/mexico.svg')" alt="VYTechServices" />
                         </span>
                         Español
                     </a>
@@ -131,6 +131,8 @@ export default defineComponent({
             convertTMZdatetime
         } = useUtilerias();
 
+        const appName = import.meta.env.VITE_APP_NAME;
+
         i18n.locale.value = localStorage.getItem("lang")
             ? (localStorage.getItem("lang") as string)
             : "es";
@@ -166,13 +168,15 @@ export default defineComponent({
         });
 
         return {
-            signOut,
-            setLang,
+            appName,
             currentLanguage,
             currentLangugeLocale,
             countries,
-            getAssetPath,
             store,
+
+            signOut,
+            setLang,
+            getAssetPath,
             convertTMZdatetime
         };
     },

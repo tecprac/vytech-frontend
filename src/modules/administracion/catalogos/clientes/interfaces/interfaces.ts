@@ -39,6 +39,7 @@ export interface Cliente {
     observaciones:          string;
     latitud:                string;
     longitud:               string;
+    enviar_factura:         boolean;
     add_addenda?:           adm_addenda | null;
     sat_pais?:              sat_pais | null;
     sat_estado?:            sat_estado | null;

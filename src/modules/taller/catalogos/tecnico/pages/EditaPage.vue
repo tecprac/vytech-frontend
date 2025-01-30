@@ -22,7 +22,13 @@ import Tab from 'primevue/tab';
 import TabPanels from 'primevue/tabpanels';
 import TabPanel from 'primevue/tabpanel';
 import Image from 'primevue/image';
+import Divider from 'primevue/divider';
+import VuePdfEmbed from 'vue-pdf-embed'
+import Dialog from 'primevue/dialog';
 
+// optional styles
+import 'vue-pdf-embed/dist/styles/annotationLayer.css'
+import 'vue-pdf-embed/dist/styles/textLayer.css'
 
 const route = useRoute();
 const router = useRouter();
@@ -40,11 +46,23 @@ const {
     estadosfiltrados,
     file_img,
     tabActiva,
+    file_pdf,
+    file_pdf2,
+    file_pdf_pdf,
+    file_pdf_pdf2,
+    dialogPDFVisor,
+    pdfDocumento,
+    pdfViewer,
 
     updateRegistro,
     buscarEstados,
     subirArchivo,
-    selectFile
+    selectFile,
+    subirArchivoPDF,
+    selectFile_pdf,
+    selectFile_pdf2,
+    VisualizarPDF,
+    cerrarVisualizarPDF,
 } = useTecnico( +route.params.id );
 
 watch( isUpdatingSuccess, () => {
@@ -103,7 +121,15 @@ const validarDatos = async (data:Tecnico ) => {
         toast.add({
             severity:   'error',
             summary:    'Verificar',
-            detail:     'El campo RFC no puede estar vacío',
+            detail:     'El campo CURP no puede estar vacío',
+            life:       3000
+        });
+        return;
+    } else if (data.pin.length > 4) {
+        toast.add({
+            severity:   'error',
+            summary:    'Verificar',
+            detail:     'El PIN debe ser de máximo 4 caracteres alfanumericos',
             life:       3000
         });
         return;
@@ -111,6 +137,9 @@ const validarDatos = async (data:Tecnico ) => {
     data.estado_id = selectedestado.value.id;
     await subirArchivo();
     data.imagen = registro.value.imagen;
+    data.file_pdf = await subirArchivoPDF(file_pdf.value,'pdf1');
+    data.file_pdf2 = await subirArchivoPDF(file_pdf2.value,'pdf2');
+    data.pin = data.pin.substring(0,4);
     updateRegistro(data);
 }
 
@@ -375,6 +404,34 @@ const validarDatos = async (data:Tecnico ) => {
                                     <Image :src="imgURL" alt="Imagen Técnico" width="250" preview />
                                 </div>
                             </div>
+                            <Divider />
+                            <div class="row mb-2">
+                                <div class="col-sm-2">
+                                    <Button
+                                        v-if="registro.file_pdf"
+                                        label="Ver PDF 1"
+                                        @click="VisualizarPDF(registro.file_pdf)"
+                                        icon="pi pi-file-pdf"
+                                        severity="info"
+                                        size="small"
+                                        raised
+                                    >
+                                    </Button>
+                                </div>
+                                <div class="col-sm-2">
+                                    <Button
+                                        v-if="registro.file_pdf2"
+                                        label="Ver PDF 2"
+                                        @click="VisualizarPDF(registro.file_pdf2)"
+                                        icon="pi pi-file-pdf"
+                                        severity="info"
+                                        size="small"
+                                        raised
+                                    >
+                                    </Button>
+                                </div>
+                            </div>
+                            <Divider />
                             <div class="row mb-5">
                                 <label for="file" class="col-form-label col-sm-2">
                                     Subir Imagen (png,jpg,gif)
@@ -402,6 +459,58 @@ const validarDatos = async (data:Tecnico ) => {
                                     </FileUpload>
                                 </div>
                             </div>
+                            <div class="row mt-3 mb-5">
+                                <label for="file" class="col-form-label col-sm-2">
+                                    PDF
+                                    <i class="pi pi-info-circle" style="font-size: 1rem;"
+                                    v-tooltip.top="'Puede adjuntar un archivo pdf'" />
+                                </label>
+                                <div class="col-sm-4">
+                                    <FileUpload
+                                        ref="file_pdf_pdf"
+                                        :multiple="true"
+                                        name="pdf[]"
+                                        accept="application/pdf"
+                                        :max-file-size="5000000"
+                                        :file-limit="1"
+                                        invalid-file-size-message="El archivo no puede se mayor a 5Mb"
+                                        invalid-file-type-message="Solo puede subir archivo en formato PDF"
+                                        fluid
+                                        :show-upload-button="false"
+                                        custom-upload
+                                        @select="selectFile_pdf"
+                                    >
+                                        <template #empty>
+                                            <span>Arrastre y suelte aqui el archivo.</span>
+                                        </template>
+                                    </FileUpload>
+                                </div>
+                                <label for="file" class="col-form-label col-sm-2">
+                                    PDF 2
+                                    <i class="pi pi-info-circle" style="font-size: 1rem;"
+                                    v-tooltip.top="'Puede adjuntar un segundo archivo pdf'" />
+                                </label>
+                                <div class="col-sm-4">
+                                    <FileUpload
+                                        ref="file_pdf_pdf2"
+                                        :multiple="true"
+                                        name="pdf[]"
+                                        accept="application/pdf"
+                                        :max-file-size="5000000"
+                                        :file-limit="1"
+                                        invalid-file-size-message="El archivo no puede se mayor a 5Mb"
+                                        invalid-file-type-message="Solo puede subir archivo en formato PDF"
+                                        fluid
+                                        :show-upload-button="false"
+                                        custom-upload
+                                        @select="selectFile_pdf2"
+                                    >
+                                        <template #empty>
+                                            <span>Arrastre y suelte aqui el archivo.</span>
+                                        </template>
+                                    </FileUpload>
+                                </div>
+                            </div>
                         </TabPanel>
                     </TabPanels>
                 </Tabs>
@@ -420,6 +529,52 @@ const validarDatos = async (data:Tecnico ) => {
             </div>
         </form>
     </div>
+    <Dialog
+        v-model:visible="dialogPDFVisor" 
+        modal
+        maximizable
+        :closable="false"
+        header="Visualización del Archivo PDF" 
+        :style="{width: '80vw'}"
+        :breakpoints="{ '960px': '75vw', '641px': '100vw' }"
+        @show="() => {console.log('Test')}"
+        :pt = " { 
+                    header: { class: 'bg-secondary' },
+                    content: { style: 'height: 660px'},
+                    footer: { class: 'bg-secondary' } 
+                }"
+    >
+        <VuePdfEmbed ref="pdfViewer" 
+            :annotation-layer="true" 
+            :text-layer="true" 
+            :source="pdfDocumento"
+            >
+        </VuePdfEmbed>
+        <template #footer>
+            <Button
+                raised
+                @click="() => { pdfViewer.download(registro.rfc) }"
+                severity="info"
+                label="Descargar PDF"
+                :pt="{
+                    root: { class: 'mt-2'}
+                }"
+            >
+
+            </Button>
+            <Button 
+                raised
+                @click="cerrarVisualizarPDF"
+                label="Cerrar"
+                severity="success"
+                icon="pi pi-times"
+                :pt="{
+                    root: { class: 'mt-2'}
+                }"
+            >
+            </Button>
+        </template>
+    </Dialog>
     <Toast/>
     <Toast group="uploadfile">
         <template #message="slotProps">

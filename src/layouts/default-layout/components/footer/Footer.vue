@@ -10,10 +10,10 @@
             <!--begin::Copyright-->
             <div class="text-gray-900 order-2 order-md-1">
                 <span class="text-muted fw-semibold me-1">2025©</span>
-                <a href="https://leonprodiesel.com.mx"
+                <a href="https://vytechservices.com.mx"
                     target="_blank"
                     class="text-gray-800 text-hover-primary">
-                    VYTechServices Ver. {{ latestVersion }}
+                    {{ appName }} Ver. {{ latestVersion }}
                 </a>
             </div>
             <!--end::Copyright-->
@@ -44,6 +44,7 @@ export default defineComponent({
     setup() {
 
         const latestVersion     = ref<number>();
+        const appName           = ref<string>(import.meta.env.VITE_APP_NAME);
 
         onMounted(() => {
             fetch(`/meta.json?${new Date().getTime()}`, { cache: 'no-cache' })
@@ -54,6 +55,8 @@ export default defineComponent({
         });
 
         return {
+            appName,
+
             footerWidthFluid,
             footerDisplay,
             latestVersion

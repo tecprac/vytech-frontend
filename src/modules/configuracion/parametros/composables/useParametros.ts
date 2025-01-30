@@ -22,6 +22,7 @@ const useParametros = () => {
                                 observaciones:          '',
                         });
 
+    const appName = ref<string>(import.meta.env.VITE_APP_NAME); 
 
     const getVersionActual = async ():Promise<Version> => {
         ApiService.setHeader();
@@ -33,13 +34,13 @@ const useParametros = () => {
             if (error.response.status === 401) {
                 if (error.response.data.message === 'Token Invalido') {
                     Swal.fire({
-                        title:  'ProDiesel',
+                        title:  appName.value,
                         icon:   "warning",
                         html:   "<b>La sesión ha finalizado.<b><br> Vuelva a ingresar por favor",
                         showDenyButton: false,
                         showCancelButton: false,
                         confirmButtonText: 'Enterado',
-                        confirmButtonColor: "#01ACC8",
+                        confirmButtonColor: "#870000",
                         allowEscapeKey: false,
                         allowOutsideClick: false,
                     }).then((result) => {
@@ -52,7 +53,7 @@ const useParametros = () => {
                 }
                 if (error.response.data.message === 'El usuario ya no esta activo') {
                     Swal.fire({
-                        title:  'ProDiesel',
+                        title:  appName.value  ,
                         icon:   "error",
                         html:   "<b>Su usuario ha sido deshabilitado<b> ",
                         showDenyButton: false,

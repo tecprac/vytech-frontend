@@ -24,6 +24,9 @@ export interface Tecnico {
     activo:             boolean;
     email:              string;
     pin:                string;
+    nss:                string;
+    file_pdf:           string;
+    file_pdf2:          string;
     sat_estado?:        sat_estado | null;
 }
 

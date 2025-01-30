@@ -37,6 +37,9 @@ const getregistro = async( id:number ):Promise<Tecnico> => {
             imagen:             '',
             email:              '',
             pin:                '',
+            nss:                "",
+            file_pdf:           "",
+            file_pdf2:          "",
             activo:             true,
             sat_estado:         null,
         }
@@ -92,6 +95,9 @@ const useTecnico = ( id: number) => {
                                 imagen:             '',
                                 email:              '',
                                 pin:                '',
+                                nss:                "",
+                                file_pdf:           "",
+                                file_pdf2:          "",
                                 activo:             true,
                                 sat_estado:         null,
                             });
@@ -113,6 +119,12 @@ const useTecnico = ( id: number) => {
     const imgURL            = ref();
     const pdfViewer         = ref();
     const tabActiva         = ref<string>('0');
+    const file_pdf_pdf      = ref();
+    const file_pdf_pdf2     = ref();
+    const file_pdf          = ref();
+    const file_pdf2         = ref();
+    const filePDF           = ref(null);
+    const pdfDocumento      = ref();
 
     const { isPending, data, isError } = useQuery({
         queryKey:    ['tecnico', id],
@@ -131,6 +143,45 @@ const useTecnico = ( id: number) => {
 
     const selectFile = ($event:any) => {
         file.value = $event.files[0];
+    }
+
+    const selectFile_pdf = (event:any) => {
+        file_pdf.value = event.files[0];
+    }
+
+    const selectFile_pdf2 = (event:any) => {
+        file_pdf2.value = event.files[0];
+    }
+
+    const subirArchivoPDF = async (documento: any, tipoarchivo: string) => {
+        if(documento) {
+            try {
+                toast.add({
+                    severity:   'info',
+                    summary:    `Subiendo archivo ${tipoarchivo} ...`,
+                    group:      'uploadfile',
+                });
+                const formData = new FormData();
+                if (tipoarchivo.indexOf('pdf1') >= 0) formData.append('file',file_pdf.value);
+                if (tipoarchivo.indexOf('fpd2') >= 0)  formData.append('file',file_pdf2.value);
+                formData.append('file',documento);
+                const { data } = await ApiService.post('upload/single/tecnicos',formData);
+                toast.removeGroup('uploadfile');
+                if (tipoarchivo.indexOf('pdf1') >= 0) file_pdf_pdf.value.clear();
+                if (tipoarchivo.indexOf('pdf2') >= 0)  file_pdf_pdf2.value.clear();
+                return data.filename;
+            } catch (error) {
+                console.log(error);
+                toast.removeGroup('uploadfile');
+                toast.add({
+                    severity:   'warn',
+                    summary:    'Error archivo',
+                    detail:     'Se genero un error al subir el archivo '+tipoarchivo,
+                    life:       3500
+                });
+                return '';
+            }
+        }
     }
 
     const subirArchivo = async () => {
@@ -155,6 +206,52 @@ const useTecnico = ( id: number) => {
                 })
             }
             file_img.value.clear();
+        }
+    }
+
+    const cerrarVisualizarPDF = () => {
+        if (pdfDocumento.value) {
+            dialogPDFVisor.value = false;
+            URL.revokeObjectURL(pdfDocumento.value);
+            pdfDocumento.value = null;
+        }
+        
+    }
+
+    const VisualizarPDF = async (filename: string) => {
+        if (filename) {
+            toast.add({
+                severity:   'info',
+                summary:    "Descargando archivo pdf...",
+                group:      'uploadfile',
+            })
+            filePDF.value = null;
+            try {
+                const response = await ApiService.get2('download/tecnicos/'+filename,{responseType: 'arraybuffer'});
+                if (response.status == 200) {
+                    filePDF.value = response.data;
+                    // const blob = new Blob([response.data], { type: 'application/pdf' });
+                    pdfDocumento.value = URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+                    toast.removeGroup('uploadfile');
+                    dialogPDFVisor.value = true;
+                } else {
+                    toast.removeGroup('uploadfile');
+                    toast.add({
+                        severity:   "error",
+                        summary:    "Visualizar PDF",
+                        detail:     "No se logro descargar el archivo solicitado\n. Intentelo mas tarde.",
+                        life:       3500,
+                    })
+                }    
+            } catch (error) {
+                toast.removeGroup('uploadfile');
+                toast.add({
+                    severity:   "error",
+                    summary:    "Visualizar PDF",
+                    detail:     "No se logro descargar el archivo solicitado.\n Intentelo mas tarde.",
+                    life:       3500,
+                })
+            }
         }
     }
 
@@ -212,6 +309,9 @@ const useTecnico = ( id: number) => {
                                                         imagen:             '',
                                                         email:              '',
                                                         pin:                '',
+                                                        nss:                "",
+                                                        file_pdf:           "",
+                                                        file_pdf2:          "",
                                                         activo:             true,
                                                         sat_estado:         null,
                                                     }
@@ -296,6 +396,11 @@ const useTecnico = ( id: number) => {
         imgURL,
         pdfViewer,
         tabActiva,
+        file_pdf,
+        file_pdf2,
+        file_pdf_pdf,
+        file_pdf_pdf2,
+        pdfDocumento,
         
         newRegistro:        dataMutationNew.mutate,
         updateRegistro:     dataMutationUpdate.mutate,
@@ -312,6 +417,11 @@ const useTecnico = ( id: number) => {
         buscarEstados,
         subirArchivo,
         selectFile,
+        subirArchivoPDF,
+        selectFile_pdf,
+        selectFile_pdf2,
+        VisualizarPDF,
+        cerrarVisualizarPDF,
     }
 }
 

@@ -296,7 +296,10 @@ const Eliminar = (data: Cliente) => {
                                             </div>
                                             <div class="col-sm-6 fv-row">
                                                 <label for="email_adicional" class="form-label fw-semibold">
-                                                    Email Secundario
+                                                    Email para enviar documentos CFDI
+                                                    <i class="pi pi-info-circle" 
+                                                        style="font-size: 1rem;"
+                                                        v-tooltip.top="'A este correo se enviaran los CFDI (Facturas, Pagos, Notas de Crédito, etc )'" />
                                                 </label>
                                                 <InputText
                                                     v-model="registro.email_adicional"
@@ -377,6 +380,18 @@ const Eliminar = (data: Cliente) => {
                                                     :value="registro.sat_metodopago.c_metodopago+' '+registro.sat_metodopago.metodopago"
                                                     size="small" fluid disabled >
                                                 </InputText>
+                                            </div>
+                                            <label for="enviarfactura" class="col-form-label col-form-label-sm col-sm-3">
+                                                Enviar Factura por correo
+                                                <i class="pi pi-info-circle" 
+                                                    style="font-size: 1rem;"
+                                                    v-tooltip.top="'Al activar esta opción, despues de timbrar el CFDI, será enviando al receptor automaticamente'" />
+                                            </label>
+                                            <div class="col-sm-2">
+                                                <Checkbox
+                                                    v-model="registro.enviar_factura" binary
+                                                    input-id="enviarfactura" fluid disabled
+                                                ></Checkbox>
                                             </div>
                                         </div>
                                         <div class="row mb-2">

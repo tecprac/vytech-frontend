@@ -11,7 +11,6 @@ import Toast from 'primevue/toast';
 import Textarea from 'primevue/textarea';
 import AutoComplete from 'primevue/autocomplete';
 import { useToast } from 'primevue/usetoast';
-import { useAuthStore } from '@/stores/auth';
 import FileUpload from 'primevue/fileupload';
 import ProgressSpinner from 'primevue/progressspinner';
 import Dialog from 'primevue/dialog';
@@ -19,7 +18,6 @@ import MarcaNuevoPage from '../../marcas/pages/MarcaNuevoPage.vue';
 
 const router = useRouter();
 const toast  = useToast();
-const auth   = useAuthStore();
 
 const {
     registro,
@@ -51,13 +49,25 @@ watch(isError, () => {
 })
 
 const validarDatos = async (data:Motor ) => {
-    if (selectedmarca.value.id == 0) {
+    if (data.descripcion.trim().length == 0) {
         toast.add({
             severity:   'error',
             summary:    'Verificar',
-            detail:     'Debe seleccionar una marca',
+            detail:     'La descripción del Motor no puede estar vacía',
             life:       3000
         });
+        return;
+    }
+    try {
+        if (selectedmarca.value.id == 0) {
+            toast.add({ severity:   'error',summary:    'Verificar',
+                detail:     'Debe seleccionar una marca',life:       3000
+            });
+            return;
+        }    
+    } catch (error) {
+        toast.add({ severity:   'error', summary:    'Verificar',
+            detail:     'Debe seleccionar una marca', life: 3000});
         return;
     }
     data.marca_id = selectedmarca.value.id;
@@ -100,6 +110,8 @@ const validarDatos = async (data:Motor ) => {
                             v-model="selectedmarca"
                             option-label="descripcion"
                             :suggestions="marcasfiltradas"
+                            force-selection
+                            auto-option-focus
                             empty-search-message="No existen marcas que coincidan"
                             empty-selection-message="No se ha se leccionado una marca"
                             placeholder="Capture una marca"
