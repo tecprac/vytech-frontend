@@ -1,12 +1,12 @@
 import { ref } from 'vue';
 import { defineStore } from 'pinia';
-import type { UnidadMedida } from '@/modules/administracion/catalogos/unidadmedida/interfaces/interfaces';
+import type { TipoInventario } from '@/modules/almacen/catalogos/tipoinventario/interfaces/interfaces';
 
-export const useUnidadesMedidaStore = defineStore('unidadmedidas', () => {
+export const useTiposInventarioStore = defineStore('tiposinventario', () => {
 
     const currentPage   = ref<number>(1);
     const totalPages    = ref<number>(5);
-    const registros     = ref<UnidadMedida[]>([]);
+    const registros     = ref<TipoInventario[]>([]);
     const currentBuscar = ref<string>('');
 
     return{
@@ -20,7 +20,7 @@ export const useUnidadesMedidaStore = defineStore('unidadmedidas', () => {
         // squareCount: computed( () => count.value * count.value),
 
         // Actions
-        setRegistros( newRegistros: UnidadMedida[]) {
+        setRegistros( newRegistros: TipoInventario[]) {
             registros.value = newRegistros;
         },
         setPage( page: number) {

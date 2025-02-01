@@ -7,7 +7,7 @@
       id="kt_login_signin_form"
       @submit="onSubmitLogin"
       :validation-schema="login"
-      :initial-values="{ email: 'Administrador', password: '' }"
+      :initial-values="{ email: '', password: '' }"
     >
         <div class="d-flex flex-column flex-center py-7 py-lg-15 px-5 px-md-15 w-100">
             <img alt="Logo" :src="getAssetPath('media/logos/custom-1.png')" class="h-60px h-lg-75px" />

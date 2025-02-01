@@ -95,9 +95,9 @@ const MainMenuConfig: Array<MenuItem> = [
                         subseccion: "CATALOGOS",
                         sub: [
                             {
-                                heading:    'Ubiaciones',
-                                route:      '/modules/catalogos/ubicaciones',
-                                codigo:     '002',
+                                heading:    'Tipo Inventario',
+                                route:      '/modules/almacen/catalogos/tipoinventario',
+                                codigo:     '043',
                             },
                         ]
                     },

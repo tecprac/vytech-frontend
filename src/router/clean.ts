@@ -1103,7 +1103,7 @@ const routes: Array<RouteRecordRaw> = [
                         }
                     },
                     {
-                        path: 'cliente-consulta/:id',
+                        path: 'unidadmedida-consulta/:id',
                         name: 'unidadmedida-consulta',
                         component: () => import(/* webpackChunkName: "unidadmedidaconsulta" */ "@/modules/administracion/catalogos/unidadmedida/pages/ConsultaPage.vue"),
                         meta: {
@@ -1116,6 +1116,52 @@ const routes: Array<RouteRecordRaw> = [
                         component: () => import(/* webpackChunkName: "unidadmedidaedita" */ "@/modules/administracion/catalogos/unidadmedida/pages/EditaPage.vue"),
                         meta: {
                             pageTitle: "Unidades de Medida Editar"
+                        }
+                    },
+                ]
+            },
+            // Menú Almacén-Catalogos Tipo Inventario
+            {
+                path: "/modules/almacen/catalogos/tipoinventario",
+                name: "tipoinventario",
+                component: () => import(/* webpackChunkName: "tipoinventario" */ "@/modules/almacen/catalogos/tipoinventario/layouts/TipoInventarioLayout.vue"),
+                meta: {
+                    pageTitle: "Tipo de Inventario",
+                    breadcrumbs: ["Almacén","Catalogos","Tipo de Inventario"],
+                    codigo: '042'
+                },
+                redirect: { name: 'tipoinventariolist'},
+                children:[
+                    {
+                        path: 'tipoinventariolist',
+                        name: 'tipoinventariolist',
+                        component: () => import(/* webpackChunkName: "tipoinventariolist" */ "@/modules/almacen/catalogos/tipoinventario/pages/ListPage.vue"),
+                        meta: {
+                            pageTitle: "Tipo de Inventario",
+                        }
+                    },
+                    {
+                        path: 'tipoinventario-nuevo/',
+                        name: 'tipoinventario-nuevo',
+                        component: () => import(/* webpackChunkName: "tipoinventarionuevo" */ "@/modules/almacen/catalogos/tipoinventario/pages/NuevoPage.vue"),
+                        meta: {
+                            pageTitle: "Tipo de Inventario Nuevo"
+                        }
+                    },
+                    {
+                        path: 'tipoinventario-consulta/:id',
+                        name: 'tipoinventario-consulta',
+                        component: () => import(/* webpackChunkName: "tipoinventarioconsulta" */ "@/modules/almacen/catalogos/tipoinventario/pages/ConsultaPage.vue"),
+                        meta: {
+                            pageTitle: "Tipo de Inventario Consulta"
+                        }
+                    },
+                    {
+                        path: 'tipoinventario-edita/:id',
+                        name: 'tipoinventario-edita',
+                        component: () => import(/* webpackChunkName: "tipoinventarioedita" */ "@/modules/almacen/catalogos/tipoinventario/pages/EditaPage.vue"),
+                        meta: {
+                            pageTitle: "Tipo de Inventario Editar"
                         }
                     },
                 ]

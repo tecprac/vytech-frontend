@@ -2,25 +2,25 @@ import { watch } from 'vue';
 import { useQuery } from "@tanstack/vue-query";
 import { storeToRefs } from "pinia";
 import ApiService from "@/core/services/ApiService";
-import type { UnidadMedida } from '../interfaces/interfaces';
-import { useUnidadesMedidaStore } from '@/stores/administracion/catalogos/unidadmedida';
+import type { TipoInventario } from '../interfaces/interfaces';
+import { useMarcasStore } from '@/stores/taller/catalogos/marcas';
 
-const getRegistros = async(page: number, buscar:string = ''):Promise<UnidadMedida[]> => {
+const getRegistros = async(page: number, buscar:string = ''):Promise<TipoInventario[]> => {
     ApiService.setHeader();
-    const { data } = await ApiService.get2(`AdmUnidadMedida/paginado?page=${page}&buscar=${buscar}`,null);
-    const registrosdata: UnidadMedida[] = data.items
-    const storeint = useUnidadesMedidaStore();
+    const { data } = await ApiService.get2(`InvTipoInventario/paginado?page=${page}&buscar=${buscar}`,null);
+    const registrosdata: TipoInventario[] = data.items
+    const storeint = useMarcasStore();
     storeint.setPaginas(data.totalPages);
     return registrosdata;
 }
 
-const useUnidadMedidas = () => {
+const useTiposInventario = () => {
 
-    const store = useUnidadesMedidaStore();
+    const store = useMarcasStore();
     const { currentPage,registros,totalPages,currentBuscar } = storeToRefs(store);
 
     const { isPending, data, isError, isSuccess } = useQuery({
-        queryKey:   ['unidadesmedidas?page=',currentPage,'?buscar=',currentBuscar],
+        queryKey:   ['tiposinventario?page=',currentPage,'?buscar=',currentBuscar],
         queryFn:    async () => getRegistros(currentPage.value,currentBuscar.value),
         gcTime:     0,
         staleTime:  0,
@@ -55,4 +55,4 @@ const useUnidadMedidas = () => {
     }
 }
 
-export default useUnidadMedidas;
+export default useTiposInventario;
