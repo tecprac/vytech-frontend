@@ -99,6 +99,11 @@ const MainMenuConfig: Array<MenuItem> = [
                                 route:      '/modules/almacen/catalogos/tipoinventario',
                                 codigo:     '043',
                             },
+                            {
+                                heading:    'Producto',
+                                route:      '/modules/almacen/catalogos/producto',
+                                codigo:     '044',
+                            },
                         ]
                     },
                     {

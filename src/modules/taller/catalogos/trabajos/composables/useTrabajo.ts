@@ -125,7 +125,6 @@ const useTrabajo = ( id: number) => {
 
     onMounted(async () => {
         satobjetosimpuestos.value.splice(0);
-
         isPending.value = true;
         const response = await ApiService.get2(`SatObjetoImp/listado`,null);
         satobjetosimpuestos.value = <SatObjetoImpuesto[]>response.data;

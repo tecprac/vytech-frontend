@@ -1166,6 +1166,52 @@ const routes: Array<RouteRecordRaw> = [
                     },
                 ]
             },
+            // Menú Almacén-Catalogos Producto
+            {
+                path: "/modules/almacen/catalogos/producto",
+                name: "producto",
+                component: () => import(/* webpackChunkName: "producto" */ "@/modules/almacen/catalogos/producto/layouts/ProductoLayout.vue"),
+                meta: {
+                    pageTitle: "Producto",
+                    breadcrumbs: ["Almacén","Catalogos","Producto"],
+                    codigo: '044'
+                },
+                redirect: { name: 'productolist'},
+                children:[
+                    {
+                        path: 'productolist',
+                        name: 'productolist',
+                        component: () => import(/* webpackChunkName: "productolist" */ "@/modules/almacen/catalogos/producto/pages/ListPage.vue"),
+                        meta: {
+                            pageTitle: "Producto",
+                        }
+                    },
+                    {
+                        path: 'producto-nuevo/',
+                        name: 'producto-nuevo',
+                        component: () => import(/* webpackChunkName: "productonuevo" */ "@/modules/almacen/catalogos/producto/pages/NuevoPage.vue"),
+                        meta: {
+                            pageTitle: "Producto Nuevo"
+                        }
+                    },
+                    {
+                        path: 'producto-consulta/:id',
+                        name: 'producto-consulta',
+                        component: () => import(/* webpackChunkName: "productoconsulta" */ "@/modules/almacen/catalogos/producto/pages/ConsultaPage.vue"),
+                        meta: {
+                            pageTitle: "Producto Consulta"
+                        }
+                    },
+                    {
+                        path: 'producto-edita/:id',
+                        name: 'producto-edita',
+                        component: () => import(/* webpackChunkName: "productoedita" */ "@/modules/almacen/catalogos/producto/pages/EditaPage.vue"),
+                        meta: {
+                            pageTitle: "Producto Editar"
+                        }
+                    },
+                ]
+            },
         ],
     },
     {

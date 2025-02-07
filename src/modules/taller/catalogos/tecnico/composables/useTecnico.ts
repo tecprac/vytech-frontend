@@ -4,7 +4,6 @@ import ApiService from "@/core/services/ApiService";
 import type { Tecnico } from '../interfaces/interfaces';
 import type { SatEstado } from '@/modules/sat/catalogos/estados/interfaces/interfaces';
 import { useToast } from 'primevue/usetoast';
-import useUtilerias from "@/core/helpers/utilerias" ;
 
 const getregistro = async( id:number ):Promise<Tecnico> => {
     if (id > 0){
@@ -64,10 +63,6 @@ const deleteRegistro =async ( registro:Tecnico ):Promise<Tecnico> => {
     const { data } = await ApiService.delete(`Tecnicos/${registro.id}`);
     return data;
 };
-
-const { 
-    convertTMZdatetime
-} = useUtilerias();
 
 const useTecnico = ( id: number) => {
     const registro          = ref<Tecnico>({
