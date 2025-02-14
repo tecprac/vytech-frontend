@@ -143,17 +143,17 @@ const useTrabajo = ( id: number) => {
 
     const buscarClaveProdServ = async (event:any) => {
         if (event.query.trim().length) {
-            const response = await ApiService.get2('SatClaveProdServ/SearchByField/descripcion/'+event.query,null)
-            const marcas:SatClaveProdServ[] = response.data;
-            satprodservfiltrados.value = marcas;
+            const response = await ApiService.get2('SatClaveProdServ/SearchByText/'+event.query,null)
+            const registros:SatClaveProdServ[] = response.data;
+            satprodservfiltrados.value = registros;
         } 
     }
 
     const buscarClaveUnidad = async (event:any) => {
         if (event.query.trim().length) {
-            const response = await ApiService.get2('SatClaveUnidad/SearchByField/nombre/'+event.query,null)
-            const marcas:SatClaveUnidad[] = response.data;
-            satclaveunidadfiltradas.value = marcas;
+            const response = await ApiService.get2('SatClaveUnidad/SearchByText/'+event.query,null)
+            const registros:SatClaveUnidad[] = response.data;
+            satclaveunidadfiltradas.value = registros;
         } 
     }
     

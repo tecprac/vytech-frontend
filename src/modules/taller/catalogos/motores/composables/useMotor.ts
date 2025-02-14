@@ -126,7 +126,6 @@ const useMotor = ( id: number) => {
             URL.revokeObjectURL(pdfDocumento.value);
             pdfDocumento.value = null;
         }
-        
     }
 
     const VisualizarPDF = async () => {

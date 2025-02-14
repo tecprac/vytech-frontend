@@ -1212,6 +1212,52 @@ const routes: Array<RouteRecordRaw> = [
                     },
                 ]
             },
+            // Menú Taller-Modulos Orden
+            {
+                path: "/modules/taller/modulos/orden",
+                name: "orden",
+                component: () => import(/* webpackChunkName: "orden" */ "@/modules/taller/modulos/orden/layouts/OrdenLayout.vue"),
+                meta: {
+                    pageTitle: "Orden de Servicio",
+                    breadcrumbs: ["Taller","Modulos","Orden"],
+                    codigo: '023'
+                },
+                redirect: { name: 'ordenlist'},
+                children:[
+                    {
+                        path: 'ordenlist',
+                        name: 'ordenlist',
+                        component: () => import(/* webpackChunkName: "ordenlist" */ "@/modules/taller/modulos/orden/pages/ListPage.vue"),
+                        meta: {
+                            pageTitle: "Orden",
+                        }
+                    },
+                    {
+                        path: 'orden-nuevo/',
+                        name: 'orden-nuevo',
+                        component: () => import(/* webpackChunkName: "ordennuevo" */ "@/modules/taller/modulos/orden/pages/NuevoPage.vue"),
+                        meta: {
+                            pageTitle: "Orden Nueva"
+                        }
+                    },
+                    {
+                        path: 'orden-consulta/:id',
+                        name: 'orden-consulta',
+                        component: () => import(/* webpackChunkName: "ordenconsulta" */ "@/modules/taller/modulos/orden/pages/ConsultaPage.vue"),
+                        meta: {
+                            pageTitle: "Orden Consulta"
+                        }
+                    },
+                    {
+                        path: 'orden-edita/:id',
+                        name: 'orden-edita',
+                        component: () => import(/* webpackChunkName: "ordenedita" */ "@/modules/taller/modulos/orden/pages/EditaPage.vue"),
+                        meta: {
+                            pageTitle: "Orden Editar"
+                        }
+                    },
+                ]
+            },
         ],
     },
     {

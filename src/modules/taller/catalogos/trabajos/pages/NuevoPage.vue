@@ -303,7 +303,7 @@ const validarDatos = async (data:Trabajo ) => {
                                 </label>
                                 <div class="col-sm-10">
                                     <AutoComplete v-model="selectedprodserv"
-                                        :option-label="(data) => data.c_claveprodserv+' '+data.descripcion"
+                                        :option-label="(data) => {return (data.c_claveprodserv+' '+data.descripcion).trim()}"
                                         force-selection auto-option-focus size="small"
                                         :suggestions="satprodservfiltrados"
                                         empty-search-message="No existen Clave de Producto/Servicio que coincidan"
@@ -319,7 +319,7 @@ const validarDatos = async (data:Trabajo ) => {
                                 </label>
                                 <div class="col-sm-4">
                                     <AutoComplete v-model="selectedclaveunidad"
-                                        :option-label="(data) => data.c_claveunidad+' '+data.nombre"
+                                        :option-label="(data) => {return (data.c_claveunidad+' '+data.nombre).trim()}"
                                         force-selection auto-option-focus size="small"
                                         :suggestions="satclaveunidadfiltradas"
                                         empty-search-message="No existen Clave de Unidad que coincidan"

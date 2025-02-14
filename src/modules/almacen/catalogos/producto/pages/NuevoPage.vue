@@ -223,12 +223,14 @@ const validarDatos = async (data:Producto ) => {
                                 <div class="col-sm-2">
                                     <Select v-model="selecttipo_inventario" 
                                         option-label="descripcion" variant="filled"
+                                        placeholder="Seleccione un Tipo de Inventario"
                                         :options="tipos_inventario" fluid>
                                     </Select>
                                 </div>
                                 <label for="unidadmedida" class="col-form-label col-sm-2">Unidad Medida</label>
                                 <div class="col-sm-2">
-                                    <Select v-model="selectunidad_medida" 
+                                    <Select v-model="selectunidad_medida"
+                                        placeholder="Seleccione una Unidad de Medida"
                                         option-label="descripcion" variant="filled"
                                         :options="unidades_medida" fluid>
                                     </Select>
@@ -472,7 +474,7 @@ const validarDatos = async (data:Producto ) => {
                                 </label>
                                 <div class="col-sm-10">
                                     <AutoComplete v-model="selectedprodserv"
-                                        :option-label="(data) => data.c_claveprodserv+' '+data.descripcion"
+                                        :option-label="(data) => {return (data.c_claveprodserv+' '+data.descripcion).trim()}"
                                         force-selection auto-option-focus size="small"
                                         :suggestions="satprodservfiltrados"
                                         empty-search-message="No existen Clave de Producto/Servicio que coincidan"
@@ -488,7 +490,7 @@ const validarDatos = async (data:Producto ) => {
                                 </label>
                                 <div class="col-sm-4">
                                     <AutoComplete v-model="selectedclaveunidad"
-                                        :option-label="(data) => data.c_claveunidad+' '+data.nombre"
+                                        :option-label="(data) => {return (data.c_claveunidad+' '+data.nombre).trim()}"
                                         force-selection auto-option-focus size="small"
                                         :suggestions="satclaveunidadfiltradas"
                                         empty-search-message="No existen Clave de Unidad que coincidan"

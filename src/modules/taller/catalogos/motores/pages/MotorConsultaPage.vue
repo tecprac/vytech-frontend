@@ -34,7 +34,7 @@ const {
 
 watch(isError, () => {
     if(isError.value)
-        router.replace('/motores')
+        router.push({ name: 'motores'});
 })
 
 </script>

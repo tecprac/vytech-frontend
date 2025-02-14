@@ -191,11 +191,11 @@ const useProducto = ( id: number) => {
         // Tipo de Imventario
         const responseinv = await ApiService.get2(`InvTipoInventario/listado`,null);
         tipos_inventario.value = <TipoInventario[]>responseinv.data;
-        if (tipos_inventario.value.length > 0) selecttipo_inventario.value = tipos_inventario.value[0];
+        // if (tipos_inventario.value.length > 0) selecttipo_inventario.value = tipos_inventario.value[0];
         // Unidad de Medida
         const responsemed = await ApiService.get2(`AdmUnidadMedida/listado`,null);
         unidades_medida.value = <UnidadMedida[]>responsemed.data;
-        if (unidades_medida.value.length > 0) selectunidad_medida.value = unidades_medida.value[0];
+        // if (unidades_medida.value.length > 0) selectunidad_medida.value = unidades_medida.value[0];
 
         isPending.value = false;
     });
@@ -217,17 +217,17 @@ const useProducto = ( id: number) => {
 
     const buscarClaveProdServ = async (event:any) => {
         if (event.query.trim().length) {
-            const response = await ApiService.get2('SatClaveProdServ/SearchByField/descripcion/'+event.query,null)
-            const marcas:SatClaveProdServ[] = response.data;
-            satprodservfiltrados.value = marcas;
+            const response = await ApiService.get2('SatClaveProdServ/SearchByText/'+event.query,null)
+            const registros:SatClaveProdServ[] = response.data;
+            satprodservfiltrados.value = registros;
         } 
     }
 
     const buscarClaveUnidad = async (event:any) => {
         if (event.query.trim().length) {
-            const response = await ApiService.get2('SatClaveUnidad/SearchByField/nombre/'+event.query,null)
-            const marcas:SatClaveUnidad[] = response.data;
-            satclaveunidadfiltradas.value = marcas;
+            const response = await ApiService.get2('SatClaveUnidad/SearchByText/'+event.query,null)
+            const registros:SatClaveUnidad[] = response.data;
+            satclaveunidadfiltradas.value = registros;
         } 
     }
 
@@ -451,10 +451,9 @@ const useProducto = ( id: number) => {
             registro.value = {...data.value};
             if (id > 0) {
                 isPending.value = true;
-                
                 const response = await ApiService.get2(`InvTipoInventario/GetById/${registro.value.tipo_inventario_id}`,null);
-                selectunidad_medida.value = <UnidadMedida>response.data;
-                const responseuni = await ApiService.get2(`AdmUnidadMedida/GetById/${registro.value.tipo_inventario_id}`,null);
+                selecttipo_inventario.value = <TipoInventario>response.data;
+                const responseuni = await ApiService.get2(`AdmUnidadMedida/GetById/${registro.value.unidad_medida_id}`,null);
                 selectunidad_medida.value = <UnidadMedida>responseuni.data;
                 const responsemar = await ApiService.get2(`Marcas/GetById/${registro.value.marca_id}`,null);
                 selectedmarca.value = <Marca>responsemar.data;
@@ -467,7 +466,7 @@ const useProducto = ( id: number) => {
             }
         }
             
-    },{immediate: true});
+    },{immediate: true, deep: true});
 
     return {
         isPending,
