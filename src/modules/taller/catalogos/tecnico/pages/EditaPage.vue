@@ -189,13 +189,13 @@ const validarDatos = async (data:Tecnico ) => {
                         </InputText>
                     </div>
                 </div>
-                <div class="row mb-5">
+                <div class="row mb-2">
                     <div class="col-sm-4 fv-row">
                         <label class="required form-label fs-6 fw-semibold mb-2">
                             Fecha Nacimiento
                         </label>
                         <DatePicker v-model="registro.fecha_nacimiento"
-                            show-icon :show-on-focus="false">
+                            show-icon :show-on-focus="false" fluid>
                         </DatePicker>
                     </div>
                     <div class="col-sm-4 fv-row">
@@ -203,16 +203,25 @@ const validarDatos = async (data:Tecnico ) => {
                             RFC
                         </label>
                         <InputMask v-model="registro.rfc" mask="aaaa-999999-***"
-                            placeholder="????-000000-???" :unmask="true"
-                            class="form-control">
+                            placeholder="????-000000-???" :unmask="true" fluid>
                         </InputMask>
                     </div>
                     <div class="col-sm-4 fv-row">
                         <label class="required form-label fs-6 fw-semibold mb-2">
                             CURP
                         </label>
-                        <InputText v-model="registro.curp" maxlength="18"
-                            class="form-control">
+                        <InputText v-model="registro.curp" maxlength="18" fluid>
+                        </InputText>
+                    </div>
+                </div>
+                <div class="row mb-5">
+                    <div class="col-sm-4 fv-row">
+                        <label class="form-label fs-6 fw-semibold mb-2">
+                            NSS
+                            <i class="pi pi-info-circle" style="font-size: 1rem;"
+                                v-tooltip.top="'Numero de Seguridad Social'" />
+                        </label>
+                        <InputText v-model="registro.nss" maxlength="20" fluid>
                         </InputText>
                     </div>
                 </div>

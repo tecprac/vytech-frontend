@@ -79,6 +79,12 @@ const tableHeader   = ref([
         class:          "text-start"
     },
     {
+        columnLabel:    'Tipo Servicio',
+        columnField:    'talle_tipo_servicio',
+        sortEnabled:    true,
+        class:          "text-start"
+    },
+    {
         columnLabel:    'Cliente',
         columnField:    'adm_cliente',
         sortEnabled:    true,
@@ -176,6 +182,9 @@ permisos.value.forEach(element => {
                             </template>
                             <template v-else-if="col.columnLabel=='Modelo' && item['talle_unidad']">
                                 {{  item['talle_unidad']['talle_modelo']['modelo']  }}
+                            </template>
+                            <template v-else-if="col.columnLabel=='Tipo Servicio' && item['talle_tipo_servicio']">
+                                {{  item['talle_tipo_servicio']['tipo_servicio'] }}
                             </template>
                             <template v-else-if="col.columnField=='adm_cliente' && item['adm_cliente']">
                                 {{  item[col.columnField]!['tipo_persona'] == 'Moral' 

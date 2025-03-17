@@ -11,6 +11,15 @@ const useUtilerias = () => {
         }
     }
 
+    const convertTMZtime = (fecha: string) => {
+        const timezone:string = import.meta.env.VITE_APP_TIME_ZONE;
+        try {
+            return formatInTimeZone(fecha,timezone,'HH:mm');    
+        } catch (error) {
+            return formatInTimeZone(new Date(),timezone,'HH:mm');    
+        }
+    }
+
     const convertTMZdate = (fecha: string) => {
         const timezone:string = import.meta.env.VITE_APP_TIME_ZONE;
         try {
@@ -138,6 +147,7 @@ const useUtilerias = () => {
         formatDateTime,
         formatDateTime2,
         convertTMZdate,
+        convertTMZtime,
         convertTMZdatetime,
         restardias,
         getLocalIP,
