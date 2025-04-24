@@ -87,16 +87,16 @@ const {
 
 const schema = yup.object({
     numeroeco:          yup.string().required().min(1).max(20).label('Numero Económico'),
-    fecha_compra:       yup.date().optional().label('Fecha de Compra'),
-    año:                yup.number().optional().moreThan(1900).lessThan(2500).label('Año'),
-    placas:             yup.string().optional().max(10).label('Placas'),
-    kms:                yup.number().optional().moreThan(-1).label('Kilometraje'),
-    num_motor:          yup.string().optional().max(30).label('Numero de Motor'),
-    color:              yup.string().optional().max(20).label('Color'),
-    num_serie:          yup.string().optional().max(30).label('Numero de Serie Motor'),
-    ejes:               yup.number().optional().moreThan(-1).label('Numero de ejes'),
+    fecha_compra:       yup.date().notRequired().label('Fecha de Compra'),
+    año:                yup.number().notRequired().moreThan(1900).lessThan(2500).label('Año'),
+    placas:             yup.string().notRequired().max(10).label('Placas'),
+    kms:                yup.number().notRequired().moreThan(-1).label('Kilometraje'),
+    num_motor:          yup.string().notRequired().max(30).label('Numero de Motor'),
+    color:              yup.string().notRequired().max(20).label('Color'),
+    num_serie:          yup.string().notRequired().max(30).label('Numero de Serie Motor'),
+    ejes:               yup.number().notRequired().moreThan(-1).label('Numero de ejes'),
     combustible:        yup.string().required().max(15).label('Combustible'),
-    estatus:            yup.string().required().min(1).max(15).label('Estatus'),
+    estatus:            yup.string().required().max(15).label('Estatus'),
     arrendado:          yup.boolean().required().label('Arrendado'),
     marca_id:           yup.object({ id: yup.number().required().min(1) }).required().label('Marca'),
     modelo_id:          yup.object({ id: yup.number().required().min(1) }).required().label('Modelo'),
@@ -655,18 +655,6 @@ watch(isError, () => {
                 </Button>
             </div>
         </form>
-        <!-- <span>
-            {{ meta }}
-        </span>
-        <Divider />
-        <span>
-            {{ values }}
-        </span>
-        <Divider />
-        <span>
-            {{ errors }}
-        </span>
-        <Divider /> -->
     </div>
     <Dialog
         v-model:visible="dialogPDFVisor" 
@@ -676,9 +664,6 @@ watch(isError, () => {
         header="Visualización del Archivo PDF" 
         :style="{width: '80vw'}"
         :breakpoints="{ '960px': '75vw', '641px': '100vw' }"
-        @maximize="(event:any) => {console.log(event.screenX)}"
-        @unmaximize="(event:any) => {console.log(event.screenX)}"
-        @show="() => {console.log('Test')}"
         :pt = " { 
                     header: { class: 'bg-secondary' },
                     content: { style: 'height: 660px'},

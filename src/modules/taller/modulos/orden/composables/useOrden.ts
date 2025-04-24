@@ -2,7 +2,7 @@ import { ref, watch, computed, onMounted } from 'vue';
 import { useQuery,useMutation } from '@tanstack/vue-query';
 import ApiService from "@/core/services/ApiService";
 import { useToast } from 'primevue/usetoast';
-import type { Orden, Orden_Trabajo, Orden_Miscelaneo, 
+import type { Orden, Orden_Trabajo, Orden_Miscelaneo,  TrabajoBitacora,
     Producto, Requisicion, RequisicionDetalle } from '../interfaces/interfaces';
 import type { Cliente } from '@/modules/administracion/catalogos/clientes/interfaces/interfaces';
 import type { Tecnico } from '@/modules/taller/catalogos/tecnico/interfaces/interfaces';
@@ -12,7 +12,6 @@ import type { FolioDocumento } from '@/modules/configuracion/folioDocumento/inte
 import type { TipoServicio } from '@/modules/taller/catalogos/tiposervicios/interfaces/interfaces';
 import type { Trabajo } from '@/modules/taller/catalogos/trabajos/interfaces/interfaces';
 import Swal from 'sweetalert2';
-import { jsPDF } from 'jspdf';
 import { getAssetPath } from "@/core/helpers/assets";
 import { useConfirm } from 'primevue/useconfirm';
 import { useAuthStore } from '@/stores/auth';
@@ -243,6 +242,7 @@ const useOrden = ( id: number ) => {
                             });
     const refacciones_orden = ref<RequisicionDetalle[]>([]);
     const isLoadingRequi    = ref<boolean>(false);
+    const trabajosbitacora  = ref<TrabajoBitacora[]>([]);
     const { formatCurrency, formatNumber2Dec } = useUtilerias();
     const { PDFBlanco, PDFDatos, PDFDatosInterno } = useOrdenFormatos();
 
@@ -352,6 +352,12 @@ const useOrden = ( id: number ) => {
             selectecnicotrabajo.value = tecnicos.value.filter(item => item.id == trabajo_orden.value.tecnico_id)[0];
             const resptrab = await ApiService.get2(`Trabajos/GetById/${trabajo_orden.value.trabajo_id}`,null);
             selecttrabajo.value = <Trabajo>resptrab.data;
+            if (trabajo_orden.value.estatus != 'SinIniciar') {
+                trabajosbitacora.value.splice(0);
+                const respbitacora = await ApiService.get2(`Orden/Trabajo/Bitacora/${trabajo_orden.value.id}`,null);
+                trabajosbitacora.value = respbitacora.data;
+                console.log(trabajosbitacora.value);
+            }
         }
         dialogTrabajo.value = true;
     }
@@ -395,7 +401,7 @@ const useOrden = ( id: number ) => {
                             cantidad_pendiente: item.cantidad_pendiente,
                             cantidad_cancelada: item.cantidad_cancelada,
                             observaciones: item.observaciones,
-                            descripcion: item.inv_producto!.descripcion,
+                            descripcion: (item.inv_producto!.descvariable ? '*': '')+item.descripcion,
                             codigo: item.inv_producto!.codigo,
                             trabajo_id: item.trabajo_id,
                             inv_producto: item.inv_producto,
@@ -493,6 +499,7 @@ const useOrden = ( id: number ) => {
             refaccion_orden.value.descripcion = selectproducto.value.descripcion;
             refaccion_orden.value.codigo = selectproducto.value.codigo;
             refaccion_orden.value.producto_id = selectproducto.value.id;
+            refaccion_orden.value.descripcion = selectproducto.value.descripcion;
             refacciones_orden.value.push(refaccion_orden.value);
         }
         selectproducto.value = null;
@@ -748,7 +755,52 @@ const useOrden = ( id: number ) => {
                 severity: 'warn'
             },
             accept: async () => {
-                refacciones_orden.value = refacciones_orden.value.filter(item => item.id !== data.id);
+                if (tipo_operacion_refaccion.value == 'Solicitar') {
+                    refacciones_orden.value = refacciones_orden.value.filter(item => item.id !== data.id);
+                } else  {
+                    try {
+                        console.log(data);
+                        await ApiService.delete(`Requisicion/Detalle/${data.id}`);  
+                        const resptra = await ApiService.get2(`Orden/TrabajoByOrden/${registro.value.id}`,null);
+                        trabajos_orden.value.splice(0);
+                        trabajos_orden.value = <Orden_Trabajo[]>resptra.data;
+                        const trabajotmp = <Orden_Trabajo>trabajos_orden.value.find(Item => Item.id == data.trabajo_id);
+                        if ( trabajotmp) {
+                            refacciones_orden.value.splice(0);
+                            trabajotmp.talle_requisicion_detalles!.forEach((item:RequisicionDetalle) => {
+                                refacciones_orden.value.push({
+                                    id: item.id,
+                                    requisicion_id: item.requisicion_id,
+                                    producto_id: item.producto_id,
+                                    cantidad: item.cantidad,
+                                    costo: item.costo,
+                                    costo_total: item.costo_total,
+                                    cantidad_surtida: item.cantidad_surtida,
+                                    cantidad_pendiente: item.cantidad_pendiente,
+                                    cantidad_cancelada: item.cantidad_cancelada,
+                                    observaciones: item.observaciones,
+                                    descripcion: (item.inv_producto!.descvariable ? '*': '')+item.descripcion,
+                                    codigo: item.inv_producto!.codigo,
+                                    trabajo_id: item.trabajo_id,
+                                    inv_producto: item.inv_producto,
+                                    talle_requisicion: item.talle_requisicion,
+                                })
+                            });  
+                        }
+                        toast.add({
+                            severity:   'success',
+                            summary:    'El miscelaneo se elimino correctamente',
+                            life:       3000
+                        });
+                    } catch (error) {
+                        toast.add({
+                            severity:   'error',
+                            summary:    'Error al Eliminar el Miscelaneo',
+                            detail:     'Se genero el error '+error,
+                            life:       3500
+                        });
+                    }
+                }
             },
         });
     }
@@ -939,6 +991,7 @@ const useOrden = ( id: number ) => {
         refaccion_orden,
         refacciones_orden,
         isLoadingRequi,
+        trabajosbitacora,
 
         newRegistro:        dataMutationNew.mutate,
         updateRegistro:     dataMutationUpdate.mutate,

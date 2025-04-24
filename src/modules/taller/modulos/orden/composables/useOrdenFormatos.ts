@@ -1,7 +1,7 @@
 import { ref } from 'vue';
 import type { Orden } from '../interfaces/interfaces';
 import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import { autoTable } from 'jspdf-autotable'
 import JsBarcode from 'jsbarcode';
 import { getAssetPath } from "@/core/helpers/assets";
 import useUtilerias from '@/core/helpers/utilerias';
@@ -77,6 +77,39 @@ const useOrdenFormatos = (  ) => {
         pdf.setFont("helvetica","bold");
         // CONSTRUCCION PDF NUMERO DE ORDEN DE SERVICIO
         pdf.text(`ORDEN DE SERVICIO NO. ${data.serie} - ${data.folio} `,155,130);
+
+        //RECTANGULO ID INTERNO
+        pdf.setDrawColor(0);
+        pdf.setFillColor(216,216,216);
+        pdf.setLineWidth(0.5)
+        pdf.roundedRect(510,70,50,16,2,2,'FD'); 
+        pdf.setFontSize(8);
+        pdf.setFont("helvetica","regular");
+        pdf.setTextColor(0,0,0);
+        pdf.text("ID INTERNO",513,80);
+        // NÚMERO ID
+        pdf.setFillColor(255,255,255);
+        pdf.setLineWidth(0.5)
+        pdf.roundedRect(510,87,50,18,2,2,'FD'); 
+        pdf.setFontSize(16);
+        pdf.setFont("helvetica","regular");
+        pdf.setTextColor(0,0,0);
+        pdf.text(`${data.id}`,528,100);
+        
+        // CODIGO DE BARRA DEL ID
+        // Generar el código de barras
+        const canvas = document.createElement('canvas');
+        JsBarcode(canvas, data.id.toString(), {
+            format: 'CODE128',
+            displayValue: false,
+            fontSize: 8,
+        });
+
+        // Convertir el canvas a una imagen
+        const imgData = canvas.toDataURL('image/png');
+
+        // Agregar la imagen del código de barras al PDF
+        pdf.addImage(imgData, 'PNG', 470, 110, 100, 30);
 
         // CONSTRUCCION PDF DE CAMPOS DE LA ORDEN DE SERVICIO
         //NOMBRE
@@ -495,14 +528,49 @@ const useOrdenFormatos = (  ) => {
         pdf.setTextColor(0,127,222);
         pdf.setFont("helvetica","bold");
         // CONSTRUCCION PDF NUMERO DE ORDEN DE SERVICIO
-        pdf.text(`ORDEN DE SERVICIO NO. ${data.serie} - ${data.folio} `,155,130);
+        pdf.text(`ORDEN DE SERVICIO FOLIO. ${data.serie} - ${data.folio} `,155,130);
+
+        //RECTANGULO ID INTERNO
+        pdf.setDrawColor(0);
+        pdf.setFillColor(216,216,216);
+        pdf.setLineWidth(0.5)
+        pdf.roundedRect(510,70,50,16,2,2,'FD'); 
+        pdf.setFontSize(8);
+        pdf.setFont("helvetica","regular");
+        pdf.setTextColor(0,0,0);
+        pdf.text("ID INTERNO",513,80);
+        // NÚMERO ID
+        pdf.setFillColor(255,255,255);
+        pdf.setLineWidth(0.5)
+        pdf.roundedRect(510,87,50,18,2,2,'FD'); 
+        pdf.setFontSize(16);
+        pdf.setFont("helvetica","regular");
+        pdf.setTextColor(0,0,0);
+        pdf.text(`${data.id}`,528,100);
+        
+        // CODIGO DE BARRA DEL ID
+        // Generar el código de barras
+        const canvas = document.createElement('canvas');
+        JsBarcode(canvas, data.id.toString(), {
+            format: 'CODE128',
+            displayValue: false,
+            fontSize: 8,
+        });
+
+        // Convertir el canvas a una imagen
+        const imgData = canvas.toDataURL('image/png');
+
+        // Agregar la imagen del código de barras al PDF
+        pdf.addImage(imgData, 'PNG', 470, 110, 100, 30);
+
+
 
         // CONSTRUCCION PDF DE CAMPOS DE LA ORDEN DE SERVICIO
         //NOMBRE
         pdf.setFont("helvetica","bold");
         pdf.setFontSize(11);
         pdf.setTextColor(0,0,0);
-        pdf.text(`NOMBRE:     ${(data.adm_cliente!.tipo_persona == 'Moral' ? data.adm_cliente!.razon_social : (data.adm_cliente!.nombre))}`,20,170)
+        pdf.text(`NOMBRE:     ${(data.adm_cliente!.tipo_persona == 'Moral' ? data.adm_cliente!.razon_social : (data.adm_cliente!.nombre)).substring(0, 48) }`,20,170)
         //LINEA NOMBRE
         pdf.setDrawColor(0);
         pdf.setDrawColor(0,0,0);
@@ -932,6 +1000,40 @@ const useOrdenFormatos = (  ) => {
         // CONSTRUCCION PDF NUMERO DE ORDEN DE SERVICIO
         pdf.text(`ORDEN DE SERVICIO NO. ${data.serie} - ${data.folio} `,155,130);
 
+        //RECTANGULO ID INTERNO
+        pdf.setDrawColor(0);
+        pdf.setFillColor(216,216,216);
+        pdf.setLineWidth(0.5)
+        pdf.roundedRect(510,70,50,16,2,2,'FD'); 
+        pdf.setFontSize(8);
+        pdf.setFont("helvetica","regular");
+        pdf.setTextColor(0,0,0);
+        pdf.text("ID INTERNO",513,80);
+        // NÚMERO ID
+        pdf.setFillColor(255,255,255);
+        pdf.setLineWidth(0.5)
+        pdf.roundedRect(510,87,50,18,2,2,'FD'); 
+        pdf.setFontSize(16);
+        pdf.setFont("helvetica","regular");
+        pdf.setTextColor(0,0,0);
+        pdf.text(`${data.id}`,528,100);
+        
+        // CODIGO DE BARRA DEL ID
+        // Generar el código de barras
+        const canvas = document.createElement('canvas');
+        JsBarcode(canvas, data.id.toString(), {
+            format: 'CODE128',
+            displayValue: false,
+            fontSize: 8,
+        });
+
+        // Convertir el canvas a una imagen
+        const imgData = canvas.toDataURL('image/png');
+
+        // Agregar la imagen del código de barras al PDF
+        pdf.addImage(imgData, 'PNG', 470, 110, 100, 30);
+
+
         // CONSTRUCCION PDF DE CAMPOS DE LA ORDEN DE SERVICIO
         //NOMBRE
         pdf.setFont("helvetica","bold");
@@ -1108,7 +1210,7 @@ const useOrdenFormatos = (  ) => {
             ]);
         });
 
-        (pdf as any).autoTable({
+        autoTable(pdf,{
             headStyles: {
                 fillColor: [164,22,22],
                 fontSize: 9,
@@ -1143,12 +1245,12 @@ const useOrdenFormatos = (  ) => {
                 formatNumber(item2.trabajo_id),
                 formatNumber(item2.requisicion_id),
                 item2.inv_producto.codigo,
-                item2.inv_producto.descripcion,
+                item2.descripcion,
                 item2.cantidad,
             ]);
         });
         
-        const posY = (pdf as any).lastAutoTable.finalY;
+        let posY = (pdf as any).lastAutoTable.finalY;
         pdf.setDrawColor(0);
         pdf.setFillColor(77,77,77);
         pdf.roundedRect(15, posY+10, 573, 14,3,3,'F');
@@ -1156,7 +1258,7 @@ const useOrdenFormatos = (  ) => {
         pdf.setTextColor(255,255,255);
         pdf.setFont("helvetica","bold");
         pdf.text("REFACCIONES",255, posY+20); 
-        (pdf as any).autoTable({
+        autoTable(pdf,{
             headStyles: {
                 fillColor: [164,22,22],
                 fontSize: 9,
@@ -1178,6 +1280,49 @@ const useOrdenFormatos = (  ) => {
             },
             head: [['ID','ID TRAB','FOLIO REQ','CÓDIGO','DESCRIPCIÓN','CANT.SOLICiTADA']],
             body: refacciones,
+            pageBreak: 'auto',
+            startY: posY+25,
+            margin: { left: 15, right: 7 },
+        });
+
+        // TABLA DE MISCELANEOS
+        const miscelaneos:any[] = [];
+        data.talle_orden_miscelaneos.forEach((item2: any) => {
+            miscelaneos.push([
+                formatNumber(item2.id),
+                item2.descripcion,
+                item2.cantidad,
+            ]);
+        });
+        
+        posY = (pdf as any).lastAutoTable.finalY;
+        pdf.setDrawColor(0);
+        pdf.setFillColor(77,77,77);
+        pdf.roundedRect(15, posY+10, 573, 14,3,3,'F');
+        pdf.setFontSize(10);
+        pdf.setTextColor(255,255,255);
+        pdf.setFont("helvetica","bold");
+        pdf.text("MISCELANEOS / MATERIALES DIVERSOS ",185, posY+20); 
+
+        autoTable(pdf, {
+            headStyles: {
+                fillColor: [164,22,22],
+                fontSize: 9,
+                halign: 'center',
+                valign: 'middle',
+            },
+            bodyStyles: {
+                textColor: 0,
+                fontSize: 9,
+                halign: 'center' 
+            },
+            columnStyles: {
+                0: {halign: 'center'},
+                3: {halign: 'left'},
+                5: {halign: 'right'},
+            },
+            head: [['ID','DESCRIPCIÓN','CANTIDAD']],
+            body: miscelaneos,
             pageBreak: 'auto',
             startY: posY+25,
             margin: { left: 15, right: 7 },

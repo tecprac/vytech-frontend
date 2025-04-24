@@ -23,7 +23,8 @@ import { initKtIcon } from "@/core/plugins/keenthemes";
 import PrimeVue from 'primevue/config';
 import Tooltip from 'primevue/tooltip';
 import { definePreset } from '@primevue/themes';
-import Aura from '@primevue/themes/aura';
+// import Aura from '@primevue/themes/aura';
+import Aura from '@primeuix/themes/aura';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import DialogService from 'primevue/dialogservice';
@@ -83,6 +84,7 @@ const MyPreset = definePreset(Aura,{
         button: {
             colorScheme: {
                 light: {
+                    // @ts-ignore
                     warn: {
                         background: '{yellow.400}',
                         border: { color: '{yellow.400}'},
@@ -101,6 +103,7 @@ const MyPreset = definePreset(Aura,{
                     },
                 },
                 dark: {
+                    // @ts-ignore
                     warn: {
                         background: '{yellow.600}',
                         border: { color: '{yellow.600}'},

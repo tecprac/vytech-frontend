@@ -1028,6 +1028,98 @@ const routes: Array<RouteRecordRaw> = [
                     },
                 ]
             },
+            // Menú Administración-Catalogos Propietarios
+            {
+                path: "/modules/administracion/catalogos/propietario",
+                name: "propietario",
+                component: () => import(/* webpackChunkName: "propietario" */ "@/modules/administracion/catalogos/propietario/layouts/PropietarioLayout.vue"),
+                meta: {
+                    pageTitle: "Emisores",
+                    breadcrumbs: ["Administración","Catalogos","Emisores"],
+                    codigo: '040'
+                },
+                redirect: { name: 'propietariolist'},
+                children:[
+                    {
+                        path: 'propietariolist',
+                        name: 'propietariolist',
+                        component: () => import(/* webpackChunkName: "propietariolist" */ "@/modules/administracion/catalogos/propietario/pages/ListPage.vue"),
+                        meta: {
+                            pageTitle: "Emisores",
+                        }
+                    },
+                    {
+                        path: 'propietario-nuevo/',
+                        name: 'propietario-nuevo',
+                        component: () => import(/* webpackChunkName: "propietarionuevo" */ "@/modules/administracion/catalogos/propietario/pages/NuevoPage.vue"),
+                        meta: {
+                            pageTitle: "Emisor Nuevo"
+                        }
+                    },
+                    {
+                        path: 'propietario-consulta/:id',
+                        name: 'propietario-consulta',
+                        component: () => import(/* webpackChunkName: "propietarioconsulta" */ "@/modules/administracion/catalogos/propietario/pages/ConsultaPage.vue"),
+                        meta: {
+                            pageTitle: "Emisor Consulta"
+                        }
+                    },
+                    {
+                        path: 'propietario-edita/:id',
+                        name: 'propietario-edita',
+                        component: () => import(/* webpackChunkName: "propietarioedita" */ "@/modules/administracion/catalogos/propietario/pages/EditaPage.vue"),
+                        meta: {
+                            pageTitle: "Emisor Editar"
+                        }
+                    },
+                ]
+            },
+            // Menú Administración-Catalogos Agentes
+            {
+                path: "/modules/administracion/catalogos/agente",
+                name: "agente",
+                component: () => import(/* webpackChunkName: "agente" */ "@/modules/administracion/catalogos/agente/layouts/AgenteLayout.vue"),
+                meta: {
+                    pageTitle: "Agentes",
+                    breadcrumbs: ["Administración","Catalogos","Agentes"],
+                    codigo: '049'
+                },
+                redirect: { name: 'agentelist'},
+                children:[
+                    {
+                        path: 'agentelist',
+                        name: 'agentelist',
+                        component: () => import(/* webpackChunkName: "agentelist" */ "@/modules/administracion/catalogos/agente/pages/ListPage.vue"),
+                        meta: {
+                            pageTitle: "Agentes",
+                        }
+                    },
+                    {
+                        path: 'agente-nuevo/',
+                        name: 'agente-nuevo',
+                        component: () => import(/* webpackChunkName: "agentenuevo" */ "@/modules/administracion/catalogos/agente/pages/NuevoPage.vue"),
+                        meta: {
+                            pageTitle: "Agente Nuevo"
+                        }
+                    },
+                    {
+                        path: 'agente-consulta/:id',
+                        name: 'agente-consulta',
+                        component: () => import(/* webpackChunkName: "agenteconsulta" */ "@/modules/administracion/catalogos/agente/pages/ConsultaPage.vue"),
+                        meta: {
+                            pageTitle: "Agente Consulta"
+                        }
+                    },
+                    {
+                        path: 'agente-edita/:id',
+                        name: 'agente-edita',
+                        component: () => import(/* webpackChunkName: "agenteedita" */ "@/modules/administracion/catalogos/agente/pages/EditaPage.vue"),
+                        meta: {
+                            pageTitle: "agente Editar"
+                        }
+                    },
+                ]
+            },
             // Menú Administración-Catalogos Cliente
             {
                 path: "/modules/administracion/catalogos/clientes",
@@ -1120,6 +1212,52 @@ const routes: Array<RouteRecordRaw> = [
                     },
                 ]
             },
+            // Menú Administración-Modulos Factura
+            {
+                path: "/modules/administracion/modulos/factura",
+                name: "factura",
+                component: () => import(/* webpackChunkName: "factura" */ "@/modules/administracion/modulos/factura/layouts/FacturaLayout.vue"),
+                meta: {
+                    pageTitle: "Factura",
+                    breadcrumbs: ["Administración","Modulos","Factura"],
+                    codigo: '047'
+                },
+                redirect: { name: 'facturalist'},
+                children:[
+                    {
+                        path: 'facturalist',
+                        name: 'facturalist',
+                        component: () => import(/* webpackChunkName: "facturalist" */ "@/modules/administracion/modulos/factura/pages/ListPage.vue"),
+                        meta: {
+                            pageTitle: "Factura",
+                        }
+                    },
+                    {
+                        path: 'factura-nuevo/',
+                        name: 'factura-nuevo',
+                        component: () => import(/* webpackChunkName: "facturanuevo" */ "@/modules/administracion/modulos/factura/pages/NuevoPage.vue"),
+                        meta: {
+                            pageTitle: "Factura Nueva"
+                        }
+                    },
+                    {
+                        path: 'factura-consulta/:id',
+                        name: 'factura-consulta',
+                        component: () => import(/* webpackChunkName: "facturaconsulta" */ "@/modules/administracion/modulos/factura/pages/ConsultaPage.vue"),
+                        meta: {
+                            pageTitle: "Factura Consulta"
+                        }
+                    },
+                    {
+                        path: 'factura-edita/:id',
+                        name: 'factura-edita',
+                        component: () => import(/* webpackChunkName: "facturaedita" */ "@/modules/administracion/modulos/factura/pages/EditaPage.vue"),
+                        meta: {
+                            pageTitle: "Factura Editar"
+                        }
+                    },
+                ]
+            },
             // Menú Almacén-Catalogos Tipo Inventario
             {
                 path: "/modules/almacen/catalogos/tipoinventario",
@@ -1162,6 +1300,52 @@ const routes: Array<RouteRecordRaw> = [
                         component: () => import(/* webpackChunkName: "tipoinventarioedita" */ "@/modules/almacen/catalogos/tipoinventario/pages/EditaPage.vue"),
                         meta: {
                             pageTitle: "Tipo de Inventario Editar"
+                        }
+                    },
+                ]
+            },
+            // Menú Almacén-Catalogos Almacenes
+            {
+                path: "/modules/almacen/catalogos/almacen",
+                name: "almacen",
+                component: () => import(/* webpackChunkName: "almacen" */ "@/modules/almacen/catalogos/almacen/layouts/AlmacenLayout.vue"),
+                meta: {
+                    pageTitle: "Almacén",
+                    breadcrumbs: ["Almacén","Catalogos","Almacén"],
+                    codigo: '042'
+                },
+                redirect: { name: 'almacenlist'},
+                children:[
+                    {
+                        path: 'almacenlist',
+                        name: 'almacenlist',
+                        component: () => import(/* webpackChunkName: "almacenlist" */ "@/modules/almacen/catalogos/almacen/pages/ListPage.vue"),
+                        meta: {
+                            pageTitle: "Almacén",
+                        }
+                    },
+                    {
+                        path: 'almacen-nuevo/',
+                        name: 'almacen-nuevo',
+                        component: () => import(/* webpackChunkName: "almacennuevo" */ "@/modules/almacen/catalogos/almacen/pages/NuevoPage.vue"),
+                        meta: {
+                            pageTitle: "Almacen"
+                        }
+                    },
+                    {
+                        path: 'almacen-consulta/:id',
+                        name: 'almacen-consulta',
+                        component: () => import(/* webpackChunkName: "almacenconsulta" */ "@/modules/almacen/catalogos/almacen/pages/ConsultaPage.vue"),
+                        meta: {
+                            pageTitle: "Almacén"
+                        }
+                    },
+                    {
+                        path: 'almacen-edita/:id',
+                        name: 'almacen-edita',
+                        component: () => import(/* webpackChunkName: "almacenedita" */ "@/modules/almacen/catalogos/almacen/pages/EditaPage.vue"),
+                        meta: {
+                            pageTitle: "Almacén"
                         }
                     },
                 ]
@@ -1258,6 +1442,28 @@ const routes: Array<RouteRecordRaw> = [
                     },
                 ]
             },
+            // Menú Talle-Modulos Iniciar/Terminar Trabajos
+            {
+                path: '/modules/taller/modulos/iniciarterminar',
+                name: 'iniciarterminar',
+                component: () => import (/* webpackChunkName: "iniciarterminar" */ "@/modules/taller/modulos/iniciarterminar/layouts/IniciarTerminarLayouts.vue"),
+                meta: {
+                    pageTitle: "Iniciar/Pausar/Terminar Trabajos",
+                    breadcrumbs: ["Taller","Modulos","Iniciar/Pausar/Terminar"],
+                    codigo: '046'
+                },
+                redirect: { name: 'iniciarterminarindex'},
+                children: [
+                    {
+                        path: 'iniciarterminarindex',
+                        name: 'iniciarterminarindex',
+                        component: () => import(/* webpackChunkName: "iniciarterminarindex" */ "@/modules/taller/modulos/iniciarterminar/pages/IndexPage.vue" ),
+                        meta: {
+                            pageTitle: "Iniciar/Pausar/Terminar Trabajos",
+                        }
+                    }
+                ]
+            }
         ],
     },
     {

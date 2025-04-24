@@ -33,6 +33,7 @@ import SplitButton from 'primevue/splitbutton';
 import Slider from 'primevue/slider';
 import Textarea from 'primevue/textarea';
 import Badge from 'primevue/badge';
+import Tag from 'primevue/tag';
 
 // optional styles
 import 'vue-pdf-embed/dist/styles/annotationLayer.css'
@@ -375,7 +376,16 @@ const validarDatos = async (data: Orden) => {
                                 <Column field="talle_trabajo.trabajo"       header="Descripción" :pt="{ headerCell: { class: 'bg-secondary'} }"></Column>
                                 <Column field="talle_tecnico.tecnico"       header="Técnico" :pt="{ headerCell: { class: 'bg-secondary'} }"></Column>
                                 <Column field="horas_estandar"              header="Horas" :pt="{ headerCell: { class: 'bg-secondary'} }"></Column>
-                                <Column field="estatus"                     header="Estatus" :pt="{ headerCell: { class: 'bg-secondary'} }"></Column>
+                                <Column field="estatus"                     header="Estatus" :pt="{ headerCell: { class: 'bg-secondary'} }">
+                                    <template #body="{ data }">
+                                        <Tag :value="data.estatus"
+                                            :severity="data.estatus == 'SinIniciar' ? 'secondary' :
+                                                        data.estatus == 'EnProceso' ? 'success' :
+                                                        data.estatus == 'Pausa' ? 'warn' :
+                                                        data.estatus == 'Cancelado' ? 'danger': 'info'">
+                                        </Tag>
+                                    </template>
+                                </Column>
                                 <Column class="w-24 text-center"           header="Acciones" :pt="{ headerCell: { class: 'bg-secondary'} }">
                                     <template #body="{ data }">
                                         <SplitButton rounded
@@ -428,7 +438,7 @@ const validarDatos = async (data: Orden) => {
                                             }" class="me-2"
                                             @click="openDialogTrabajo(data.id,'Update')">
                                         </Button>
-                                        <Button
+                                        <Button v-if="data.estatus!='Terminado' && data.estatus!='Cancelado'"
                                             severity="danger"
                                             raised rounded size="small"
                                             icon="pi pi-trash"
@@ -561,6 +571,14 @@ const validarDatos = async (data: Orden) => {
                 </InputNumber>
             </div>
         </div>
+        <div class="row mb-2" v-if="selectproducto">
+            <template v-if="selectproducto.descvariable">
+                <label for="descvariable" class="col-form-label col-form-label-sm col-sm-2">Descripción</label>
+                <div class="col-sm-10">
+                    <InputText v-model="selectproducto.descripcion" fluid></InputText>
+                </div>
+            </template>
+        </div>
         <div class="row mb-2">
             <label for="notas" class="col-form-label col-form-label-sm col-sm-2">Notas</label>
             <div class="col-sm-10">
@@ -624,7 +642,7 @@ const validarDatos = async (data: Orden) => {
             <Column field="descripcion" header="Descripción" :pt="{ headerCell: { class: 'bg-secondary'} }" />
             <Column class="text-center" header="Acciones" :pt="{ headerCell: { class: 'bg-secondary'} }" >
                 <template #body="{data}">
-                    <Button v-if="tipo_operacion_refaccion == 'Solicitar'"
+                    <Button 
                         raised roundec size="small"
                         icon="pi pi-trash" severity="danger" 
                         v-tooltip.top="{ 

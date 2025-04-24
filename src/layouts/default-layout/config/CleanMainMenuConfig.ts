@@ -95,6 +95,11 @@ const MainMenuConfig: Array<MenuItem> = [
                         subseccion: "CATALOGOS",
                         sub: [
                             {
+                                heading:    'Almacén',
+                                route:      '/modules/almacen/catalogos/almacen',
+                                codigo:     '050',
+                            },
+                            {
                                 heading:    'Tipo Inventario',
                                 route:      '/modules/almacen/catalogos/tipoinventario',
                                 codigo:     '043',
@@ -221,8 +226,8 @@ const MainMenuConfig: Array<MenuItem> = [
                             },
                             {
                                 heading:    'Iniciar/Terminar Trabajos',
-                                route:      '/modules/taller/modulos/iniciar',
-                                codigo:     '023',
+                                route:      '/modules/taller/modulos/iniciarterminar',
+                                codigo:     '046',
                             },
                             {
                                 heading:    'Bitacora de Unidad',
@@ -351,6 +356,16 @@ const MainMenuConfig: Array<MenuItem> = [
                                     codigo:     '042',
                                 },
                                 {
+                                    heading:    'Emisores',
+                                    route:      '/modules/administracion/catalogos/propietario',
+                                    codigo:     '048',
+                                },
+                                {
+                                    heading:    'Agentes',
+                                    route:      '/modules/administracion/catalogos/agente',
+                                    codigo:     '049',
+                                },
+                                {
                                     heading:    'Clientes',
                                     route:      '/modules/administracion/catalogos/clientes',
                                     codigo:     '040',
@@ -363,7 +378,13 @@ const MainMenuConfig: Array<MenuItem> = [
                         route:      "/administracion/modulos",
                         seccion:    "ADMINISTRACION",
                         subseccion: "MODULOS",
-                        sub:[]
+                        sub:[
+                                {
+                                    heading:    'Factura',
+                                    route:      '/modules/administracion/modulos/factura',
+                                    codigo:     '047',
+                                },
+                        ]
                     },
                     {
                         sectionTitle: "reports",
