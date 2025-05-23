@@ -26,7 +26,7 @@ interface Emits {
 const props         = defineProps<Props>();
 const emits         = defineEmits<Emits>();
 const router        = useRouter();
-const { convertTMZdatetime } = useUtilerias();
+const { convertTMZdatetime,formatCurrency } = useUtilerias();
 
 
 const tableHeader   = ref([
@@ -40,7 +40,7 @@ const tableHeader   = ref([
         columnLabel:    'Folio',
         columnField:    'folio',
         sortEnabled:    true,
-        class:          "text-start"
+        class:          "text-end"
     },
     {
         columnLabel:    'Serie',
@@ -56,7 +56,13 @@ const tableHeader   = ref([
     },
     {
         columnLabel:    'Cliente',
-        columnField:    'razon_social',
+        columnField:    'adm_cliente',
+        sortEnabled:    true,
+        class:          "text-start"
+    },
+    {
+        columnLabel:    'Orden',
+        columnField:    'orden_taller',
         sortEnabled:    true,
         class:          "text-start"
     },
@@ -64,25 +70,25 @@ const tableHeader   = ref([
         columnLabel:    'Subtotal',
         columnField:    'subtotal',
         sortEnabled:    true,
-        class:          "text-start"
+        class:          "text-end"
     },
     {
         columnLabel:    'Impuestos',
-        columnField:    'talle_modelo',
+        columnField:    'impuestos',
         sortEnabled:    true,
-        class:          "text-start"
+        class:          "text-end"
     },
     {
         columnLabel:    'Total',
         columnField:    'total',
         sortEnabled:    true,
-        class:          "text-start"
+        class:          "text-end"
     },
     {
         columnLabel:    'Saldo',
         columnField:    'saldo',
         sortEnabled:    true,
-        class:          "text-start"
+        class:          "text-end"
     },
     {
         columnLabel:    'Estatus',
@@ -156,29 +162,23 @@ permisos.value.forEach(element => {
                                     class="me-3">
                                 </Button>
                                 <Button severity="warn" icon="pi pi-pencil" raised
-                                    v-if="sPermisos.indexOf('Editar') >= 0 "
+                                    v-if="sPermisos.indexOf('Editar') >= 0 && (item.estatus == 'SinAplicar')"
                                     @click="() => { router.push({name: 'factura-edita', params: {id: item.id}}) }"
                                     v-tooltip.top="{ value: 'Editar', showDelay: 1000, hideDelay: 300}"
                                     class="me-3">
                                 </Button>
                             </template>
-                            <template v-else-if="col.columnField=='talle_tipo_servicio'">
-                                {{  item[col.columnField]!['tipo_servicio']  }}
+                            <template v-else-if="col.columnField=='subtotal'">
+                                {{  formatCurrency(item[col.columnField])   }}
                             </template>
-                            <template v-else-if="col.columnField=='talle_unidad' && item['talle_unidad']">
-                                {{  item[col.columnField]!['unidad']  }}
+                            <template v-else-if="col.columnField=='impuestos'">
+                                {{  formatCurrency(item[col.columnField])  }}
                             </template>
-                            <template v-else-if="col.columnLabel=='Marca' && item['talle_unidad']">
-                                {{  item['talle_unidad']['talle_marca']['marca']  }}
+                            <template v-else-if="col.columnField=='total'">
+                                {{  formatCurrency(item[col.columnField])  }}
                             </template>
-                            <template v-else-if="col.columnLabel=='Tipo Unidad' && item['talle_unidad']">
-                                {{  item['talle_unidad']['talle_tipo_unidad']['tipo_unidad']  }}
-                            </template>
-                            <template v-else-if="col.columnLabel=='Modelo' && item['talle_unidad']">
-                                {{  item['talle_unidad']['talle_modelo']['modelo']  }}
-                            </template>
-                            <template v-else-if="col.columnLabel=='Tipo Servicio' && item['talle_tipo_servicio']">
-                                {{  item['talle_tipo_servicio']['tipo_servicio'] }}
+                            <template v-else-if="col.columnField=='saldo'">
+                                {{  formatCurrency(item[col.columnField])  }}
                             </template>
                             <template v-else-if="col.columnField=='adm_cliente' && item['adm_cliente']">
                                 {{  item[col.columnField]!['tipo_persona'] == 'Moral' 
@@ -186,16 +186,16 @@ permisos.value.forEach(element => {
                                             : item[col.columnField]!['nombre']
                                 }}
                             </template>
-                            <template v-else-if="col.columnField=='fecha_alta'">
+                            <template v-else-if="col.columnField=='fecha'">
                                 {{  convertTMZdatetime(item[col.columnField].toString() ) }}
                             </template>
                             <template v-else-if="col.columnField=='estatus'">
                                 <Tag :value="item['estatus']"
-                                    :severity="item['estatus'] == 'Cancelada' 
+                                    :severity="item['estatus'] == 'Cancelado' 
                                     ? 'danger' 
-                                    : item['estatus'] == 'Pausa' 
+                                    : item['estatus'] == 'Aplicado' 
                                         ? 'warn' 
-                                        : item['estatus'] == 'Abierta' 
+                                        : item['estatus'] == 'SinAplicar' 
                                             ? 'info' : 'success' ">
                                 </Tag>
                             </template>

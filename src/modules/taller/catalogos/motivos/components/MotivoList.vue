@@ -2,12 +2,11 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { getAssetPath } from "@/core/helpers/assets";
-import type { Cliente } from '../interfaces/interfaces';
+import type { Motivo } from '../interfaces/interfaces';
 import { useAuthStore } from "@/stores/auth";
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import FloatLabel from 'primevue/floatlabel';
-import useUtilerias from '@/core/helpers/utilerias';
 
 export interface Permisos {
     modulo: string,
@@ -15,15 +14,13 @@ export interface Permisos {
 }
 
 interface Props {
-    registros:      Cliente[],
+    registros:      Motivo[],
     currentBuscar:  string,
 }
 
 interface Emits {
     (e: 'buscarChanged', buscar: string): void;
 }
-
-const { formatCurrency } = useUtilerias();
 
 const props         = defineProps<Props>();
 const emits         = defineEmits<Emits>();
@@ -37,22 +34,10 @@ const tableHeader   = ref([
         class:          "text-center"
     },
     {
-        columnLabel:    'RFC',
-        columnField:    'rfc',
+        columnLabel:    'Motivo',
+        columnField:    'descripcion',
         sortEnabled:    true,
         class:          "text-start"
-    },
-    {
-        columnLabel:    'CLIENTE',
-        columnField:    'razon_social',
-        sortEnabled:    true,
-        class:          "text-start"
-    },
-    {
-        columnLabel:    'Saldo',
-        columnField:    'saldo',
-        sortEnabled:    true,
-        class:          "text-end"
     },
     {
         columnLabel:    'Estado',
@@ -73,7 +58,7 @@ const store = useAuthStore();
 
 const permisos = ref<Permisos[]>([]);
 const sPermisos = ref<string>('');
-permisos.value = store.permisos.filter((element: any) => element.codigo == '040'); // Modulo Catalogos Clientes
+permisos.value = store.permisos.filter((element: any) => element.codigo == '051'); // Modulo Catalogos Motivos
 permisos.value.forEach(element => {
      sPermisos.value += element.permiso+',';
 });
@@ -84,10 +69,10 @@ permisos.value.forEach(element => {
     <div class="card-header border-0 pt-6">
         <div class="card-toolbar">
             <div class="d-flex justify-content-end" data-kt-customer-table-toolbar="base">
-                <Button label='Nuevo Cliente' severity="Primary" icon="pi pi-plus" raised
-                    @click="() => { router.push({name: 'cliente-nuevo', params: {id: 0}}) }"
+                <Button label='Nuevo Motivo' severity="Primary" icon="pi pi-plus" raised
+                    @click="() => { router.push({name: 'motivo-nuevo', params: {id: 0}}) }"
                     v-if="sPermisos.indexOf('Nuevo') >= 0 "
-                    v-tooltip-top="'Registrar nuevo Cliente'">
+                    v-tooltip-top="'Registrar un nuevo Motivo'">
                 </Button>
             </div>
         </div>
@@ -98,11 +83,10 @@ permisos.value.forEach(element => {
                 </span>
                 <FloatLabel variant="on">
                     <InputText type="text" id="search" v-model="search" @input="emits('buscarChanged',search)" variant="filled" class="ms-10"></InputText>
-                    <label for="search" class="ms-10">Buscar en Clientes</label>
+                    <label for="search" class="ms-10">Buscar en Motivos</label>
                 </FloatLabel>
             </div>
         </div>
-        
     </div>
     <div class="card-body pt-0 py-0">
         <div class="table-responsive">
@@ -120,25 +104,19 @@ permisos.value.forEach(element => {
                             <template v-if="col.columnField === 'actions'">
                                 <Button severity="info" icon="pi pi-search" raised
                                     v-if="sPermisos.indexOf('Consultar') >= 0 "
-                                    @click="() => { router.push({name: 'cliente-consulta', params: {id: item.id}}) }"
+                                    @click="() => { router.push({name: 'motivo-consulta', params: {id: item.id}}) }"
                                     v-tooltip.top="{ value: 'Consultar', showDelay: 1000, hideDelay: 300}"
                                     class="me-3">
                                 </Button>
                                 <Button severity="warn" icon="pi pi-pencil" raised
                                     v-if="sPermisos.indexOf('Editar') >= 0 "
-                                    @click="() => { router.push({name: 'cliente-edita', params: {id: item.id}}) }"
+                                    @click="() => { router.push({name: 'motivo-edita', params: {id: item.id}}) }"
                                     v-tooltip.top="{ value: 'Editar', showDelay: 1000, hideDelay: 300}"
                                     class="me-3">
                                 </Button>
                             </template>
                             <template v-else-if="col.columnField=='activo'">
-                                {{  item[col.columnField] ? 'ACTIVO' : 'INACTIVO'  }}
-                            </template>
-                            <template v-else-if="col.columnField=='saldo'">
-                                {{ formatCurrency(item[col.columnField]) }}
-                            </template>
-                            <template v-else-if="col.columnField=='razon_social'">
-                                {{ item['tipo_persona'] == 'Fisica' ? item['nombres']+' '+item['apaterno']+' '+item['amaterno'] : item[col.columnField] }}
+                                {{ item[col.columnField] ? 'ACTIVO' : 'INACTIVO' }}
                             </template>
                             <template v-else>
                                 {{ item[col.columnField] }}

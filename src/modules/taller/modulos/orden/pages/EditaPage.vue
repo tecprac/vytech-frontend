@@ -335,7 +335,8 @@ const validarDatos = async (data: Orden) => {
                             <div class="row mb-2">
                                 <label for="kms" class="col-form-label col-form-label-sm col-sm-2">Kilometraje</label>
                                 <div class="col-sm-2">
-                                    <InputNumber v-model="registro.kms" :min="0" :max="999999999" fluid
+                                    <InputNumber v-model="registro.kms" :min="0.0" :max="99999999999.9" highlight-on-focus
+                                        :min-fraction-digits="1" :max-fraction-digits="1" fluid
                                         :pt="{ pcInputText: { root:{ class: 'text-end'}} }">
                                     </InputNumber>
                                 </div>

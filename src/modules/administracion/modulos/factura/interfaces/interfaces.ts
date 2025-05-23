@@ -1,6 +1,7 @@
 export interface Documento {
     id:                 		number;
 	tipo_documento:     		string;
+	folio_documento_id:			number;
 	folio:              		number;
 	serie:              		string;
 	propietario_id:     		number;
@@ -37,6 +38,7 @@ export interface Documento {
 	motivocancelacion_id?: 		number;
 	foliosustitucion?:  		string;
 	codigocancela?:     		string;
+	carta_porte:				boolean;
     activo:             		boolean;
 	adm_cliente?:       		adm_cliente | null;
     conf_usuario?:      		conf_usuario | null;
@@ -55,11 +57,14 @@ export interface Documento {
 export interface Documento_Detalle {
 	id: 					number;
 	documento_id: 			number;
+	tipo_partida: 			string;
 	producto_id: 			number;
+	trabajo_id: 			number;
 	almacen_id: 			number;
 	orden_trabajo_id: 		number;
 	requision_detalle_id: 	number;
 	cantidad: 				number;
+	descripcion: 			string;
 	devueltas: 				number;
 	costo: 					number;
 	costotal: 				number;
@@ -71,11 +76,44 @@ export interface Documento_Detalle {
 	descuento: 				number;
 	importe_final: 			number;
 	impuesto: 				number;
-	porcentanje_impuesto: 	number;
+	porcentaje_impuesto: 	number;
 	retencion: 				number;
 	porcentaje_retencion: 	number;
 	observaciones: 			string;
 	activo: 				boolean;
+}
+
+export interface Documento_CFDI {
+    id: 					number;
+    documento_id: 			number;
+    folio:   				number;
+    serie:					string;
+    tipodecomprobante_id: 	number;
+    uuid: 					string;
+    fecha_emision: 		    Date;
+    enviado: 				boolean;
+    email:   				string;
+    fecha_cancelacion: 	    Date | null;
+    estatus: 				string;
+    fechatimbrado:   		string;
+    version: 				string;
+    sellocfd: 				string;
+    nocertificadosat: 		string;
+    nocertificado:   		string;
+    sellosat: 				string;
+    cadenaoriginal?: 		string;
+    filepdf: 				string;
+    filexml: 				string;
+    error?: 				string;
+    sat_tipodecomprobante?:  sat_tipodecomprobante;
+    versioncfdi: 			string | null;
+    versionccp?: 			string | null;
+}
+
+interface sat_tipodecomprobante {
+    id:                     number;
+	c_tipodecomprobante:    string;
+	descripcion:            string;
 }
 
 interface adm_cliente {
@@ -188,11 +226,17 @@ export interface adm_cp_transporte {
 }
 
 export interface adm_documento_relacionado {
-	id?: 				number;
+	id: 				number;
 	documento_id: 		number;
 	origen: 			string;
 	id_documentorel: 	number;
-	uuid?: 				string | null;
+	uuid: 				string;
 	tiporelacion_id: 	number;
 	activo: 			boolean;
+	sat_tiporelacion?:	sat_tiporelacion | null;
+}
+
+interface sat_tiporelacion {
+	c_tiporelacion:	string;
+	descripcion:	string;
 }

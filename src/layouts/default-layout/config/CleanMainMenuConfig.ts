@@ -142,6 +142,11 @@ const MainMenuConfig: Array<MenuItem> = [
                         subseccion:     "CATALOGOS",
                         sub:[
                                 {
+                                    heading:    'Motivos',
+                                    route:      '/modules/taller/catalogos/motivos',
+                                    codigo:     '051',
+                                },
+                                {
                                     heading:    'Marcas',
                                     route:      '/modules/taller/catalogos/marcas',
                                     codigo:     '009',

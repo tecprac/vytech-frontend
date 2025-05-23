@@ -126,6 +126,13 @@ const useUtilerias = () => {
         return fechainterna;
     }
 
+    const sumarDias = (fecha:Date, dias:number): Date  =>{
+        const nuevaFecha = new Date(fecha);
+        nuevaFecha.setHours(12,0,0,0);
+        nuevaFecha.setDate(nuevaFecha.getDate() + dias);
+        return nuevaFecha;
+    }
+
     const getLocalIP = async ():Promise<string> => {
         let ip = '127.0.0.1';
         await fetch('https://api.ipify.org?format=json')
@@ -150,6 +157,7 @@ const useUtilerias = () => {
         convertTMZtime,
         convertTMZdatetime,
         restardias,
+        sumarDias,
         getLocalIP,
     }
 

@@ -42,7 +42,7 @@ const useOrdenFormatos = (  ) => {
 
     const { formatDateTime,convertTMZdate, convertTMZdatetime, convertTMZtime, formatNumber } = useUtilerias();
 
-    // CONSTRUCCION PDF ORDEN DE SERVICIO LEONPRODIESEL
+    // CONSTRUCCION PDF ORDEN DE SERVICIO VYTECHSERVICES
     const PDFBlanco = (data: Orden ) => {
         const pdf = new jsPDF({
             orientation: "portrait",

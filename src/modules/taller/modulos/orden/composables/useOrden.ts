@@ -356,7 +356,6 @@ const useOrden = ( id: number ) => {
                 trabajosbitacora.value.splice(0);
                 const respbitacora = await ApiService.get2(`Orden/Trabajo/Bitacora/${trabajo_orden.value.id}`,null);
                 trabajosbitacora.value = respbitacora.data;
-                console.log(trabajosbitacora.value);
             }
         }
         dialogTrabajo.value = true;

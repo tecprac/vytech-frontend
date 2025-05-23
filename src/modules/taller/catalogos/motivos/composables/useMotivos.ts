@@ -2,26 +2,25 @@ import { watch } from 'vue';
 import { useQuery } from "@tanstack/vue-query";
 import { storeToRefs } from "pinia";
 import ApiService from "@/core/services/ApiService";
-import type { Documento } from '../interfaces/interfaces';
-import { useFacturasStore } from '@/stores/administracion/modulos/facturas';
+import type { Motivo } from '../interfaces/interfaces';
+import { useMotivoStore } from '@/stores/taller/catalogos/motivo';
 
-
-const getRegistros = async(page: number, buscar:string = ''):Promise<Documento[]> => {
+const getRegistros = async(page: number, buscar:string = ''):Promise<Motivo[]> => {
     ApiService.setHeader();
-    const { data } = await ApiService.get2(`AdmFactura/paginado?page=${page}&buscar=${buscar}&tipo=Factura`,null);
-    const registrosdata: Documento[] = data.items
-    const storeint = useFacturasStore();
+    const { data } = await ApiService.get2(`Motivo/paginado?page=${page}&buscar=${buscar}`,null);
+    const registrosdata: Motivo[] = data.items
+    const storeint = useMotivoStore();
     storeint.setPaginas(data.totalPages);
     return registrosdata;
 }
 
-const useFacturas = () => {
+const useMotivos = () => {
 
-    const store = useFacturasStore();
+    const store = useMotivoStore();
     const { currentPage,registros,totalPages,currentBuscar } = storeToRefs(store);
 
     const { isPending, data, isError, isSuccess } = useQuery({
-        queryKey:   ['facturas?page=',currentPage,'?buscar=',currentBuscar],
+        queryKey:   ['motivos?page=',currentPage,'?buscar=',currentBuscar],
         queryFn:    async () => getRegistros(currentPage.value,currentBuscar.value),
         gcTime:     0,
         staleTime:  0,
@@ -56,4 +55,4 @@ const useFacturas = () => {
     }
 }
 
-export default useFacturas;
+export default useMotivos;

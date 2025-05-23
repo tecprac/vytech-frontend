@@ -26,7 +26,7 @@ interface Emits {
 const props         = defineProps<Props>();
 const emits         = defineEmits<Emits>();
 const router        = useRouter();
-const { convertTMZdatetime } = useUtilerias();
+const { convertTMZdatetime, formatNumber } = useUtilerias();
 
 
 const tableHeader   = ref([
@@ -83,6 +83,12 @@ const tableHeader   = ref([
         columnField:    'talle_tipo_servicio',
         sortEnabled:    true,
         class:          "text-start"
+    },
+    {
+        columnLabel:    'Kilometraje',
+        columnField:    'kms',
+        sortEnabled:    true,
+        class:          "text-end"
     },
     {
         columnLabel:    'Cliente',
@@ -162,7 +168,7 @@ permisos.value.forEach(element => {
                                     class="me-3">
                                 </Button>
                                 <Button severity="warn" icon="pi pi-pencil" raised
-                                    v-if="sPermisos.indexOf('Editar') >= 0 "
+                                    v-if="sPermisos.indexOf('Editar') >= 0 && (item.estatus == 'Abierta' || item.estatus == 'EnProceso')"
                                     @click="() => { router.push({name: 'orden-edita', params: {id: item.id}}) }"
                                     v-tooltip.top="{ value: 'Editar', showDelay: 1000, hideDelay: 300}"
                                     class="me-3">
@@ -194,6 +200,9 @@ permisos.value.forEach(element => {
                             </template>
                             <template v-else-if="col.columnField=='fecha_alta'">
                                 {{  convertTMZdatetime(item[col.columnField].toString() ) }}
+                            </template>
+                            <template v-else-if="col.columnField=='kms'">
+                                {{  formatNumber( item[col.columnField] ) }}
                             </template>
                             <template v-else-if="col.columnField=='estatus'">
                                 <Tag :value="item['estatus']"

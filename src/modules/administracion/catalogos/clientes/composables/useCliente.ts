@@ -199,8 +199,8 @@ const useCliente = ( id: number) => {
         const respusocfdi = await ApiService.get2('SatUsoCFDI/listado',null);
         usoscfdi.value = <UsoCFDI[]>respusocfdi.data;
         isPending.value = false;
-        regimenesfiscal_filtrado.value = regimenesfiscal.value.filter(item => item.fisica == 'Sí');
-        usoscfdi_filtrado.value = usoscfdi.value.filter(item => item.fisica == 'Sí');
+        if (id == 0) regimenesfiscal_filtrado.value = regimenesfiscal.value.filter(item => item.fisica == 'Sí');
+        if (id == 0) usoscfdi_filtrado.value = usoscfdi.value.filter(item => item.fisica == 'Sí');
     })
 
     const cambiaTipoPersona = async(tipopersona:string) => {
@@ -395,11 +395,18 @@ const useCliente = ( id: number) => {
     watch( data, async () => {
         if (data.value){
             registro.value = {...data.value};
-            
             if (id > 0) {
                 const response = await ApiService.get2(`SatEstados/GetById/${registro.value.estado_id}`,null);
                 selectedestado.value = <SatEstado>response.data;
                 selectpais.value = paises.value.find(item => item.id == registro.value.pais_id);
+                regimenesfiscal.value.splice(0);
+                const respregimen = await ApiService.get2('SatRegimenFiscal/listado',null);
+                regimenesfiscal.value = <RegimenFiscal[]>respregimen.data;
+                regimenesfiscal_filtrado.value = regimenesfiscal.value.filter(item => (registro.value.tipo_persona == 'Moral' ? item.moral == 'Sí' : item.fisica == 'Sí'));
+                usoscfdi.value.splice(0);
+                const respusocfdi = await ApiService.get2('SatUsoCFDI/listado',null);
+                usoscfdi.value = <UsoCFDI[]>respusocfdi.data;
+                usoscfdi_filtrado.value = usoscfdi.value.filter(item => (registro.value.tipo_persona == 'Moral' ? item.moral == 'Sí' : item.fisica == 'Sí'));
             }
         }
             

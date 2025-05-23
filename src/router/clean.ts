@@ -28,6 +28,28 @@ const routes: Array<RouteRecordRaw> = [
                     breadcrumbs: ["Dashboards"],
                 },
             },
+            // Opción Configuración Parametros
+            {
+                path: "/modules/configuracion/parametros",
+                name: 'parametros',
+                component: () => import(/* webpackChunkName: "parametros" */ "@/modules/configuracion/parametros/layouts/ParametrosLayout.vue"),
+                meta: {
+                    pageTitle: "Parametros",
+                    breadcrumbs: ["Configuración","Parametros"],
+                    codigo: '006'
+                },
+                redirect: { name: 'parametrosindex'},
+                children: [
+                    {
+                        path: 'parametrosindex',
+                        name: 'parametrosindex',
+                        component: () => import(/* webpackChunkName: "parametrosindex" */ "@/modules/configuracion/parametros/pages/IndexPage.vue"),
+                        meta: {
+                            pageTitle: "Parametros",
+                        }
+                    }
+                ]
+            },
             // Menú Configuración Roles
             {
                 path: "/modules/configuracion/roles",
@@ -384,6 +406,52 @@ const routes: Array<RouteRecordRaw> = [
                         component: () => import(/* webpackChunkName: "folioconsulta" */ "@/modules/configuracion/folioDocumento/pages/ConsultaPage.vue"),
                         meta: {
                             pageTitle: "Folio Documento Consulta"
+                        }
+                    },
+                ]
+            },
+            // Menú Taller-Catalogos Motivos
+            {
+                path: "/modules/taller/catalogos/motivos",
+                name: "motivo",
+                component: () => import(/* webpackChunkName: "motivo" */ "@/modules/taller/catalogos/motivos/layouts/MotivoLayout.vue"),
+                meta: {
+                    pageTitle: "Motivos",
+                    breadcrumbs: ["Taller","Catalogos","Motivos"],
+                    codigo: '051'
+                },
+                redirect: { name: 'motivoslist'},
+                children:[
+                    {
+                        path: 'motivoslist',
+                        name: 'motivoslist',
+                        component: () => import(/* webpackChunkName: "motivoslist" */ "@/modules/taller/catalogos/motivos/pages/ListPage.vue"),
+                        meta: {
+                            pageTitle: "Motivos",
+                        }
+                    },
+                    {
+                        path: 'motivo-nuevo/',
+                        name: 'motivo-nuevo',
+                        component: () => import(/* webpackChunkName: "motivonuevo" */ "@/modules/taller/catalogos/motivos/pages/NuevoPage.vue"),
+                        meta: {
+                            pageTitle: "Motivo Nuevo"
+                        }
+                    },
+                    {
+                        path: 'motivo-edita/:id',
+                        name: 'motivo-edita',
+                        component: () => import(/* webpackChunkName: "motivoedita" */ "@/modules/taller/catalogos/motivos/pages/EditaPage.vue"),
+                        meta: {
+                            pageTitle: "Motivo Editar"
+                        }
+                    },
+                    {
+                        path: 'motivo-consulta/:id',
+                        name: 'motivo-consulta',
+                        component: () => import(/* webpackChunkName: "motivoconsulta" */ "@/modules/taller/catalogos/motivos/pages/ConsultaPage.vue"),
+                        meta: {
+                            pageTitle: "Motivo Consulta"
                         }
                     },
                 ]
