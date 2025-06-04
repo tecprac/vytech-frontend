@@ -935,7 +935,6 @@ const useOrden = ( id: number ) => {
         generandopdf.value = true;
         const response  = await ApiService.get2(`Orden/GetByIdFormato/${registro.value.id}`,null);
         const responseref = await ApiService.get2(`Orden/GetByIdFormatoRefacciones/${registro.value.id}`,null);
-        console.log(responseref.data);
         pdfDocumento.value = tipo == 'Blanco' ? 
                                     PDFBlanco(registro.value) : 
                                     tipo == 'Datos' ? 

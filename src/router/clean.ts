@@ -1326,6 +1326,52 @@ const routes: Array<RouteRecordRaw> = [
                     },
                 ]
             },
+            // Menú Administración-Modulos Pago
+            {
+                path: "/modules/administracion/modulos/pago",
+                name: "pago",
+                component: () => import(/* webpackChunkName: "pago" */ "@/modules/administracion/modulos/pago/layouts/PagoLayout.vue"),
+                meta: {
+                    pageTitle: "Pago",
+                    breadcrumbs: ["Administración","Modulos","Pago"],
+                    codigo: '052'
+                },
+                redirect: { name: 'pagolist'},
+                children:[
+                    {
+                        path: 'pagolist',
+                        name: 'pagolist',
+                        component: () => import(/* webpackChunkName: "pagolist" */ "@/modules/administracion/modulos/pago/pages/ListPage.vue"),
+                        meta: {
+                            pageTitle: "Pago",
+                        }
+                    },
+                    {
+                        path: 'pago-nuevo/',
+                        name: 'pago-nuevo',
+                        component: () => import(/* webpackChunkName: "pagonuevo" */ "@/modules/administracion/modulos/pago/pages/NuevoPage.vue"),
+                        meta: {
+                            pageTitle: "Pago Nuevo"
+                        }
+                    },
+                    {
+                        path: 'pago-consulta/:id',
+                        name: 'pago-consulta',
+                        component: () => import(/* webpackChunkName: "pagoconsulta" */ "@/modules/administracion/modulos/pago/pages/ConsultaPage.vue"),
+                        meta: {
+                            pageTitle: "Pago Consulta"
+                        }
+                    },
+                    {
+                        path: 'pago-edita/:id',
+                        name: 'pago-edita',
+                        component: () => import(/* webpackChunkName: "pagoedita" */ "@/modules/administracion/modulos/pago/pages/EditaPage.vue"),
+                        meta: {
+                            pageTitle: "Pago Editar"
+                        }
+                    },
+                ]
+            },
             // Menú Almacén-Catalogos Tipo Inventario
             {
                 path: "/modules/almacen/catalogos/tipoinventario",

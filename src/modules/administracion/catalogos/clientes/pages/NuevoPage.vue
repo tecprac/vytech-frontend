@@ -180,13 +180,13 @@ watch(isError, () => {
                 <div class="row mb-2">
                     <label for="id" class="col-form-label col-form-label-sm col-sm-2">ID</label>
                     <div class="col-sm-2">
-                        <InputNumber id="id" v-model="registro.id" maxlength="120" disabled fluid size="small"
+                        <InputNumber id="id" v-model="registro.id" maxlength="120" disabled fluid 
                             :pt="{ pcInputText: { root:{ class: 'text-end'}} }">
                         </InputNumber>
                     </div>
                     <label for="tipo_persona" class="col-form-label col-form-label-sm col-sm-2">Tipo Persona</label>
                     <div class="col-sm-2">
-                        <Select v-model="tipo_persona" :options="tipospersona" size="small" fluid
+                        <Select v-model="tipo_persona" :options="tipospersona" fluid
                             @change="cambiaTipoPersona(tipo_persona)">
                         </Select>
                     </div>
@@ -197,7 +197,7 @@ watch(isError, () => {
                             Nombres
                         </label>
                         <InputText id="nombres" 
-                            v-model="registro.nombres" size="small"
+                            v-model="registro.nombres"
                             :disabled="tipo_persona=='Moral'" fluid>
                         </InputText>
                     </div>
@@ -206,7 +206,7 @@ watch(isError, () => {
                             Apellido Paterno
                         </label>
                         <InputText id="apaterno" 
-                            v-model="registro.apaterno" size="small"
+                            v-model="registro.apaterno"
                             :disabled="tipo_persona=='Moral'" fluid>
                         </InputText>
                     </div>
@@ -215,7 +215,7 @@ watch(isError, () => {
                             Apellido Materno
                         </label>
                         <InputText id="amaterno" 
-                            v-model="registro.amaterno" size="small"
+                            v-model="registro.amaterno"
                             :disabled="tipo_persona=='Moral'" fluid>
                         </InputText>
                     </div>
@@ -226,7 +226,7 @@ watch(isError, () => {
                             Razón Social
                         </label>
                         <InputText id="razonsocial" 
-                            v-model="registro.razon_social" size="small"
+                            v-model="registro.razon_social"
                             :disabled="tipo_persona=='Fisica'" fluid>
                         </InputText>
                     </div>
@@ -237,7 +237,7 @@ watch(isError, () => {
                             RFC:
                         </label>
                         <InputMask v-model="rfc" :mask="tipo_persona=='Fisica' ? 'aaaa-999999-***': 'aaa-999999-***'"
-                            fluid :unmask="true" size="small">
+                            fluid :unmask="true">
                         </InputMask>
                         <Message v-if="errors.rfc" severity="error" variant="simple" size="small">{{ errors.rfc }}</Message>
                     </div>
@@ -246,7 +246,7 @@ watch(isError, () => {
                             CURP:
                         </label>
                         <InputText id="curp" 
-                            v-model="registro.curp" size="small"
+                            v-model="registro.curp"
                             :disabled="tipo_persona=='Moral'" fluid>
                         </InputText>
                     </div>
@@ -288,7 +288,7 @@ watch(isError, () => {
                                                     v-model="selectpais" 
                                                     :options="paises" fluid
                                                     option-label="descripcion" 
-                                                    filter size="small"
+                                                    filter
                                                     @change="cambiaPais"
                                                 >
                                                 </Select>
@@ -297,7 +297,7 @@ watch(isError, () => {
                                                 <label for="cp" class="required form-label fw-semibold">
                                                     C.P:
                                                 </label>
-                                                <InputMask v-model="cp" mask="99999" fluid size="small"
+                                                <InputMask v-model="cp" mask="99999" fluid
                                                     :unmask="true" placeholder="00000"
                                                     @keypress="(event:Event) => { buscarCP(cp,event) }"
                                                     @blur="buscarCP(cp)"
@@ -317,7 +317,7 @@ watch(isError, () => {
                                                     :options="estadosfiltrados"
                                                     :editable="estadosfiltrados.length == 0"
                                                     :placeholder="estadosfiltrados.length == 0 ? 'Capture un Estado' : 'Seleccione un estado'"
-                                                    fluid size="small"
+                                                    fluid 
                                                 >
                                                 </Select>
                                             </div>
@@ -327,7 +327,7 @@ watch(isError, () => {
                                                 </label>
                                                 <Select
                                                     v-model="registro.municipio"
-                                                    fluid size="small"
+                                                    fluid 
                                                     :options="municipios"
                                                     :editable="true"
                                                     placeholder="Seleccione o Capture un Municipio"
@@ -340,7 +340,7 @@ watch(isError, () => {
                                                 </label>
                                                 <Select
                                                     v-model="registro.ciudad"
-                                                    fluid size="small"
+                                                    fluid 
                                                     :options="ciudades"
                                                     :editable="true"
                                                     placeholder="Seleccione o Capture una Ciudad"
@@ -355,7 +355,7 @@ watch(isError, () => {
                                                 </label>
                                                 <Select
                                                     v-model="registro.colonia"
-                                                    fluid size="small"
+                                                    fluid 
                                                     :options="colonias"
                                                     :editable="true"
                                                     placeholder="Seleccione o Capture una Colonia"
@@ -366,7 +366,7 @@ watch(isError, () => {
                                                 <label for="calle" class="form-label fw-semibold">
                                                     Calle y Numero
                                                 </label>
-                                                <InputText v-model="registro.calle" size="small" fluid>
+                                                <InputText v-model="registro.calle" fluid>
                                                 </InputText>
                                             </div>
                                         </div>
@@ -380,7 +380,7 @@ watch(isError, () => {
                                                 <label for="telefono_fijo" class="form-label fw-semibold">
                                                     Telefono Oficina
                                                 </label>
-                                                <InputMask v-model="registro.telefono_fijo" mask="(999) 999 9999" fluid size="small"
+                                                <InputMask v-model="registro.telefono_fijo" mask="(999) 999 9999" fluid 
                                                     :unmask="true" placeholder="(999) 999 9999"
                                                 >
                                                 </InputMask>
@@ -389,7 +389,7 @@ watch(isError, () => {
                                                 <label for="telefono_movil" class="form-label fw-semibold">
                                                     Telefono Movil
                                                 </label>
-                                                <InputMask v-model="registro.telefono_movil" mask="(999) 999 9999" fluid size="small"
+                                                <InputMask v-model="registro.telefono_movil" mask="(999) 999 9999" fluid
                                                     :unmask="true" placeholder="(999) 999 9999"
                                                 >
                                                 </InputMask>
@@ -401,9 +401,7 @@ watch(isError, () => {
                                                     Email
                                                 </label>
                                                 <InputText
-                                                    v-model="registro.email"
-                                                    size="small" fluid
-                                                >
+                                                    v-model="registro.email" fluid>
                                                 </InputText>
                                             </div>
                                             <div class="col-sm-6 fv-row">
@@ -414,9 +412,7 @@ watch(isError, () => {
                                                         v-tooltip.top="'A este correo se enviaran los CFDI (Facturas, Pagos, Notas de Crédito, etc )'" />
                                                 </label>
                                                 <InputText
-                                                    v-model="registro.email_adicional"
-                                                    size="small" fluid
-                                                >
+                                                    v-model="registro.email_adicional" fluid>
                                                 </InputText>
                                             </div>
                                         </div>
@@ -426,10 +422,8 @@ watch(isError, () => {
                                                     Representante Legal o Nombre del Contacto
                                                 </label>
                                                 <InputText
-                                                    v-model="registro.rep_legal"
-                                                    size="small" fluid
-                                                    :disabled="registro.tipo_persona == 'Física'"
-                                                >
+                                                    v-model="registro.rep_legal" fluid
+                                                    :disabled="registro.tipo_persona == 'Física'">
                                                 </InputText>
                                             </div>
                                         </div>
@@ -449,8 +443,7 @@ watch(isError, () => {
                                             </label>
                                             <div class="col-sm-4">
                                                 <Select
-                                                    v-model="registro.regimenfiscal_id"
-                                                    fluid size="small"
+                                                    v-model="registro.regimenfiscal_id" fluid 
                                                     :options="regimenesfiscal_filtrado"
                                                     option-value="id"
                                                     :option-label="(data) => data.c_regimenfiscal+' '+data.descripcion"
@@ -474,8 +467,7 @@ watch(isError, () => {
                                             </label>
                                             <div class="col-sm-4">
                                                 <Select
-                                                    v-model="registro.formapago_id"
-                                                    fluid size="small"
+                                                    v-model="registro.formapago_id" fluid
                                                     :options="formaspago"
                                                     option-value="id"
                                                     :option-label="(data) => data.c_formapago+' '+data.descripcion"
@@ -499,8 +491,7 @@ watch(isError, () => {
                                             </label>
                                             <div class="col-sm-4">
                                                 <Select
-                                                    v-model="registro.metodopago_id"
-                                                    fluid size="small"
+                                                    v-model="registro.metodopago_id" fluid 
                                                     :options="metodospago"
                                                     option-value="id"
                                                     :option-label="(data) => data.c_metodopago+' '+data.descripcion"
@@ -527,8 +518,7 @@ watch(isError, () => {
                                             </label>
                                             <div class="col-sm-4">
                                                 <Select
-                                                    v-model="registro.usocfdi_id"
-                                                    fluid size="small"
+                                                    v-model="registro.usocfdi_id" fluid 
                                                     :options="usoscfdi_filtrado"
                                                     option-value="id"
                                                     :option-label="(data) => data.c_usocfdi+' '+data.descripcion"
@@ -552,8 +542,7 @@ watch(isError, () => {
                                                     :min-fraction-digits="2"
                                                     :max-fraction-digits="2"
                                                     :max="100.00"
-                                                    :min="0.00"
-                                                    fluid size="small"
+                                                    :min="0.00" fluid 
                                                     :pt="{ pcInputText: { root:{ class: 'text-end'}} }"
                                                 >
                                                 </InputNumber>
@@ -567,8 +556,7 @@ watch(isError, () => {
                                                     :max="100.00"
                                                     :min="0.00"
                                                     :min-fraction-digits="2"
-                                                    :max-fraction-digits="2"
-                                                    fluid size="small"
+                                                    :max-fraction-digits="2" fluid 
                                                     :pt="{ pcInputText: { root:{ class: 'text-end'}} }"
                                                 >
                                                 </InputNumber>
@@ -584,8 +572,7 @@ watch(isError, () => {
                                                     :max="100.00"
                                                     :min="0.00"
                                                     :min-fraction-digits="2"
-                                                    :max-fraction-digits="2"
-                                                    fluid size="small"
+                                                    :max-fraction-digits="2" fluid 
                                                     :pt="{ pcInputText: { root:{ class: 'text-end'}} }"
                                                 >
                                                 </InputNumber>
@@ -599,8 +586,7 @@ watch(isError, () => {
                                                     :max="100.00"
                                                     :min="0.00"
                                                     :min-fraction-digits="2"
-                                                    :max-fraction-digits="2"
-                                                    fluid size="small"
+                                                    :max-fraction-digits="2" fluid 
                                                     :pt="{ pcInputText: { root:{ class: 'text-end'}} }"
                                                 >
                                                 </InputNumber>
@@ -632,9 +618,7 @@ watch(isError, () => {
                                     <Select
                                         v-model="registro.condiciones"
                                         :options="condicionescredito"
-                                        size="small"
-                                        fluid
-                                    >
+                                        fluid >
                                     </Select>
                                 </div>
                             </div>
@@ -652,7 +636,7 @@ watch(isError, () => {
                                         mode="currency"
                                         locale="en-US"
                                         currency="USD"
-                                        fluid size="small"
+                                        fluid
                                         :disabled="registro.condiciones == 'Contado'"
                                         :pt="{ pcInputText: { root:{ class: 'text-end'}} }"
                                     >
@@ -666,7 +650,7 @@ watch(isError, () => {
                                         v-model="registro.dias_credito"
                                         :max="9999"
                                         :min="0"
-                                        fluid size="small"
+                                        fluid 
                                         :disabled="registro.condiciones == 'Contado'"
                                         :pt="{ pcInputText: { root:{ class: 'text-end'}} }"
                                     >

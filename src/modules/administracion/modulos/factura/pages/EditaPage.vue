@@ -17,23 +17,17 @@ import TabPanels from 'primevue/tabpanels';
 import TabPanel from 'primevue/tabpanel';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
-import Row from 'primevue/row';
 import AutoComplete from 'primevue/autocomplete';
 import Select from 'primevue/select';
-import Message from 'primevue/message';
 import { useToast } from 'primevue/usetoast';
 import { useAuthStore } from '@/stores/auth';
-import FileUpload from 'primevue/fileupload';
 import Toolbar from 'primevue/toolbar';
 import ProgressSpinner from 'primevue/progressspinner';
 import { useConfirm } from 'primevue/useconfirm';
 import ConfirmDialog from 'primevue/confirmdialog';
 import ConfirmPopup from 'primevue/confirmpopup';
 import Dialog from 'primevue/dialog';
-import SplitButton from 'primevue/splitbutton';
-import Slider from 'primevue/slider';
 import Textarea from 'primevue/textarea';
-import Badge from 'primevue/badge';
 import Accordion from 'primevue/accordion';
 import AccordionPanel from 'primevue/accordionpanel';
 import AccordionHeader from 'primevue/accordionheader';
@@ -144,7 +138,6 @@ watch(isError, () => {
         router.push({name: 'factura'});
 });
 
-
 const validarDatos = async(data: Documento) => {
     if (data.folio == 0) {
         toast.add({ severity:   'error',summary:    'Verificar',
@@ -164,7 +157,6 @@ const validarDatos = async(data: Documento) => {
             detail: 'Debe seleccionar un Cliente ', life: 3500});
         return;
     }
-    console.log(selectalmacen.value);
     data.folio_documento_id = selecfoliodocto.value.id
     data.cliente_id         = selectcliente.value.id;
     data.usuario_id         = auth.user.id;

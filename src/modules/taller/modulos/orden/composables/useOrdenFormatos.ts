@@ -629,6 +629,7 @@ const useOrdenFormatos = (  ) => {
         pdf.setFontSize(10);
         pdf.setTextColor(0,0,0);
         pdf.text("PLACAS:",420,190);
+        pdf.text(`${data.talle_unidad!.placas}`,470,188);
         //LINEA PLACAS
         pdf.setDrawColor(0);
         pdf.setDrawColor(0,0,0);
@@ -688,6 +689,7 @@ const useOrdenFormatos = (  ) => {
         pdf.setFontSize(10);
         pdf.setTextColor(0,0,0);
         pdf.text("SERIE DE CHASIS:",20,230);
+        pdf.text(`${data.talle_unidad!.num_serie ? data.talle_unidad!.num_serie : ''}`,115,228);
         // LINEA CHASIS
         pdf.setDrawColor(0);
         pdf.setDrawColor(0,0,0);
@@ -701,6 +703,7 @@ const useOrdenFormatos = (  ) => {
         pdf.setFontSize(10);
         pdf.setTextColor(0,0,0);
         pdf.text("SERIE DE MOTOR:",300,230);
+        pdf.text(`${data.talle_unidad!.num_motor ? data.talle_unidad!.num_motor : ''}`,395,228);
         //LINEA SERIE MOTOR
         pdf.setDrawColor(0);
         pdf.setDrawColor(0,0,0);

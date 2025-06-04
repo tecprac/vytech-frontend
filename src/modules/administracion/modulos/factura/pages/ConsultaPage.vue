@@ -49,7 +49,7 @@ const toast   = useToast();
 const auth    = useAuthStore();
 const confirm = useConfirm();
 
-const { sumarDias,formatCurrency } = useUtilerias();
+const { sumarDias,formatCurrency,convertTMZdatetime } = useUtilerias();
 
 const {
     isPending,
@@ -100,7 +100,9 @@ const {
     pdfDocumento,
     pdfViewer,
     dialogXMLVisor,
-    
+    dialogMovimientos,
+    movtos_cliente,
+
     cambiaDocumento,
     cambiaMoneda,
     buscarClientes,
@@ -125,6 +127,8 @@ const {
     downloadXML,
     RegenerarPDF,
     enviarCFDI,
+    openDialogMovimientos,
+
 } = useDocumento( +route.params.id );
 
 watch(isError, () => {
@@ -157,8 +161,13 @@ watch(isError, () => {
                         size="small" @click="timbrarFactura" :loading="bTimbrando"
                         :disabled="registro.estatus != 'SinAplicar'">
                     </Button>
-                    <Button v-if="registro.id > 0 && (registro.estatus == 'SinAplicar' || registro.estatus == 'Timbrado') " raised icon="pi pi-times-circle" class="ms-2" severity="danger" label="Cancelar"
+                    <Button v-if="registro.id > 0 && (registro.estatus == 'SinAplicar' || (registro.estatus == 'Timbrado' && registro.saldo == registro.total)) " 
+                        raised icon="pi pi-times-circle" class="ms-2" severity="danger" label="Cancelar"
                         size="small" @click="cancelarFactura" :loading="bTimbrando">
+                    </Button>
+                    <Button v-if="registro.id > 0 && registro.saldo != registro.total" label="Movimientos"
+                        size="small"  class="ms-2" raised severity="info" icon="pi pi-dollar"
+                        @click="openDialogMovimientos">
                     </Button>
                 </template>
                 <template #end>
@@ -626,6 +635,16 @@ watch(isError, () => {
                             </InputNumber>
                         </div>
                     </div>
+                    <div class="row">
+                        <label for="total" class="col-form-label col-sm-6">SALDO</label>
+                        <div class="col-sm-6">
+                            <InputNumber v-model="registro.saldo" :min="0.00" :max="99999999.99" 
+                                mode="currency" currency="USD" locale="en-US" fluid 
+                                :min-fraction-digits="2" :max-fraction-digits="2" disabled
+                                :pt="{ pcInputText: { root:{ class: 'text-end fw-bold text-primary'}} }">
+                            </InputNumber>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -689,7 +708,64 @@ watch(isError, () => {
                 :pt="{ root: { class: 'mt-2'} }">
             </Button>
         </template>
-    </Dialog>     
+    </Dialog> 
+    <!-- DIALOGO MOVIMIENTOS ESTADO DE CUENTA -->
+    <Dialog
+        v-model:visible="dialogMovimientos"
+        modal :closable="false" position="top"
+        header="Movimientos: Estado de cuenta del documento"
+        :pt = " { 
+                    header: { class: 'bg-secondary' },
+                    // content: { style: 'height: 360px'},
+                    footer: { class: 'bg-secondary' } 
+                }">
+        <div class="row mt-2 mb-2">
+            <DataTable :value="movtos_cliente">
+                <Column field="fecha" header="Fecha"
+                    :pt="{ headerCell: { class: 'bg-secondary text-center'} }">
+                    <template #body="{data}">
+                        {{ convertTMZdatetime(data.fecha) }}
+                    </template>
+                </Column>
+                <Column field="descripcion" header="Descripcion"
+                    :pt="{ headerCell: { class: 'bg-secondary text-center'} }">
+                </Column>
+                <Column field="conf_usuario" header="Usuario"
+                    :pt="{ headerCell: { class: 'bg-secondary text-center'} }">
+                    <template #body="{data}">
+                        {{ data.conf_usuario.usuario+' | '+data.conf_usuario.nombre }}
+                    </template>
+                </Column>
+                <Column field="cargo" header="Cargo" class="text-end"
+                    :pt="{ headerCell: { class: 'bg-secondary text-center'} }">
+                    <template #body="{data}">
+                        {{ formatCurrency(data.cargo) }}
+                    </template>
+                </Column>
+                <Column field="abono" header="Abono" class="text-end"
+                    :pt="{ headerCell: { class: 'bg-secondary text-center'} }">
+                    <template #body="{data}">
+                        {{ formatCurrency(data.abono) }}
+                    </template>
+                </Column>
+                <Column field="saldo" header="Saldo" class="text-end"
+                    :pt="{ headerCell: { class: 'bg-secondary text-center'} }">
+                    <template #body="{data}">
+                        {{ formatCurrency(data.saldo) }}
+                    </template>
+                </Column>
+            </DataTable>
+        </div>
+        <template #footer>
+            <Button 
+                label="Cerrar" raised
+                severity="secondary"
+                icon="pi pi-times"
+                @click="() => { dialogMovimientos = false }"
+                :pt="{ root: { class: 'mt-2'} }">
+            </Button>
+        </template>
+    </Dialog>
     <!-- DIALOGO DOCUMENTOS RELACIONADOS -->
     <Dialog
         v-model:visible="dialogRelacionados"

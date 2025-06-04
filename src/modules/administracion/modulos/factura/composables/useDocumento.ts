@@ -5,7 +5,7 @@ import { useToast } from 'primevue/usetoast';
 import type { 
     Documento, Documento_Detalle, adm_cp_adicionales,
     adm_cp_mercancia, adm_cp_transporte, 
-    adm_documento_relacionado, Documento_CFDI } from '../interfaces/interfaces';
+    adm_documento_relacionado, Documento_CFDI, MovtoCliente } from '../interfaces/interfaces';
 import type { Cliente } from '@/modules/administracion/catalogos/clientes/interfaces/interfaces';
 import type { FolioDocumento } from '@/modules/configuracion/folioDocumento/interfaces/interfaces';
 import type { Propietario } from '@/modules/administracion/catalogos/propietario/interfaces/interfaces';
@@ -19,7 +19,6 @@ import type { MetodoPago } from '@/modules/administracion/catalogos/clientes/int
 import type { UsoCFDI } from '@/modules/administracion/catalogos/clientes/interfaces/usocfdi';
 import type { SatTipoRelacion } from '@/modules/sat/catalogos/tiporelacion/interfaces/interfaces';
 import Swal from 'sweetalert2';
-import { getAssetPath } from "@/core/helpers/assets";
 import { useConfirm } from 'primevue/useconfirm';
 import { useAuthStore } from '@/stores/auth';
 import useUtilerias from '@/core/helpers/utilerias';
@@ -355,18 +354,20 @@ const useDocumento = (id: number ) => {
     const tipo_docto_relacionado = ref<string[]>(['Externo','Interno']);
     const bTimbrando            = ref<boolean>(false);
     const dialogCancelacion     = ref<boolean>(false);
+    const dialogMovimientos     = ref<boolean>(false);
     const dialogPDFVisor        = ref<boolean>(false);
     const dialogXMLVisor        = ref<boolean>(false);
     const documento_cfdi        = ref<Documento_CFDI>();
     const pdfDocumento          = ref();
     const filePDF               = ref(null);
     const pdfViewer             = ref();
+    const movtos_cliente        = ref<MovtoCliente[]>([]);
 
 
     const { formatCurrency, formatNumber2Dec } = useUtilerias();
 
     const { isPending, data, isError } = useQuery({
-            queryKey:               ['orden', id],
+            queryKey:               ['factura', id],
             queryFn:                () => getregistro(id),
             refetchOnWindowFocus:   (id > 0 ? true : false),
             retry:                  false,
@@ -574,11 +575,19 @@ const useDocumento = (id: number ) => {
         await ApiService.post(`AdmFactura/updateTotales/${registro.value.id}`,data);
     }
 
+    const openDialogMovimientos = async () => {
+        movtos_cliente.value.splice(0);
+        if (registro.value.id > 0) {
+            const response = await ApiService.get2(`AdmFactura/MovtosCliente/${registro.value.id}`,null);
+            movtos_cliente.value = response.data;
+        }
+        dialogMovimientos.value = true;
+    }
+
     const openDialogDetalle = async (detalle_id:number, tipo: string, caso: string) => {
         tipo_detalle.value = tipo;
         tipo_detalle_operacion.value = caso;
         if(detalle_id > 0){
-            
             const response = await ApiService.get2(`AdmFactura/DetalleById/${detalle_id}`,null);
             documento_detalle.value = <Documento_Detalle>response.data.registro;
             if (tipo == 'Producto') {
@@ -1177,7 +1186,7 @@ const useDocumento = (id: number ) => {
         }
     }
 
-    const dataMutationNew    = useMutation( { mutationFn: newRegistro,
+    const dataMutationNew = useMutation( { mutationFn: newRegistro,
                                                         onSuccess(data: Documento) {
                                                             toast.add({
                                                                 severity:   'success',
@@ -1267,9 +1276,10 @@ const useDocumento = (id: number ) => {
                 const respusocfd        = await ApiService.get2(`SatUsoCfdi/GetById/${registro.value.usocfdi_id}`,null);
                 selectusocfdi.value     = <UsoCFDI>respusocfd.data;
                 await CalcularTototales();
-                if (registro.value.estatus == 'Timbrado' || registro.value.estatus == 'Cancelado' ){
+                if (registro.value.estatus == 'Aplicado' || registro.value.estatus == 'Timbrado' || registro.value.estatus == 'Cancelado' ){
                     const responsecfdi  = await ApiService.get2(`AdmFactura/GetCFDI/${registro.value.id}/I`,null);
                     documento_cfdi.value = <Documento_CFDI>responsecfdi.data;
+                    console.log(documento_cfdi.value);
                 }
                 isPending.value = false;
             }
@@ -1326,6 +1336,8 @@ const useDocumento = (id: number ) => {
         dialogXMLVisor,
         pdfDocumento,
         pdfViewer,
+        dialogMovimientos,
+        movtos_cliente,
 
         newRegistro:        dataMutationNew.mutate,
         updateRegistro:     dataMutationUpdate.mutate,
@@ -1364,6 +1376,7 @@ const useDocumento = (id: number ) => {
         downloadXML,
         RegenerarPDF,
         enviarCFDI,
+        openDialogMovimientos
     }
 }
 

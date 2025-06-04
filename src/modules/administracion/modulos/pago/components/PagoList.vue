@@ -26,7 +26,7 @@ interface Emits {
 const props         = defineProps<Props>();
 const emits         = defineEmits<Emits>();
 const router        = useRouter();
-const { convertTMZdatetime,formatCurrency } = useUtilerias();
+const { convertTMZdatetime,formatCurrency, convertTMZdate } = useUtilerias();
 
 
 const tableHeader   = ref([
@@ -49,8 +49,14 @@ const tableHeader   = ref([
         class:          "text-start"
     },
     {
-        columnLabel:    'Fecha',
-        columnField:    'fecha',
+        columnLabel:    'Fecha Alta',
+        columnField:    'fecha_registro',
+        sortEnabled:    true,
+        class:          "text-start"
+    },
+    {
+        columnLabel:    'Fecha Pago',
+        columnField:    'fecha_pago',
         sortEnabled:    true,
         class:          "text-start"
     },
@@ -61,26 +67,8 @@ const tableHeader   = ref([
         class:          "text-start"
     },
     {
-        columnLabel:    'Orden',
-        columnField:    'orden_taller',
-        sortEnabled:    true,
-        class:          "text-start"
-    },
-    {
-        columnLabel:    'Subtotal',
-        columnField:    'subtotal',
-        sortEnabled:    true,
-        class:          "text-end"
-    },
-    {
-        columnLabel:    'Impuestos',
-        columnField:    'impuestos',
-        sortEnabled:    true,
-        class:          "text-end"
-    },
-    {
-        columnLabel:    'Total',
-        columnField:    'total',
+        columnLabel:    'Importe',
+        columnField:    'importe',
         sortEnabled:    true,
         class:          "text-end"
     },
@@ -109,7 +97,7 @@ const store = useAuthStore();
 
 const permisos = ref<Permisos[]>([]);
 const sPermisos = ref<string>('');
-permisos.value = store.permisos.filter((element: any) => element.codigo == '047'); // Administracion->Modulos->Factura a Clientes
+permisos.value = store.permisos.filter((element: any) => element.codigo == '052'); // Administracion->Modulos->Pago a Clientes
 permisos.value.forEach(element => {
      sPermisos.value += element.permiso+',';
 });
@@ -120,10 +108,10 @@ permisos.value.forEach(element => {
     <div class="card-header border-0 pt-6">
         <div class="card-toolbar">
             <div class="d-flex justify-content-end" data-kt-customer-table-toolbar="base">
-                <Button label='Nueva Factura' severity="Primary" icon="pi pi-plus" raised
-                    @click="() => { router.push({name: 'factura-nuevo', params: {id: 0}}) }"
+                <Button label='Nuevo Pago' severity="Primary" icon="pi pi-plus" raised
+                    @click="() => { router.push({name: 'pago-nuevo', params: {id: 0}}) }"
                     v-if="sPermisos.indexOf('Nuevo') >= 0 "
-                    v-tooltip-top="'Registrar nueva Factura '">
+                    v-tooltip-top="'Registrar nuevo Pago '">
                 </Button>
             </div>
         </div>
@@ -134,7 +122,7 @@ permisos.value.forEach(element => {
                 </span>
                 <FloatLabel variant="on">
                     <InputText type="text" id="search" v-model="search" @input="emits('buscarChanged',search)" variant="filled" class="ms-10"></InputText>
-                    <label for="search" class="ms-10">Buscar en Facturas</label>
+                    <label for="search" class="ms-10">Buscar en Pagos</label>
                 </FloatLabel>
             </div>
         </div>
@@ -157,25 +145,19 @@ permisos.value.forEach(element => {
                             <template v-if="col.columnField === 'actions'">
                                 <Button severity="info" icon="pi pi-search" raised
                                     v-if="sPermisos.indexOf('Consultar') >= 0 "
-                                    @click="() => { router.push({name: 'factura-consulta', params: {id: item.id}}) }"
+                                    @click="() => { router.push({name: 'pago-consulta', params: {id: item.id}}) }"
                                     v-tooltip.top="{ value: 'Consultar', showDelay: 1000, hideDelay: 300}"
                                     class="me-3">
                                 </Button>
                                 <Button severity="warn" icon="pi pi-pencil" raised
                                     v-if="sPermisos.indexOf('Editar') >= 0 && (item.estatus == 'SinAplicar')"
-                                    @click="() => { router.push({name: 'factura-edita', params: {id: item.id}}) }"
+                                    @click="() => { router.push({name: 'pago-edita', params: {id: item.id}}) }"
                                     v-tooltip.top="{ value: 'Editar', showDelay: 1000, hideDelay: 300}"
                                     class="me-3">
                                 </Button>
                             </template>
-                            <template v-else-if="col.columnField=='subtotal'">
+                            <template v-else-if="col.columnField=='importe'">
                                 {{  formatCurrency(item[col.columnField])   }}
-                            </template>
-                            <template v-else-if="col.columnField=='impuestos'">
-                                {{  formatCurrency(item[col.columnField])  }}
-                            </template>
-                            <template v-else-if="col.columnField=='total'">
-                                {{  formatCurrency(item[col.columnField])  }}
                             </template>
                             <template v-else-if="col.columnField=='saldo'">
                                 {{  formatCurrency(item[col.columnField])  }}
@@ -186,9 +168,10 @@ permisos.value.forEach(element => {
                                             : item[col.columnField]!['nombre']
                                 }}
                             </template>
-                            <template v-else-if="col.columnField=='fecha'">
-                                {{  convertTMZdatetime(item[col.columnField].toString() ) }}
+                            <template v-else-if="col.columnField=='fecha_registro' || col.columnField=='fecha_pago'">
+                                {{  convertTMZdate(item[col.columnField].toString() ) }}
                             </template>
+
                             <template v-else-if="col.columnField=='estatus'">
                                 <Tag :value="item['estatus']"
                                     :severity="item['estatus'] == 'Cancelado' 

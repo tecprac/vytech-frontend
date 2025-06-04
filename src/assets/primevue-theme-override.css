@@ -1,0 +1,5 @@
+:root {
+  --p-button-warn-background: #f4c430; /* Color personalizado para warning */
+  --p-button-warn-hover-background: #eab308; /* Color cuando el mouse pasa por encima */
+  --p-button-warn-active-background: #d97706; /* Color cuando el botón está activo */
+}

@@ -82,48 +82,66 @@ const MyPreset = definePreset(Aura,{
     },
     components: {
         button: {
-            colorScheme: {
-                light: {
-                    // @ts-ignore
-                    warn: {
-                        background: '{yellow.400}',
-                        border: { color: '{yellow.400}'},
-                        hover: {
-                            background: '{yellow.300}',
-                            border: { color: '{yellow.300}' }
-                        },
-                    },
-                    info: {
-                        background: '{blue.400}',
-                        border: { color: '{blue.400}'},
-                        hover: {
-                            background: '{blue.300}',
-                            border: { color: '{blue.300}' }
-                        },
-                    },
-                },
-                dark: {
-                    // @ts-ignore
-                    warn: {
-                        background: '{yellow.600}',
-                        border: { color: '{yellow.600}'},
-                        hover: {
-                            background: '{yellow.500}',
-                            border: { color: '{yellow.500}' }
-                        },
-                    },
-                    info: {
-                        background: '{blue.600}',
-                        border: { color: '{blue.600}'},
-                        hover: {
-                            background: '{blue.500}',
-                            border: { color: '{blue.500}' }
-                        },
-                    },
-                },
+            extend: {
+                warn: {
+                    background: "yellow",
+                    borderColor: "yellow",
+                    color: "white",
+                    hover: {
+                        background: '{yellow.300}',
+                        border: { color: '{yellow.300}' }    
+                    }
+                }
             },
+            // colorScheme: {
+            //     light: {
+            //         // @ts-ignore
+            //         warn: {
+            //             background: '{yellow.400}',
+            //             border: { color: '{yellow.400}'},
+            //             hover: {
+            //                 background: '{yellow.300}',
+            //                 border: { color: '{yellow.300}' }
+            //             },
+            //         },
+            //         info: {
+            //             background: '{blue.400}',
+            //             border: { color: '{blue.400}'},
+            //             hover: {
+            //                 background: '{blue.300}',
+            //                 border: { color: '{blue.300}' }
+            //             },
+            //         },
+            //     },
+            //     dark: {
+            //         // @ts-ignore
+            //         warn: {
+            //             background: '{yellow.600}',
+            //             border: { color: '{yellow.600}'},
+            //             hover: {
+            //                 background: '{yellow.500}',
+            //                 border: { color: '{yellow.500}' }
+            //             },
+            //         },
+            //         info: {
+            //             background: '{blue.600}',
+            //             border: { color: '{blue.600}'},
+            //             hover: {
+            //                 background: '{blue.500}',
+            //                 border: { color: '{blue.500}' }
+            //             },
+            //         },
+            //     },
+            // },
         }
-    }
+    },
+    css: ({ dt }) => `
+        .p-button.p-button-warn {
+            background: #FBBF24;
+            border-color: #FBBF24;
+            color: white;
+        },
+    `,
 });
 app.use(PrimeVue, {
     ripple: true,
@@ -288,7 +306,6 @@ app.use(PrimeVue, {
 app.use(ConfirmationService);
 app.use(ToastService);
 app.use(DialogService);
-
 // app.directive("tooltip", (el) => {
 //   new Tooltip(el);
 // });

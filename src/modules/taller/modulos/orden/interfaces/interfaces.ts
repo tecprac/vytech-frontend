@@ -62,6 +62,11 @@ interface talle_tipo_servicio {
 
 interface talle_unidad{
     unidad:             string,
+    num_motor:          string,
+    num_serie:          string,
+    placas:             string,
+    anio:               number,
+    color:              string,
     talle_marca:        talle_marca,
     talle_modelo:       talle_modelo,
     talle_tipo_unidad:  talle_tipo_unidad,

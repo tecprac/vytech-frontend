@@ -389,6 +389,11 @@ const MainMenuConfig: Array<MenuItem> = [
                                     route:      '/modules/administracion/modulos/factura',
                                     codigo:     '047',
                                 },
+                                {
+                                    heading:    'Pago',
+                                    route:      '/modules/administracion/modulos/pago',
+                                    codigo:     '052',
+                                },
                         ]
                     },
                     {

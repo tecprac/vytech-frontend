@@ -240,3 +240,31 @@ interface sat_tiporelacion {
 	c_tiporelacion:	string;
 	descripcion:	string;
 }
+
+export interface MovtoCliente {
+    id: 					number;
+    cliente_id: 			number;
+    modulo_id: 			    number;
+    documento_id: 			number;
+	documento_origen_id: 	number;
+    usuario_id: 			number;
+    descripcion: 			string;
+    referencia: 			string;
+    tipo_movimiento: 		string;
+    fecha: 				    Date;
+    cargo: 				    number;
+    abono: 				    number;
+    saldo: 				    number;    
+    conf_modulo?:           conf_modulo | null;
+    conf_usuario?:          conf_usuario | null;
+}
+
+interface conf_modulo {
+    id:     number,
+    nombre: string
+}
+
+interface conf_usuario {
+    usuario: string,
+    nombre: string,
+}
