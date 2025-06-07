@@ -394,6 +394,11 @@ const MainMenuConfig: Array<MenuItem> = [
                                     route:      '/modules/administracion/modulos/pago',
                                     codigo:     '052',
                                 },
+                                {
+                                    heading:    'Nota de Crédito',
+                                    route:      '/modules/administracion/modulos/notacredito',
+                                    codigo:     '053',
+                                },
                         ]
                     },
                     {

@@ -983,7 +983,7 @@ const usePago = (id: number) => {
     const enviarCFDI = async () => {
         try {
             ApiService.setHeader();
-            await ApiService.post(`AdmPago/EnviarCFDI/${registro.value.id}/I`,null);
+            await ApiService.post(`AdmPago/EnviarCFDI/${registro.value.id}/P`,null);
             toast.add({
                 severity:   "success",
                 summary:    "Exitoso",

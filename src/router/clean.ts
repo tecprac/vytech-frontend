@@ -1372,6 +1372,52 @@ const routes: Array<RouteRecordRaw> = [
                     },
                 ]
             },
+            // Menú Administración-Modulos Nota Crédito
+            {
+                path: "/modules/administracion/modulos/notacredito",
+                name: "notacredito",
+                component: () => import(/* webpackChunkName: "notacredito" */ "@/modules/administracion/modulos/notacredito/layouts/NotaCreditoLayout.vue"),
+                meta: {
+                    pageTitle: "Nota de Crédito",
+                    breadcrumbs: ["Administración","Modulos","Nota Crédito"],
+                    codigo: '053'
+                },
+                redirect: { name: 'notacreditolist'},
+                children:[
+                    {
+                        path: 'notacreditolist',
+                        name: 'notacreditolist',
+                        component: () => import(/* webpackChunkName: "notacreditolist" */ "@/modules/administracion/modulos/notacredito/pages/ListPage.vue"),
+                        meta: {
+                            pageTitle: "Nota de Crédito",
+                        }
+                    },
+                    {
+                        path: 'notacredito-nuevo/',
+                        name: 'notacredito-nuevo',
+                        component: () => import(/* webpackChunkName: "notacreditonuevo" */ "@/modules/administracion/modulos/notacredito/pages/NuevoPage.vue"),
+                        meta: {
+                            pageTitle: "Nota de Crédito Nueva"
+                        }
+                    },
+                    {
+                        path: 'notacredito-consulta/:id',
+                        name: 'notacredito-consulta',
+                        component: () => import(/* webpackChunkName: "notacreditoconsulta" */ "@/modules/administracion/modulos/notacredito/pages/ConsultaPage.vue"),
+                        meta: {
+                            pageTitle: "Nota de Crédito Consulta"
+                        }
+                    },
+                    {
+                        path: 'notacredito-edita/:id',
+                        name: 'notacredito-edita',
+                        component: () => import(/* webpackChunkName: "notacreditoedita" */ "@/modules/administracion/modulos/notacredito/pages/EditaPage.vue"),
+                        meta: {
+                            pageTitle: "Nota de Crédito Editar"
+                        }
+                    },
+                ]
+            },
             // Menú Almacén-Catalogos Tipo Inventario
             {
                 path: "/modules/almacen/catalogos/tipoinventario",
