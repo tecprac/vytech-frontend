@@ -34,6 +34,11 @@ import Slider from 'primevue/slider';
 import Textarea from 'primevue/textarea';
 import Badge from 'primevue/badge';
 import Tag from 'primevue/tag';
+import Accordion from 'primevue/accordion';
+import AccordionPanel from 'primevue/accordionpanel';
+import AccordionHeader from 'primevue/accordionheader';
+import AccordionContent from 'primevue/accordioncontent';
+import Divider from 'primevue/divider';
 
 // optional styles
 import 'vue-pdf-embed/dist/styles/annotationLayer.css'
@@ -65,7 +70,6 @@ const {
     selectbahia,
     dialogPDFVisor,
     pdfDocumento,
-    pdfViewer,
     botonespdf,
     tabActiva,
     trabajo_orden,
@@ -74,6 +78,7 @@ const {
     dialogRefaccion,
     dialogRefaccionDet,
     dialogMiscelaneo,
+    dialogFacturar,
     selectecnicotrabajo,
     selecttrabajo,
     trabajosfiltrados,
@@ -87,6 +92,25 @@ const {
     refaccion_orden,
     refacciones_orden,
     isLoadingRequi,
+    trabajosbitacora,
+    dialogEstatus,
+    tipo_estatus,
+    sPermisos,
+    motivos,
+    selectmotivo,
+    trabajos_orden_fact,
+    miscelaneos_orden_fact,
+    orden_refacciones,
+    orden_refacciones_fact,
+    totalRef_facturar,
+    totaltra_facturar,
+    totalmis_facturar,
+    usuario_abre,
+    usuario_cierra,
+    usuario_cancela,
+    motivo_cancela,
+    agruparDiversos,
+    selectclientefact,
 
     updateRegistro,
     cambiaDocumento,
@@ -109,6 +133,12 @@ const {
     eliminaRefaccion,
     formatCurrency,
     formatNumber2Dec,
+    openDialogEstatus,
+    openDialogFacturar,
+    closeDialogEstatus,
+    closeDialogFacturar,
+    onCellEditComplete,
+    abrirOrden,
 } = useOrden( +route.params.id );
 
 // watch( isAddingSuccess, () => {
@@ -201,6 +231,26 @@ const validarDatos = async (data: Orden) => {
                         <SplitButton v-if="registro.id > 0" raised icon="pi pi-file-pdf" class="ms-2"
                             @click="generaPDF('Blanco')" severity="info" label="PDF Orden" size="small" :model="botonespdf" >
                         </SplitButton>
+                        <Button v-if="sPermisos.indexOf('Cerrar') >= 0 && (registro.estatus == 'Abierta' || registro.estatus == 'EnProceso')"
+                            severity="contrast" label="Cerrar" size="small"
+                            class="ms-2" rounded raised icon="pi pi-lock"
+                            @click="openDialogEstatus('Cerrada')">
+                        </Button>
+                        <Button v-if="sPermisos.indexOf('AbrirOrdenCerrada') >= 0 && (registro.estatus == 'Cerrada' || registro.estatus == 'ParcialFacturada')"
+                            severity="success" label="Abrir Orden" size="small"
+                            class="ms-2" rounded raised icon="pi pi-lock-open"
+                            @click="abrirOrden">
+                        </Button>
+                        <Button v-if="sPermisos.indexOf('Eliminar') >= 0 && (registro.estatus != 'Cancelada' && registro.estatus != 'Facturada' && registro.estatus != 'ParcialFacturada')"
+                            severity="danger" label="Cancelar" size="small"
+                            class="ms-2" rounded raised icon="pi pi-times"
+                            @click="openDialogEstatus('Cancelada')">
+                        </Button>
+                        <Button v-if="sPermisos.indexOf('Facturar') >= 0 &&  (registro.estatus != 'Cancelada' && registro.estatus != 'Facturada' && (registro.estatus == 'Cerrada' || registro.estatus == 'ParcialFacturada'))"
+                            severity="success" label="Facturar" size="small"
+                            class="ms-2" rounded raised icon="pi pi-dollar"
+                            @click="openDialogFacturar">
+                        </Button>
                     </template>
                     <template #end></template>
                 </Toolbar>
@@ -317,16 +367,25 @@ const validarDatos = async (data: Orden) => {
                             :pt="{root: { class: tabActiva == '1' ? 'bg-primary bg-opacity-25' : 'bg-secondary'}}" >
                             <i class="pi pi-user-edit" style="color: slateblue"></i>
                             Trabajos/Servicios
+                            <Badge v-if="trabajos_orden.length > 0"
+                                    :value="trabajos_orden.length" severity="danger">
+                            </Badge>
                         </Tab>
                         <Tab value="2" as="div" class="flex items-center gap-2" style="border-top-left-radius: 1rem; border-top-right-radius: 1rem;"
                             :pt="{root: { class: tabActiva == '2' ? 'bg-primary bg-opacity-25' : 'bg-secondary'}}" >
                             <i class="pi pi-wrench" style="color: slateblue"></i>
                             Refacciones
+                            <Badge v-if="orden_refacciones.length > 0"
+                                    :value="orden_refacciones.length" severity="danger">
+                            </Badge>
                         </Tab>
                         <Tab value="3" as="div" class="flex items-center gap-2" style="border-top-left-radius: 1rem; border-top-right-radius: 1rem;"
                             :pt="{root: { class: tabActiva == '3' ? 'bg-primary bg-opacity-25' : 'bg-secondary'}}" >
                             <i class="pi pi-clipboard" style="color: slateblue"></i>
-                            Miscelaneos
+                            Material Diverso
+                            <Badge v-if="miscelaenos_orden.length > 0"
+                                    :value="miscelaenos_orden.length" severity="danger">
+                            </Badge>
                         </Tab>
                     </TabList>
                     <TabPanels>
@@ -456,7 +515,36 @@ const validarDatos = async (data: Orden) => {
                         <!-- Refacciones -->
                         <TabPanel value="2">
                             <div class="row mb-2">
-                                
+                                <DataTable :value="orden_refacciones"
+                                    show-gridlines  
+                                    scroll-height="300px" size="small" scrollable>
+                                    <Column field="id" header="ID" 
+                                        :pt="{ headerCell: { class: 'bg-secondary'} }"></Column>
+                                    <Column field="codigo" header="Código" 
+                                        :pt="{ headerCell: { class: 'bg-secondary'} }"></Column>
+                                    <Column field="descripcion" header="Descripción" 
+                                        :pt="{ headerCell: { class: 'bg-secondary'} }"></Column>
+                                    <Column field="cantidad" header="Cantidad" class="text-end"
+                                        :pt="{ headerCell: { class: 'bg-secondary text-end'} }"></Column>
+                                    <Column field="costo" header="Costo" class="text-end"
+                                        :pt="{ headerCell: { class: 'bg-secondary text-end'} }">
+                                        <template #body="{data}">
+                                            {{ formatCurrency(data.costo) }}
+                                        </template>
+                                    </Column>    
+                                    <Column field="precio" header="Precio" class="text-end"
+                                        :pt="{ headerCell: { class: 'bg-secondary text-end'} }">
+                                        <template #body="{data}">
+                                            {{ formatCurrency(data.precio) }}
+                                        </template>
+                                    </Column>
+                                    <Column field="importe" header="Importe" class="text-end"
+                                        :pt="{ headerCell: { class: 'bg-secondary text-end'} }">
+                                        <template #body="{data}">
+                                            {{ formatCurrency(data.importe) }}
+                                        </template>
+                                    </Column>
+                                </DataTable>
                             </div>
                         </TabPanel>
                         <!-- Miscelaneos -->
@@ -875,6 +963,319 @@ const validarDatos = async (data: Orden) => {
                 label="Cerrar"
                 severity="success"
                 icon="pi pi-times"
+                :pt="{
+                    root: { class: 'mt-2'}
+                }"
+            >
+            </Button>
+        </template>
+    </Dialog>
+    <!-- DIALOGO FACTURAR -->
+    <Dialog
+        v-model:visible="dialogFacturar"
+        modal :closable="false" maximizable
+        :style="{width: '80rem'}"
+        :breakpoints="{ '960px': '75vw', '641px': '100vw' }"
+        :pt = " { 
+                    header: { class: 'bg-secondary' },
+                    // content: { style: 'height: 360px'},
+                    footer: { class: 'bg-secondary' } 
+                }"
+        >
+        <template #header>
+            <div class="row col-sm-12">
+                <label class="col-form-label col-form-label-sm col-sm-9 fs-2 fw-bold">Facturación de orden (Seleccione los conceptos a facturar)</label>
+                <label class="col-form-label col-form-label-sm col-sm-1"></label>
+                <label class="col-form-label col-form-label-sm col-sm-2 fs-2 fw-bold text-end text-primary">{{ formatCurrency(totalRef_facturar + totaltra_facturar + totalmis_facturar) }}</label>
+            </div>
+        </template>
+        <div class="row mt-2 mb-2">
+            <label for="clientefactura" class="required col-form-label col-form-label col-sm-3">Cliente para facturación</label>
+            <div class="col-sm-9">
+                <AutoComplete
+                    v-model="selectclientefact"
+                    :option-label="(data) => {return (data.tipo_persona == 'Moral' ? data.razon_social : data.nombres+' '+data.apaterno+' '+data.amaterno)+' RFC:'+data.rfc}"
+                    :suggestions="clientesfiltrados"
+                    force-selection :chip-Icon="true"
+                    auto-option-focus 
+                    empty-search-message="No existen clientes que coincidan"
+                    empty-selection-message="No se ha seleccionado un cliente"
+                    placeholder="Capture un cliente por RFC, Nombre o Razón Social"
+                    @complete="buscarClientes" fluid
+                >
+                </AutoComplete>
+            </div>
+        </div>
+        <Accordion :value="['0','1','2']" multiple>
+            <AccordionPanel value="0">
+                <AccordionHeader class="bg-secondary">
+                    <div class="row col-sm-12">
+                        <label class="col-form-label col-form-label-sm col-sm-3 fs-3 fw-bold">Trabajos/Servicios</label>
+                        <label class="col-form-label col-form-label-sm col-sm-7"></label>
+                        <label class="col-form-label col-form-label-sm col-sm-2 fs-3 fw-bold text-end text-primary">{{ formatCurrency(totaltra_facturar) }}</label>
+                    </div>
+                </AccordionHeader>
+                <AccordionContent>
+                    <DataTable
+                        :value="trabajos_orden" 
+                        v-model:selection="trabajos_orden_fact"
+                        data-key="id"  
+                        class="p-datatable-sm"
+                        stripedRows
+                        show-gridlines
+                        scrollable
+                        :pt="{
+                            header: {class: 'bg-primary text-center bg-opacity-50'}
+                        }">
+                        <Column selectionMode="multiple" headerStyle="width: 3rem" :pt="{ headerCell: { class: 'bg-light-danger'} }"></Column>
+                        <Column header="Trabajo" :pt="{ headerCell: { class: 'bg-light-danger'} }">
+                            <template #body="{data}">
+                                {{ data.talle_trabajo.trabajo }}
+                            </template>
+                        </Column>
+                        <Column field="horas_estandar" header="Horas" :pt="{ headerCell: { class: 'bg-light-danger'}, root: {class: 'text-end'} }"></Column>
+                        <Column field="importe" header="Importe" :pt="{ headerCell: { class: 'bg-light-danger'}, root: {class: 'text-end'} }"></Column>
+                        <Column field="estatus" header="Estatus" :pt="{ headerCell: { class: 'bg-light-danger text-center'}, root: {class: 'text-center'} }">
+                            <template #body="{ data }">
+                                <Tag :value="data.estatus"
+                                    :severity="data.estatus == 'SinIniciar' ? 'secondary' :
+                                                data.estatus == 'EnProceso' ? 'success' :
+                                                data.estatus == 'Pausa' ? 'warn' :
+                                                data.estatus == 'Cancelado' ? 'danger': 'info'">
+                                </Tag>
+                            </template>
+                        </Column>
+                        <Column fiel="documento_detalle_id" header="Facturado" :pt="{ headerCell: { class: 'bg-light-danger'}, root: {class: 'text-center'} }"
+                            
+                        body-class="fw-bold">
+                            <template #body="{ data }">
+                                {{ data.documento_detalle_id > 0 ? 'SI' : 'NO' }}
+                            </template>
+                        </Column>
+                    </DataTable>
+                </AccordionContent>
+            </AccordionPanel>
+            <AccordionPanel value="1">
+                <AccordionHeader class="bg-secondary">
+                    <div class="row col-sm-12">
+                        <label class="col-form-label col-form-label-sm col-sm-2 fs-3 fw-bold">Refacciones</label>
+                        <label class="col-form-label col-form-label-sm col-sm-8"></label>
+                        <label class="col-form-label col-form-label-sm col-sm-2 fs-3 fw-bold text-end text-primary">{{ formatCurrency(totalRef_facturar) }}</label>
+                    </div>
+                </AccordionHeader>
+                <AccordionContent>
+                    <DataTable
+                        :value="orden_refacciones" 
+                        v-model:selection="orden_refacciones_fact"
+                        data-key="id"  
+                        class="p-datatable-sm"
+                        striped-rows
+                        show-gridlines
+                        scrollable editMode="cell"
+                        @cell-edit-complete="onCellEditComplete"
+                        :pt="{
+                            header: {class: 'bg-primary text-center bg-opacity-50'}
+                        }">
+                        <Column selectionMode="multiple" headerStyle="width: 3rem" :pt="{ headerCell: { class: 'bg-light-danger'} }"></Column>
+                        <Column header="Codigo" :pt="{ headerCell: { class: 'bg-light-danger'} }">
+                            <template #body="{data}">
+                                {{ data.codigo }}
+                            </template>
+                        </Column>
+                        <Column field="descripcion" header="Descripción" :pt="{ headerCell: { class: 'bg-light-danger'} }">
+                        </Column>
+                        <Column field="cantidad" header="Cantidad" :pt="{ headerCell: { class: 'bg-light-danger'}, root: {class: 'text-end'} }">
+                        </Column>
+                        <Column field="costo" header="Costo Unitario" 
+                            body-class="bg-light-warning"
+                            :pt="{ headerCell: { class: 'bg-light-danger'}, root: {class: 'text-end'} }">
+                            <template #body="{data}">
+                                {{  formatCurrency(data.costo) }}
+                            </template>
+                            <template #editor="{data,field}">
+                                <InputNumber
+                                    v-model="data[field]" mode="currency" currency="USD" locale="en-US" autofocus fluid
+                                    highlight-on-focus :min-fraction-digits="2" :max-fraction-digits="2"
+                                    :pt="{ pcInputText: { root:{ class: 'text-end text-primary fw-bold'}} }">
+                                </InputNumber>
+                            </template>
+                        </Column>
+                        <Column field="precio" header="Precio Unitario" 
+                            body-class="bg-light-warning"
+                            :pt="{ headerCell: { class: 'bg-light-danger'}, root: {class: 'text-end'} }">
+                            <template #body="{data}">
+                                {{  formatCurrency(data.precio) }}
+                            </template>
+                            <template #editor="{data,field}">
+                                <InputNumber
+                                    v-model="data[field]" mode="currency" currency="USD" locale="en-US" autofocus fluid
+                                    highlight-on-focus :min-fraction-digits="2" :max-fraction-digits="2"
+                                    :pt="{ pcInputText: { root:{ class: 'text-end'}} }">
+                                </InputNumber>
+                            </template>
+                        </Column>
+                        <Column field="importe" header="Importe" :pt="{ headerCell: { class: 'bg-light-danger'}, root: {class: 'text-end'} }">
+                            <template #body="{data}">
+                                {{  formatCurrency(data.importe) }}
+                            </template>
+                        </Column>
+                        <Column field="documento_detalle_id" header="Facturado"  :pt="{ headerCell: { class: 'bg-light-danger'}, root: {class: 'text-center'} }"
+                            body-class="fw-bold">
+                            <template #body="{data}">
+                                {{ data.documento_detalle_id > 0 ? 'SI' : 'NO' }}
+                            </template>
+                        </Column>
+                    </DataTable>
+                </AccordionContent>
+            </AccordionPanel>
+            <AccordionPanel value="2">
+                <AccordionHeader class="bg-secondary">
+                    <div class="row col-sm-12">
+                        <label class="col-form-label col-form-label-sm col-sm-3 fs-3 fw-bold">Material Diverso</label>
+                        <label class="col-form-label col-form-label-sm col-sm-7"></label>
+                        <label class="col-form-label col-form-label-sm col-sm-2 fs-3 fw-bold text-end text-primary">{{ formatCurrency(totalmis_facturar) }}</label>
+                    </div>
+                </AccordionHeader>
+                <AccordionContent>
+                    <template v-if="miscelaenos_orden.length > 0">
+                        <div class="row mt-2 mb-2">
+                            <div class="col-sm-6">
+                                <label for="agruparDiversos" class="fs-5 fw-bold bg-light-warning">Agrupar los materiales diversos en un solo concepto en la factura </label>
+                            </div>
+                            <div class="col-sm-1">
+                                <Checkbox id="agruparDiversos" class="bg-warming" v-model="agruparDiversos" binary fluid></Checkbox>
+                            </div>
+                        </div>
+                    </template>
+                    <DataTable
+                        :value="miscelaenos_orden" 
+                        v-model:selection="miscelaneos_orden_fact"
+                        data-key="id"  
+                        class="p-datatable-sm"
+                        stripedRows
+                        show-gridlines
+                        scrollable
+                        :pt="{
+                            header: {class: 'bg-primary text-center bg-opacity-50'}
+                        }">
+                        <Column selectionMode="multiple" headerStyle="width: 3rem" :pt="{ headerCell: { class: 'bg-light-danger'} }"></Column>
+                        <Column field="descripcion" header="Descripción" :pt="{ headerCell: { class: 'bg-light-danger'} }">
+                        </Column>
+                        <Column field="cantidad" header="Cantidad" :pt="{ headerCell: { class: 'bg-light-danger'}, root: {class: 'text-end'} }"></Column>
+                        <Column field="costo" header="Costo" :pt="{ headerCell: { class: 'bg-light-danger'}, root: {class: 'text-end'} }">
+                            <template #body="{data}">
+                                {{  formatCurrency(data.costo) }}
+                            </template>
+                        </Column>
+                        <Column field="importe" header="Importe" :pt="{ headerCell: { class: 'bg-light-danger'}, root: {class: 'text-end'} }">
+                            <template #body="{data}">
+                                {{  formatCurrency(data.importe) }}
+                            </template>
+                        </Column>
+                        <Column field="estatus" header="Estatus" :pt="{ headerCell: { class: 'bg-light-danger'}, root: {class: 'text-center'} }"
+                            body-class="fw-bold">
+                        </Column>
+                    </DataTable>
+                </AccordionContent>
+            </AccordionPanel>
+        </Accordion>
+        <template #footer>
+            <Button 
+                raised
+                @click="closeDialogFacturar('cerrar')"
+                label="Cerrar"
+                severity="secondary"
+                icon="pi pi-times"
+                :pt="{
+                    root: { class: 'mt-2'}
+                }"
+            >
+            </Button>
+            <Button 
+                raised
+                label="Facturar"
+                severity="success"
+                icon="pi pi-check"
+                @click="closeDialogFacturar('guardar')"
+                :pt="{
+                    root: { class: 'mt-2'}
+                }"
+            >
+            </Button>
+        </template>
+    </Dialog>
+    <!-- DIALOGO CAMBIAR ESTATUS -->
+    <Dialog
+        v-model:visible="dialogEstatus"
+        modal :closable="false"
+        :header="tipo_estatus == 'Cerrada' ? 'Cerrar Orden' :
+                     'Cancelar Orden'"
+        :style="{width: '75rem'}"
+        :breakpoints="{ '960px': '75vw', '641px': '100vw' }"
+        :pt = " { 
+                    header: { class: 'bg-secondary' },
+                    // content: { style: 'height: 360px'},
+                    footer: { class: 'bg-secondary' } 
+                }"
+        >
+        <div class="row mt-2 mb-2">
+            <label for="fecha" class="required col-form-label col-form-label-sm col-sm-2">Fecha</label>
+            <div class="col-sm-2"> 
+                <DatePicker :defaultValue="new Date()"
+                    disabled fluid>
+                </DatePicker>
+            </div>
+        </div>
+        <template v-if="tipo_estatus=='Cancelada'">
+            <div class="row mb-2">
+                <label for="motivos" class="required col-form-label col-form-label-sm col-sm-2">Motivo</label>
+                <div class="col-sm-6">
+                    <Select
+                        v-model="selectmotivo" :options="motivos"
+                        placeholder="Seleccione un Motivo"
+                        option-label="descripcion"
+                        fluid 
+                        :disabled="tipo_operacion_trabajo == 'Show'">
+                    </Select>
+                </div>
+            </div>
+        </template>
+        <template v-if="tipo_estatus=='Cancelada'">
+            <div class="row mb-2">
+                <label for="nota" class="required col-form-label col-form-label-sm col-sm-2">Nota</label>
+                <div class="col-sm-10">
+                    <Textarea v-model="registro.nota_cancelada" rows="2" fluid size="large">
+                    </Textarea>
+                </div>
+            </div>
+        </template>
+        <template v-if="tipo_estatus=='Cerrada'">
+            <div class="row mb-2">
+                <label for="nota" class="required col-form-label col-form-label-sm col-sm-2">Nota</label>
+                <div class="col-sm-10">
+                    <Textarea v-model="registro.nota_cerrada" rows="2" fluid size="large">
+                    </Textarea>
+                </div>
+            </div>
+        </template>
+        <template #footer>
+            <Button 
+                raised
+                @click="closeDialogEstatus('cerrar')"
+                label="Cerrar"
+                severity="secondary"
+                icon="pi pi-times"
+                :pt="{
+                    root: { class: 'mt-2'}
+                }"
+            >
+            </Button>
+            <Button 
+                raised
+                label="Aceptar"
+                severity="success"
+                icon="pi pi-check"
+                @click="closeDialogEstatus('guardar')"
                 :pt="{
                     root: { class: 'mt-2'}
                 }"

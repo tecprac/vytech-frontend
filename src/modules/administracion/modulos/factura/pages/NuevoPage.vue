@@ -342,6 +342,11 @@ const validarDatos = async(data: Documento) => {
                                         {{ slotProps.data[1].codigo }}
                                     </template>
                                 </Column>
+                                <Column header="CLAVE SAT" :pt="{ headerCell: { class: 'bg-secondary'} }">
+                                    <template #body="{data}">
+                                        {{  data[1].sat_claveprodserv.c_claveprodserv }}
+                                    </template>
+                                </Column>
                                 <Column header="DESCRIPCIÓN" :pt="{ headerCell: { class: 'bg-secondary'} }">
                                     <template #body="slotProps">
                                         {{ slotProps.data[0].descripcion }}

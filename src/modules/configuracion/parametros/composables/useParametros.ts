@@ -53,13 +53,13 @@ const useParametros = () => {
                 }
                 if (error.response.data.message === 'El usuario ya no esta activo') {
                     Swal.fire({
-                        title:  appName.value  ,
+                        title:  appName.value,
                         icon:   "error",
                         html:   "<b>Su usuario ha sido deshabilitado<b> ",
                         showDenyButton: false,
                         showCancelButton: false,
                         confirmButtonText: 'Enterado',
-                        confirmButtonColor: "#01ACC8",
+                        confirmButtonColor: "#870000",
                         allowEscapeKey: false,
                         allowOutsideClick: false,
                     }).then((result) => {

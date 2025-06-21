@@ -337,7 +337,7 @@ const validarDatos = async (data: Orden) => {
                         <Tab value="3" as="div" class="flex items-center gap-2" style="border-top-left-radius: 1rem; border-top-right-radius: 1rem;"
                             :pt="{root: { class: tabActiva == '3' ? 'bg-primary bg-opacity-25' : 'bg-secondary'}}" >
                             <i class="pi pi-clipboard" style="color: slateblue"></i>
-                            Miscelaneos
+                            Material Diverso
                         </Tab>
                     </TabList>
                     <TabPanels>

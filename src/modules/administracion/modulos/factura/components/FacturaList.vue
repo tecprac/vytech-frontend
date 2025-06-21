@@ -62,7 +62,7 @@ const tableHeader   = ref([
     },
     {
         columnLabel:    'Orden',
-        columnField:    'orden_taller',
+        columnField:    'folio_orden',
         sortEnabled:    true,
         class:          "text-start"
     },

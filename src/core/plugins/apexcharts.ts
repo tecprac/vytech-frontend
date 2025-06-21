@@ -6,5 +6,5 @@ import VueApexCharts from "vue3-apexcharts";
  * @param app vue instance
  */
 export function initApexCharts(app: App<Element>) {
-  app.use(VueApexCharts);
+  app.use(VueApexCharts as any);
 }

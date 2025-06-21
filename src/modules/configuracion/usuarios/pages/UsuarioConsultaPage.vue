@@ -52,7 +52,7 @@ watch(isError, () => {
 <template>
     <LoadingModal v-if="isPending" />
     <div class="card-header border-0 pt-2">
-        <h2>Nuevo Usuario</h2>
+        <h2>Consulta Usuario</h2>
     </div>
     <div v-if="registro">
             <div class="card-body border-0 pt-0 pb-0">

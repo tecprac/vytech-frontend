@@ -268,3 +268,11 @@ interface conf_usuario {
     usuario: string,
     nombre: string,
 }
+
+export interface MailOptions {
+    to:         string,
+    from:       string,
+    bcc:        string,
+    subject:    string,
+    htmlBody:   string,
+}

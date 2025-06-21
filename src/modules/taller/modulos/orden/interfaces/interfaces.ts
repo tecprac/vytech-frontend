@@ -1,14 +1,26 @@
+export interface Permisos {
+    modulo: string,
+    permiso: string,
+}
+
+export interface Motivo {
+    id:               number;
+    descripcion:      string;
+}
+
 export interface Orden {
     id:                     number;
     fecha_alta:             Date;
     folio:                  number;
     fecha_cierre:           Date | null;
+    fecha_cancela:          Date | null;
     serie:                  string;
     folio_documento_id:     number;
     cliente_id:             number;
     tecnico_id:             number;
     usuario_inicia_id:      number;
     usuario_cierra_id:      number | null;
+    usuario_cancela_id:     number | null;
     tipo_servicio_id:       number;
     mantenimiento_id:       number | null;
     unidad_id:              number;
@@ -28,6 +40,7 @@ export interface Orden {
     nota_proceso:           string | null;
     nota_cerrada:           string | null;
     nota_cancelada:         string | null;
+    motivo_id?:             number | null;
     activo:                 boolean;
     conf_usuario?:          conf_usuario;
     adm_cliente?:           adm_cliente;
@@ -90,24 +103,25 @@ interface talle_motor {
 }
 
 export interface Orden_Trabajo {
-    id:                 number;
-    orden_id:           number;
-    usuario_id:         number;
-    fecha:              Date;
-    trabajo_id:         number;
-    descripcion:        string;
-    tecnico_id:         number;
-    estatus:            string;
-    notas:              string;
-    horas_estandar:     number;
-    horas_acumuladas:   number;
-    horas_facturadas:   number;
-    importe:            number;
-    activo:             boolean;
-    talle_orden?:       talle_orden;
-    conf_usuario?:      conf_usuario;
-    talle_tecnico?:     talle_tecnico;
-    talle_trabajo?:     talle_trabajo;
+    id:                     number;
+    orden_id:               number;
+    usuario_id:             number;
+    fecha:                  Date;
+    trabajo_id:             number;
+    descripcion:            string;
+    tecnico_id:             number;
+    estatus:                string;
+    notas:                  string;
+    horas_estandar:         number;
+    horas_acumuladas:       number;
+    horas_facturadas:       number;
+    importe:                number;
+    activo:                 boolean;
+    documento_detalle_id?:  number;
+    talle_orden?:           talle_orden;
+    conf_usuario?:          conf_usuario;
+    talle_tecnico?:         talle_tecnico;
+    talle_trabajo?:         talle_trabajo;
     talle_requisicion_detalles?: RequisicionDetalle[];
 }
 
@@ -239,4 +253,29 @@ interface talle_tecnico {
     nombre:     string,
     apaterno:   string,
     amaterno:   string,
+}
+
+export interface OrdenProducto {
+    id:                     number,
+    requisicion_id:         number,
+    producto_id:            number,
+    cantidad:               number,
+    costo:                  number,
+    costo_total:            number,
+    precio:                 number,
+    importe:                number,
+    descripcion:            string,
+    orden_id:               number,
+    documento_detalle_id:   number,
+    estatus:                string,
+    folio:                  number,
+    serie:                  string,
+    ordenestatus:           string,
+    codigo:                 string,
+    codigo_alterno:         string,
+    costo_reposicion:       number,
+    ultimo_costo:           number,
+    margen_utilidad:        number,
+    preciofijo:             number,
+    descripcionfija:        string,
 }

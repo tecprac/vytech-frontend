@@ -146,7 +146,6 @@ setFieldValue('arrendado',false);
 setFieldValue('kms',0);
 
 const onSubmit = handleSubmit( async (values) => {
-    console.log(values);
     registro.value = {
         id:                 0,
         numeroeco:          values.numeroeco,

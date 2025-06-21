@@ -347,6 +347,11 @@ watch(isError, () => {
                                     {{ formatCurrency(slotProps.data.importe) }}
                                 </template>
                             </Column>
+                            <Column header="SaldoInsoluto" :pt="{ headerCell: { class: 'bg-secondary text-end'}, root: { class: 'text-end'} }">
+                                    <template #body="slotProps">
+                                        {{ formatCurrency(slotProps.data.saldoinsoluto) }}
+                                    </template>
+                                </Column>
                             <Column header="ACCIONES" :pt="{ headerCell: { class: 'bg-secondary text-center'}, root: { class: 'text-center'} }">
                                 <template #body="{ data }">
                                     <Button

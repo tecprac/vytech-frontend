@@ -34,6 +34,12 @@ const tableHeader   = ref([
         class:          "text-center"
     },
     {
+        columnLabel:    'Código',
+        columnField:    'codigo',
+        sortEnabled:    true,
+        class:          "text-start"
+    },
+    {
         columnLabel:    'Descripción',
         columnField:    'descripcion',
         sortEnabled:    true,

@@ -4,7 +4,7 @@ import ApiService from "@/core/services/ApiService";
 import { useToast } from 'primevue/usetoast';
 import type { 
     Documento, Documento_Detalle, adm_cp_adicionales,
-    adm_cp_mercancia, adm_cp_transporte, 
+    adm_cp_mercancia, adm_cp_transporte, MailOptions,
     adm_documento_relacionado, Documento_CFDI, MovtoCliente } from '../interfaces/interfaces';
 import type { Cliente } from '@/modules/administracion/catalogos/clientes/interfaces/interfaces';
 import type { FolioDocumento } from '@/modules/configuracion/folioDocumento/interfaces/interfaces';
@@ -18,11 +18,13 @@ import type { FormaPago } from '@/modules/administracion/catalogos/clientes/inte
 import type { MetodoPago } from '@/modules/administracion/catalogos/clientes/interfaces/metodopago';
 import type { UsoCFDI } from '@/modules/administracion/catalogos/clientes/interfaces/usocfdi';
 import type { SatTipoRelacion } from '@/modules/sat/catalogos/tiporelacion/interfaces/interfaces';
+import type { Orden } from '@/modules/taller/modulos/orden/interfaces/interfaces';
 import Swal from 'sweetalert2';
 import { useConfirm } from 'primevue/useconfirm';
 import { useAuthStore } from '@/stores/auth';
 import useUtilerias from '@/core/helpers/utilerias';
 import { useRouter } from 'vue-router';
+
 
 const getregistro = async( id:number ):Promise<Documento> => {
     if (id > 0){
@@ -357,13 +359,21 @@ const useDocumento = (id: number ) => {
     const dialogMovimientos     = ref<boolean>(false);
     const dialogPDFVisor        = ref<boolean>(false);
     const dialogXMLVisor        = ref<boolean>(false);
+    const dialogEnviarMail      = ref<boolean>(false);
     const documento_cfdi        = ref<Documento_CFDI>();
     const pdfDocumento          = ref();
     const filePDF               = ref(null);
     const pdfViewer             = ref();
     const movtos_cliente        = ref<MovtoCliente[]>([]);
-
-
+    const orden                 = ref<Orden>();
+    const mailOptions           = ref<MailOptions>({
+                                    to:         '',
+                                    from:       '',
+                                    bcc:        '',
+                                    subject:    '',
+                                    htmlBody:   '',
+                                });
+    
     const { formatCurrency, formatNumber2Dec } = useUtilerias();
 
     const { isPending, data, isError } = useQuery({
@@ -1166,24 +1176,106 @@ const useDocumento = (id: number ) => {
         }
     }
 
-    const enviarCFDI = async () => {
+    const openDialogEmail = async () => {
+        dialogEnviarMail.value = true;
+    }
+
+    const consultarEstatusSAT = async () => {
+        toast.add({
+            group: 'waiting',
+            severity: 'info',
+            summary:    'Consultando estatuso del CFDI en el SAT...'
+        });
         try {
             ApiService.setHeader();
-            await ApiService.post(`AdmFactura/EnviarCFDI/${registro.value.id}/I`,null);
+            await ApiService.post(`AdmFactura/ConsultarEstatusSAT/${registro.value.id}/I`,null);
             toast.add({
                 severity:   "success",
                 summary:    "Exitoso",
                 detail:     "El CFDI Fue enviando por Email",
                 life:       3500,
             });
+            toast.removeGroup('waiting');    
         } catch (error) {
+            toast.removeGroup('waiting');
             toast.add({
                 severity:   "error",
-                summary:    "Enviar Email",
-                detail:     "No se logro enviar el CFDO por correo electrónico.\n Intentelo mas tarde.",
+                summary:    "Consulta SAT",
+                detail:     "Se genero un error al consultar el estatus del documento en el SAT.\n"+error,
                 life:       3500,
             });
         }
+    }
+
+    const enviarCFDI = async () => {
+        if (mailOptions.value.from.trim().length == 0) {
+            toast.add({
+                severity:   "error",
+                summary:    "Cuenta origen",
+                detail:     "La cuenta origen no puede estar vacía.\n Verifique con su administrador",
+                life:       3500,
+            });
+            return;
+        }
+        if (mailOptions.value.to.trim().length == 0) {
+            toast.add({
+                severity:   "error",
+                summary:    "Destinatario(s)",
+                detail:     "El destinatario no puede estar vació",
+                life:       3500,
+            });
+            return;
+        }
+        if (mailOptions.value.subject.trim().length == 0) {
+            toast.add({
+                severity:   "error",
+                summary:    "Asunto",
+                detail:     "El asunto del correo no puede estar vacío",
+                life:       3500,
+            });
+            return;
+        }
+        confirm.require({
+            message: 'Esta seguro de enviar el correo ?',
+            icon:   'pi pi-exclamation-triangle',
+            rejectProps: {
+                label: 'No',
+                severity: 'secondary',
+                outlined: true
+            },
+            acceptProps: { 
+                label: 'Si, Enviar' ,
+                severity: 'warn'
+            },
+            accept: async () => {
+                dialogEnviarMail.value = false;
+                toast.add({
+                    group: 'waiting',
+                    severity: 'info',
+                    summary:    'Enviando correo...'
+                });
+                try {
+                    ApiService.setHeader();
+                    await ApiService.post(`AdmFactura/EnviarCFDI/${registro.value.id}/I`,mailOptions.value);
+                    toast.add({
+                        severity:   "success",
+                        summary:    "Exitoso",
+                        detail:     "El CFDI Fue enviando por Email",
+                        life:       3500,
+                    });
+                    toast.removeGroup('waiting');
+                } catch (error) {
+                    toast.removeGroup('waiting');
+                    toast.add({
+                        severity:   "error",
+                        summary:    "Enviar Email",
+                        detail:     "No se logro enviar el CFDO por correo electrónico.\n"+error,
+                        life:       3500,
+                    });
+                }
+            },
+        });
+        
     }
 
     const dataMutationNew = useMutation( { mutationFn: newRegistro,
@@ -1253,6 +1345,10 @@ const useDocumento = (id: number ) => {
             registro.value = {...data.value};
             if (id > 0) {
                 isPending.value = true;
+                const paramemailfrom = await ApiService.get2(`Parametro/GetByGrupoNombre/TIMBRADO/correo_envia`,null);
+                mailOptions.value.from = paramemailfrom.data.valor;
+                const paramemailbbc = await ApiService.get2(`Parametro/GetByGrupoNombre/TIMBRADO/correo_confirmacion`,null);
+                mailOptions.value.bcc = paramemailbbc.data.valor;
                 const responserel = await ApiService.get2(`AdmFactura/RelacionadoByDocumento/${registro.value.id}`,null)
                 documentos_relacionados.value.splice(0);
                 documentos_relacionados.value = <adm_documento_relacionado[]>responserel.data;
@@ -1263,6 +1359,7 @@ const useDocumento = (id: number ) => {
                 documento_detalles2.value = response.data;
                 const respcliente       = await ApiService.get2(`AdmClientes/GetById/${registro.value.cliente_id}`,null);
                 selectcliente.value     = <Cliente>respcliente.data;
+                mailOptions.value.to = selectcliente.value.email_adicional
                 const respemisor        = await ApiService.get2(`AdmPropietario/GetById/${registro.value.propietario_id}`,null);
                 selectpropietario.value = <Propietario>respemisor.data;
                 const respalmacen       = await ApiService.get2(`InvAlmacen/GetById/${registro.value.almacen_id}`,null);
@@ -1275,11 +1372,28 @@ const useDocumento = (id: number ) => {
                 selectmetodopago.value  = <MetodoPago>respmetodopago.data;
                 const respusocfd        = await ApiService.get2(`SatUsoCfdi/GetById/${registro.value.usocfdi_id}`,null);
                 selectusocfdi.value     = <UsoCFDI>respusocfd.data;
-                await CalcularTototales();
+                if (registro.value.estatus != 'Cancelada' && registro.value.estatus == 'Timbrado') await CalcularTototales();
                 if (registro.value.estatus == 'Aplicado' || registro.value.estatus == 'Timbrado' || registro.value.estatus == 'Cancelado' ){
                     const responsecfdi  = await ApiService.get2(`AdmFactura/GetCFDI/${registro.value.id}/I`,null);
                     documento_cfdi.value = <Documento_CFDI>responsecfdi.data;
-                    console.log(documento_cfdi.value);
+                    mailOptions.value.subject = `Comprobante Fiscal: ${registro.value.folio} ${registro.value.serie} UUID: ${documento_cfdi.value.uuid}`
+                    mailOptions.value.htmlBody = `
+                                                    <b>Estimado cliente</b>,
+                                                    <br/>
+                                                    <br/>
+                                                    Te enviamos por este medio la factura electrónica, comprobante fiscal digital y al mismo tiempo nos reiteramos a tus órdenes para cualquier aclaración al respecto.
+                                                    <br/>
+                                                    Si no puede descargar los archivos anexados en este correo, por favor, escríbenos un email a <a href="mailto:lulu@vytechservices.com.mx">lulu@vytechservices.com.mx</a>
+                                                    <br/>
+                                                    <br/>
+                                                    <br/>
+                                                    AVISO DE CONFIDENCIALIDAD: Este correo electrónico, incluyendo en su caso, los archivos adjuntos al mismo, pueden contener información de carácter confidencial y/o privilegiada, y se envían a la atención única y exclusivamente de la persona y/o entidad a quien va dirigido. La copia, revisión, uso, revelación y/o distribución de dicha información confidencial sin la autorización por escrito del remitente está prohibida. Si usted no es el destinatario a quien se dirige el presente correo, favor de contactar al remitente respondiendo al presente correo y eliminar el correo original incluyendo sus archivos, así como cualesquiera copia del mismo. Mediante la recepción del presente correo usted reconoce y acepta que en caso de incumplimiento de su parte y/o de sus representantes a los términos antes mencionados, VYTechServices tendrá derecho a los daños y perjuicios que esto le cause.
+
+                                                `
+                }
+                if (registro.value.orden_id > 0){
+                    const resporden = await ApiService.get2(`Orden/GetById/${registro.value.orden_id}`,null);
+                    orden.value = resporden.data;
                 }
                 isPending.value = false;
             }
@@ -1334,10 +1448,13 @@ const useDocumento = (id: number ) => {
         documento_cfdi,
         dialogPDFVisor,
         dialogXMLVisor,
+        dialogEnviarMail,
         pdfDocumento,
         pdfViewer,
         dialogMovimientos,
         movtos_cliente,
+        orden,
+        mailOptions,
 
         newRegistro:        dataMutationNew.mutate,
         updateRegistro:     dataMutationUpdate.mutate,
@@ -1376,7 +1493,9 @@ const useDocumento = (id: number ) => {
         downloadXML,
         RegenerarPDF,
         enviarCFDI,
-        openDialogMovimientos
+        openDialogMovimientos,
+        openDialogEmail,
+        consultarEstatusSAT
     }
 }
 

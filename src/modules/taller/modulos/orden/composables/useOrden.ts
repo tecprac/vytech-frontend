@@ -3,7 +3,7 @@ import { useQuery,useMutation } from '@tanstack/vue-query';
 import ApiService from "@/core/services/ApiService";
 import { useToast } from 'primevue/usetoast';
 import type { Orden, Orden_Trabajo, Orden_Miscelaneo,  TrabajoBitacora,
-    Producto, Requisicion, RequisicionDetalle } from '../interfaces/interfaces';
+    Producto, Requisicion, RequisicionDetalle, Permisos, Motivo, OrdenProducto } from '../interfaces/interfaces';
 import type { Cliente } from '@/modules/administracion/catalogos/clientes/interfaces/interfaces';
 import type { Tecnico } from '@/modules/taller/catalogos/tecnico/interfaces/interfaces';
 import type { Unidad } from '@/modules/taller/catalogos/unidad/interfaces/interfaces';
@@ -31,12 +31,14 @@ const getregistro = async( id:number ):Promise<Orden> => {
             fecha_alta:             new Date(),
             folio:                  0,
             fecha_cierre:           null,
+            fecha_cancela:          null,
             serie:                  '',
             folio_documento_id:     0,
             cliente_id:             0,
             tecnico_id:             0,
             usuario_inicia_id:      0,
             usuario_cierra_id:      null,
+            usuario_cancela_id:     null,
             tipo_servicio_id:       0,
             mantenimiento_id:       null,
             unidad_id:              0,
@@ -56,6 +58,7 @@ const getregistro = async( id:number ):Promise<Orden> => {
             nota_proceso:           '',
             nota_cerrada:           '',
             nota_cancelada:         '',
+            motivo_id:              null,
             activo:                 true,
         }
         return newRegistro;
@@ -88,12 +91,14 @@ const useOrden = ( id: number ) => {
                                 fecha_alta:             new Date(),
                                 folio:                  0,
                                 fecha_cierre:           null,
+                                fecha_cancela:          null,
                                 serie:                  '',
                                 folio_documento_id:     0,
                                 cliente_id:             0,
                                 tecnico_id:             0,
                                 usuario_inicia_id:      0,
                                 usuario_cierra_id:      null,
+                                usuario_cancela_id:     null,
                                 tipo_servicio_id:       0,
                                 mantenimiento_id:       null,
                                 unidad_id:              0,
@@ -113,6 +118,7 @@ const useOrden = ( id: number ) => {
                                 nota_proceso:           '',
                                 nota_cerrada:           '',
                                 nota_cancelada:         '',
+                                motivo_id:              null,
                                 activo:                 true,
                             });
     const foliosdoctos      = ref<FolioDocumento[]>([]);
@@ -165,6 +171,7 @@ const useOrden = ( id: number ) => {
                             });
     const selectecnicotrabajo = ref();
     const selectcliente     = ref();
+    const selectclientefact = ref();
     const clientesfiltrados = ref<Cliente[]>([]);
     const selecttrabajo     = ref();
     const trabajosfiltrados = ref<Trabajo[]>([]);
@@ -182,6 +189,8 @@ const useOrden = ( id: number ) => {
     const dialogRefaccion   = ref<boolean>(false);
     const dialogRefaccionDet= ref<boolean>(false);
     const dialogMiscelaneo  = ref<boolean>(false);
+    const dialogEstatus     = ref<boolean>(false);
+    const dialogFacturar    = ref<boolean>(false);
     const pdfDocumento      = ref();
     const pdfViewer         = ref();
     const MensajeError      = ref<string>('');
@@ -206,6 +215,7 @@ const useOrden = ( id: number ) => {
                                 activo:             true,
                             });
     const trabajos_orden    = ref<Orden_Trabajo[]>([]);
+    const trabajos_orden_fact = ref<Orden_Trabajo[]>([]);
     const miscelaneo_orden  = ref<Orden_Miscelaneo>({
                                 id:             0,
                                 orden_id:       0,
@@ -220,6 +230,7 @@ const useOrden = ( id: number ) => {
                                 activo:         true,
                             });
     const miscelaenos_orden = ref<Orden_Miscelaneo[]>([]);
+    const miscelaneos_orden_fact = ref<Orden_Miscelaneo[]>([]);
     const tipo_operacion_trabajo = ref<string>('Create') // Create,Update,Show
     const tipo_operacion_misc = ref<string>('Create') // Create,Update,Show
     const tipo_operacion_refaccion = ref<string>('Solicitar') // Solicitar, Consultar
@@ -241,8 +252,24 @@ const useOrden = ( id: number ) => {
                                 trabajo_id:         0,
                             });
     const refacciones_orden = ref<RequisicionDetalle[]>([]);
+    const orden_refacciones = ref<OrdenProducto[]>([]);
+    const orden_refacciones_fact = ref<OrdenProducto[]>([]);
     const isLoadingRequi    = ref<boolean>(false);
     const trabajosbitacora  = ref<TrabajoBitacora[]>([]);
+    const tipo_estatus      = ref<string>('');
+    const permisos          = ref<Permisos[]>([]);
+    const sPermisos         = ref<string>('');
+    const motivos           = ref<Motivo[]>([]);
+    const selectmotivo      = ref<Motivo>({
+                                id:             0,
+                                descripcion:    ''
+                            });
+    const usuario_abre      = ref<string>('');
+    const usuario_cierra    = ref<string>('');
+    const usuario_cancela   = ref<string>('');
+    const motivo_cancela    = ref<string>('');
+    const agruparDiversos   = ref<boolean>(false);
+
     const { formatCurrency, formatNumber2Dec } = useUtilerias();
     const { PDFBlanco, PDFDatos, PDFDatosInterno } = useOrdenFormatos();
 
@@ -253,6 +280,10 @@ const useOrden = ( id: number ) => {
     });
 
     onMounted(async () => {
+        permisos.value = store.permisos.filter((element: any) => element.codigo == '023'); // Taller->Modulos->Orden de Servicio
+        permisos.value.forEach(element => {
+            sPermisos.value += element.permiso+',';
+        });
         botonespdf.value = [
                                 {
                                     icon: "pi pi-file-pdf",
@@ -274,6 +305,8 @@ const useOrden = ( id: number ) => {
         tiposservicios.value.splice(0);
         tecnicos.value.splice(0);
         bahias.value.splice(0);
+        motivos.value.splice(0);
+        ApiService.setHeader();
         const response  = await ApiService.get2('Modulos/SearchByField/codigo/023',null);
         const modulo = response.data[0];
         const respfoliosdocto = await ApiService.get2(`FolioDocumento/SearchByModuloId/${modulo.id}`,null);
@@ -282,6 +315,8 @@ const useOrden = ( id: number ) => {
         tecnicos.value = <Tecnico[]>respTecnicos.data;
         const respBahias = await ApiService.get2('Bahias/listado',null);
         bahias.value = <Bahia[]>respBahias.data;
+        const respMotivos = await ApiService.get2('Motivo/listado',null);
+        motivos.value = <Motivo[]>respMotivos.data;
         if (foliosdoctos.value.length > 0 ) {
             selecfoliodocto.value = foliosdoctos.value[0];
             if (id == 0) registro.value.folio  = selecfoliodocto.value.folio_siguiente;
@@ -804,6 +839,268 @@ const useOrden = ( id: number ) => {
         });
     }
 
+    const openDialogEstatus = async (estatus: string) => {
+        tipo_estatus.value = estatus;
+        dialogEstatus.value = true;
+    }
+
+    const closeDialogEstatus = async(caso: string) =>{
+        if (caso == 'cerrar') {
+            dialogEstatus.value = false;    
+            return;
+        }
+        if (tipo_estatus.value == 'Cancelada'){
+            if (selectmotivo.value.id == 0) {
+                toast.add({
+                    severity:   'error',
+                    summary:    'Motivo',
+                    detail:     'Debe seleccionar un Motivo',
+                    life:       3500,
+                });
+                return;
+            }
+        }
+        Swal.fire({
+            title: 'Actualizando estatus de la orden...',
+            showConfirmButton: false
+        });
+        Swal.showLoading();
+        try {
+            const body = {
+                estatus:    tipo_estatus.value,
+                usuario_id: store.user.id,
+                motivo_id:  tipo_estatus.value == 'Cancelada' ? selectmotivo.value.id : 0,
+                notas:      tipo_estatus.value == 'Cancelada' ? registro.value.nota_cancelada : registro.value.nota_cerrada,
+            }
+            await ApiService.put(`Orden/cambiaEstatus/${registro.value.id}`,body);
+            const response = await ApiService.get2(`Orden/GetById/${registro.value.id}`,null);
+            data.value = response.data;
+            registro.value = response.data;
+            Swal.close();
+        } catch (error) {
+            Swal.close();
+            toast.add({
+                severity:   'error',
+                summary:    'Error al Actualizar',
+                detail:     'Se genero un error al intentar actualizar. \n'+error,
+                life:       3500,
+            });
+        }
+        dialogEstatus.value = false;
+    }
+
+    const openDialogFacturar = async () => {
+        dialogFacturar.value = true;
+    }
+
+    const abrirOrden = async () => {
+        try {
+            confirm.require({
+                message:'Esta seguro de abrir la orden ?',
+                header: 'Abrir Orden',
+                icon:   'pi pi-info-circle',
+                rejectLabel: 'Cancelar',
+                rejectProps: {
+                    label: 'Cancelar',
+                    severity: 'secondary',
+                    outlined: true
+                },
+                acceptProps: {
+                    label: 'Si, Abrir',
+                    severity: 'primary'
+                },
+                accept: async () => {
+                    try {
+                        Swal.fire({
+                            title:  'Actualizando orden...',
+                            showConfirmButton: false,
+                        })
+                        Swal.showLoading();
+                        const body = {
+                            estatus:    'EnProceso',
+                            usuario_id: store.user.id,
+                            motivo_id:  0,
+                            notas:      ''
+                        }
+                        await ApiService.put(`Orden/cambiaEstatus/${registro.value.id}`,body);
+                        const response = await ApiService.get2(`Orden/GetById/${registro.value.id}`,null);
+                        data.value = response.data;
+                        registro.value = response.data;
+                        Swal.close();
+                        Swal.fire({
+                            icon:   'success',
+                            title:  'Orden Abierta',
+                            html:   `La orden se abrio correctamente.`,
+                            showConfirmButton: true,
+                        });
+                    } catch (error) {
+                        Swal.close();
+                        toast.add({
+                            severity: 'error',
+                            summary:    'Error al facturar',
+                            detail:     'Se genero un error al intentar facturar la orden\n'+error,
+                            life:       4000
+                        });
+                    }
+                }
+            });
+        } catch (error) {
+            Swal.close();
+            toast.add({
+                severity: 'error',
+                summary:    'Error al Abrir Orden',
+                detail:     'Se genero un error al intentar abrir la orden\n'+error,
+                life:       4000
+            });
+            dialogFacturar.value = false;
+        }
+    }
+
+    const closeDialogFacturar = async (caso: string) => {
+        if (caso == 'cerrar'){
+            dialogFacturar.value = false;
+            return;
+        }
+        if (trabajos_orden_fact.value.length == 0 
+                && orden_refacciones_fact.value.length == 0 
+                && miscelaneos_orden_fact.value.length == 0){
+            toast.add({
+                severity: 'error',
+                summary: 'No hay conceptos para facturar',
+                detail: 'Debe seleccionar uno o mas conceptos para facturar',
+                life: 3500
+            });
+            return;
+        }
+        if ( orden_refacciones_fact.value.length > 0 && 
+            orden_refacciones_fact.value.reduce((acumulador, item) => { return +acumulador + +item.importe;},0) == 0 ) {
+            toast.add({
+                severity: 'error',
+                summary: 'Sumatoria de refacciones en 0',
+                detail: 'El importe a facturar en refacciones es 0',
+                life: 3500
+            });
+            return;
+        }
+        try {
+            confirm.require({
+                message:'Esta seguro de continuar?',
+                header: 'Faturar orden',
+                icon:   'pi pi-info-circle',
+                rejectLabel: 'Cancelar',
+                rejectProps: {
+                    label: 'Cancelar',
+                    severity: 'secondary',
+                    outlined: true
+                },
+                acceptProps: {
+                    label: 'Si, Facturar',
+                    severity: 'primary'
+                },
+                accept: async () => {
+                    try {
+                        Swal.fire({
+                            title:  'Generando Factura...',
+                            html:   'Creando documento y conceptos...',
+                            showConfirmButton: false,
+                        })
+                        Swal.showLoading();
+                        const responsefol  = await ApiService.get2('Modulos/SearchByField/codigo/047',null);
+                        const modulo = responsefol.data[0];
+                        const respfoliosdocto = await ApiService.get2(`FolioDocumento/SearchByModuloId/${modulo.id}`,null);
+                        const folios:FolioDocumento[] = <FolioDocumento[]>respfoliosdocto.data;
+                        let conceptostotales:number = 0;
+                        let conceptosfacturados:number = 0;
+                        conceptostotales = trabajos_orden.value.length + orden_refacciones.value.length + miscelaenos_orden.value.length;
+                        conceptosfacturados = trabajos_orden_fact.value.length + orden_refacciones_fact.value.length + miscelaneos_orden_fact.value.length;
+                        const body = {
+                            usuario_id:         store.user.id,
+                            cliente_id:         selectclientefact.value ? selectclientefact.value.id : registro.value.cliente_id,
+                            folio_documento_id: folios[0].id,
+                            agrupado:           agruparDiversos.value,           
+                            trabajos:           trabajos_orden_fact.value,
+                            productos:          orden_refacciones_fact.value,
+                            diversos:           miscelaneos_orden_fact.value,
+                            estatus:            conceptostotales == conceptosfacturados ? 'Facturada' : 'ParcialFacturada'
+                        };
+                        const respfactura = await ApiService.post(`Orden/Facturar/${registro.value.id}`,body);
+                        const response = await ApiService.get2(`Orden/GetById/${registro.value.id}`,null);
+                        data.value = response.data;
+                        registro.value = response.data;
+                        Swal.close();
+                        Swal.fire({
+                            icon:   'success',
+                            title:  'Factura Generada correctamente',
+                            html:   `Folio: ${respfactura.data.folio} Serie: ${respfactura.data.serie} <br> Puede consultarla en el modulo de facturas.`,
+                            showConfirmButton: true,
+                        });
+                        dialogFacturar.value = false;
+                    } catch (error) {
+                        Swal.close();
+                        toast.add({
+                            severity: 'error',
+                            summary:    'Error al facturar',
+                            detail:     'Se genero un error al intentar facturar la orden\n'+error,
+                            life:       4000
+                        });
+                        dialogFacturar.value = false;            
+                    }
+                }
+            });
+        } catch (error) {
+            Swal.close();
+            toast.add({
+                severity: 'error',
+                summary:    'Error al facturar',
+                detail:     'Se genero un error al intentar facturar la orden\n'+error,
+                life:       4000
+            });
+            dialogFacturar.value = false;
+        }
+    }
+
+    const onCellEditComplete = (event: any) => {
+        switch (event.field){
+            case 'costo':
+                if (parseFloat(event.newValue) >= 0.00) {
+                    event.data[event.field] = event.newValue;
+                    event.data['precio'] =  +event.newValue * (1 + (+event.data['margen_utilidad'] /100));
+                    event.data['importe'] = (+event.data['precio'] * +event.data['cantidad']);
+                } else {
+                    toast.add({
+                        severity: 'warn',
+                        detail: 'Costo no valido',
+                        summary: 'El costo debe ser mayor a 0',
+                        life: 3500,
+                    })
+                    event.preventDefault();
+                }
+                break;
+            case 'precio':
+                if (parseFloat(event.newValue) < +event.data['costo']){
+                    toast.add({
+                        severity: 'warn',
+                        detail: 'Precio menor al Costo',
+                        summary: 'Favor de verificar el precio esta por debajo del costo',
+                        life: 3500,
+                    });
+                }
+                if (parseFloat(event.newValue) > 0.00) {
+                    event.data[event.field] = event.newValue;
+                    event.data['importe'] = (+event.newValue * +event.data['cantidad']);
+                } else {
+                    toast.add({
+                        severity: 'warn',
+                        detail: 'Costo no valido',
+                        summary: 'El costo debe ser mayor a 0',
+                        life: 3500,
+                    });
+                    event.preventDefault();
+                }
+                break;
+        }
+    }
+
     const dataMutationNew    = useMutation( { mutationFn: newRegistro,
                                                     onSuccess(data: Orden) {
                                                         toast.add({
@@ -918,9 +1215,29 @@ const useOrden = ( id: number ) => {
                 const resptiposervicio = await ApiService.get2(`TipoServicios/GetById/${registro.value.tipo_servicio_id}`,null);
                 selectiposervicio.value = <TipoServicio>resptiposervicio.data;
                 const respcliente = await ApiService.get2(`AdmClientes/GetById/${registro.value.cliente_id}`,null);
-                selectcliente.value = <Cliente>respcliente.data;
+                selectcliente.value     = <Cliente>respcliente.data;
+                selectclientefact.value = <Cliente>respcliente.data;
                 const respunidad = await ApiService.get2(`Unidades/GetById/${registro.value.unidad_id}`,null);
                 selectunidad.value = <Unidad>respunidad.data;
+                orden_refacciones.value.splice(0);
+                const resprefacciones = await ApiService.get2(`Requisicion/GetOrdenProductosByOrden/${registro.value.id}`,null);
+                orden_refacciones.value = resprefacciones.data;
+                if (registro.value.usuario_inicia_id > 0){
+                    const respuser_abre = await ApiService.get2(`Usuarios/GetById/${registro.value.usuario_inicia_id}`,null);
+                    usuario_abre.value = respuser_abre.data.usuario+' | '+respuser_abre.data.nombre;
+                }
+                if (registro.value.usuario_cierra_id){
+                    const respuser_cierra = await ApiService.get2(`Usuarios/GetById/${registro.value.usuario_cierra_id}`,null);
+                    usuario_cierra.value = respuser_cierra.data.usuario+' | '+respuser_cierra.data.nombre;
+                }
+                if (registro.value.usuario_cancela_id){
+                    const respuser_cancela = await ApiService.get2(`Usuarios/GetById/${registro.value.usuario_cancela_id}`,null);
+                    usuario_cancela.value = respuser_cancela.data.usuario+' | '+respuser_cancela.data.nombre;
+                }
+                if (registro.value.motivo_id) {
+                    const respmotivo = await ApiService.get2(`Motivo/GetById/${registro.value.motivo_id}`,null);
+                    motivo_cancela.value = respmotivo.data.descripcion;
+                }
                 isPending.value = false;
             }
         }
@@ -976,6 +1293,7 @@ const useOrden = ( id: number ) => {
         dialogRefaccion,
         dialogRefaccionDet,
         dialogMiscelaneo,
+        dialogFacturar,
         selectecnicotrabajo,
         selecttrabajo,
         trabajosfiltrados,
@@ -990,6 +1308,21 @@ const useOrden = ( id: number ) => {
         refacciones_orden,
         isLoadingRequi,
         trabajosbitacora,
+        dialogEstatus,
+        tipo_estatus,
+        sPermisos,
+        motivos,
+        selectmotivo,
+        trabajos_orden_fact,
+        miscelaneos_orden_fact,
+        orden_refacciones,
+        orden_refacciones_fact,
+        usuario_abre,
+        usuario_cierra,
+        usuario_cancela,
+        motivo_cancela,
+        agruparDiversos,
+        selectclientefact,
 
         newRegistro:        dataMutationNew.mutate,
         updateRegistro:     dataMutationUpdate.mutate,
@@ -1003,6 +1336,9 @@ const useOrden = ( id: number ) => {
         isDeleting:         computed( () => dataMutationDelete.isPending.value),
         isDeletingSuccess:  computed( () => dataMutationDelete.isSuccess.value),
         isErrorDeleting:    computed( () => dataMutationDelete.isError.value),
+        totalRef_facturar:  computed( () => orden_refacciones_fact.value.reduce((acumulador, item) => { return +acumulador + +item.importe;},0)),
+        totaltra_facturar:  computed( () => trabajos_orden_fact.value.reduce((acumulador, item) => { return +acumulador + +item.importe;},0)),
+        totalmis_facturar:  computed( () => miscelaneos_orden_fact.value.reduce((acumulador, item) => { return +acumulador + +item.importe;},0)),
         cambiaDocumento,
         buscarClientes,
         buscarUnidad,
@@ -1023,6 +1359,12 @@ const useOrden = ( id: number ) => {
         eliminaRefaccion,
         formatCurrency,
         formatNumber2Dec,
+        openDialogEstatus,
+        openDialogFacturar,
+        closeDialogEstatus,
+        closeDialogFacturar,
+        onCellEditComplete,
+        abrirOrden,
     }
 
 }

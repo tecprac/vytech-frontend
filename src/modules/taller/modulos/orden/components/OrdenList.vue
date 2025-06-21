@@ -97,6 +97,12 @@ const tableHeader   = ref([
         class:          "text-start"
     },
     {
+        columnLabel:    'Dias en Proceso',
+        columnField:    'dias_proceso',
+        sortEnabled:    true,
+        class:          "text-end"
+    },
+    {
         columnLabel:    'Estatus',
         columnField:    'estatus',
         sortEnabled:    true,

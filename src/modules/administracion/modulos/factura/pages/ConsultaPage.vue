@@ -24,7 +24,6 @@ import { useAuthStore } from '@/stores/auth';
 import Toolbar from 'primevue/toolbar';
 import ProgressSpinner from 'primevue/progressspinner';
 import { useConfirm } from 'primevue/useconfirm';
-import ConfirmDialog from 'primevue/confirmdialog';
 import ConfirmPopup from 'primevue/confirmpopup';
 import Dialog from 'primevue/dialog';
 import Textarea from 'primevue/textarea';
@@ -36,6 +35,7 @@ import Divider from 'primevue/divider';
 import useUtilerias from '@/core/helpers/utilerias';
 import VuePdfEmbed from 'vue-pdf-embed'
 import { PrettyXml } from 'pretty-xml-vue3';
+import Editor from 'primevue/editor';
 
 // optional styles
 import 'vue-pdf-embed/dist/styles/annotationLayer.css'
@@ -97,11 +97,14 @@ const {
     bTimbrando,
     documento_cfdi,
     dialogPDFVisor,
+    dialogEnviarMail,
     pdfDocumento,
     pdfViewer,
     dialogXMLVisor,
     dialogMovimientos,
     movtos_cliente,
+    orden,
+    mailOptions,
 
     cambiaDocumento,
     cambiaMoneda,
@@ -128,7 +131,8 @@ const {
     RegenerarPDF,
     enviarCFDI,
     openDialogMovimientos,
-
+    openDialogEmail,
+    consultarEstatusSAT,
 } = useDocumento( +route.params.id );
 
 watch(isError, () => {
@@ -272,6 +276,11 @@ watch(isError, () => {
                         <i class="pi pi-qrcode" style="color: slateblue"></i>
                         Timbrado
                     </Tab>
+                    <Tab v-if="registro.orden_id > 0" value="5" as="div" class="flex items-center gap-2" style="border-top-left-radius: 1rem; border-top-right-radius: 1rem;"
+                        :pt="{root: { class: tabActiva == '5' ? 'bg-primary bg-opacity-25' : 'bg-secondary'}}" >
+                        <i class="pi pi-truck" style="color: slateblue"></i>
+                        Orden Taller
+                    </Tab>
                 </TabList>
                 <TabPanels>
                     <TabPanel v-if="registro.id > 0" value="0">
@@ -290,6 +299,11 @@ watch(isError, () => {
                             <Column header="CODIGO" :pt="{ headerCell: { class: 'bg-secondary'} }">
                                 <template #body="slotProps">
                                     {{ slotProps.data[1].codigo }}
+                                </template>
+                            </Column>
+                            <Column header="CLAVE SAT" :pt="{ headerCell: { class: 'bg-secondary'} }">
+                                <template #body="{data}">
+                                    {{  data[1].sat_claveprodserv.c_claveprodserv }}
                                 </template>
                             </Column>
                             <Column header="DESCRIPCIÓN" :pt="{ headerCell: { class: 'bg-secondary'} }">
@@ -366,6 +380,13 @@ watch(isError, () => {
                                     option-label="nombre"
                                     placeholder="Seleccione un Almacén" disabled>
                                 </Select>
+                            </div>
+                            <label for="fecha" class="required col-form-label col-sm-2">
+                                Fecha Registro
+                            </label>
+                            <div class="col-sm-2">
+                                <InputText :value="convertTMZdatetime(String(registro.fecha))" disabled fluid>
+                                </InputText>
                             </div>
                         </div>
                         <div class="row mb-2">
@@ -531,6 +552,19 @@ watch(isError, () => {
                                     </label>
                                     <InputText v-model="documento_cfdi.estatus" fluid disabled>
                                     </InputText>
+                                    
+                                </div>
+                                <div class="col-sm-2 fv-row">
+                                    <label for="consultar" class="form-label fw-semibold">
+                                        ...
+                                    </label>
+                                    <Button label="Consultar Estatus"
+                                        class="text-black"
+                                        icon="pi pi-search"
+                                        severity="warn" raised
+                                        @click="consultarEstatusSAT">
+
+                                    </Button>
                                 </div>
                             </div>
                             <div class="row mb-2">
@@ -561,13 +595,84 @@ watch(isError, () => {
                                 <div class="col-sm-2">
                                     <Button
                                         label="Enviar CFDI"
-                                        @click="enviarCFDI"
+                                        @click="openDialogEmail"
                                         icon="pi pi-envelope"
                                         severity="info" size="small" raised>
                                     </Button>
                                 </div>
                             </div>
                         </template>
+                    </TabPanel>
+                    <!-- ORDEN DE SERVICIO -->
+                    <TabPanel v-if="orden" value="5">
+                        <div class="row mt-2 mb-2">
+                            <label for="cliente" class="col-form-label col-sm-1">Cliente</label>
+                            <div class="col-sm-8">
+                                <InputText disabled fluid
+                                    :value="orden.adm_cliente!.tipo_persona == 'Moral' ? orden.adm_cliente?.razon_social : orden.adm_cliente?.nombre">
+                                </InputText>
+                            </div>
+                            <label for="cliente" class="col-form-label col-sm-1">Servicio</label>
+                            <div class="col-sm-2">
+                                <Button severity="primary" fluid disabled
+                                    :label="orden.talle_tipo_servicio?.tipo_servicio">
+                                </Button>
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <label for="orden" class="col-form-label col-sm-1">Orden</label>
+                            <div class="col-sm-2">
+                                <InputText disabled fluid class="fw-bold"
+                                    :value="orden.folio">
+                                </InputText>
+                            </div>
+                            <label for="fecha_alta" class="col-form-label col-sm-1">F.Alta</label>
+                            <div class="col-sm-2">
+                                <InputText disabled fluid
+                                    :value="convertTMZdatetime(String(orden.fecha_alta))">
+                                </InputText>
+                            </div>
+                            <label for="fecha_alta" class="col-form-label col-sm-1">T.Unidad</label>
+                            <div class="col-sm-2">
+                                <InputText disabled fluid
+                                    :value="orden.talle_unidad?.talle_tipo_unidad.tipo_unidad">
+                                </InputText>
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <label for="unidad" class="col-form-label col-sm-1">Unidad</label>
+                            <div class="col-sm-2">
+                                <InputText disabled fluid
+                                    :value="orden.talle_unidad?.unidad">
+                                </InputText>
+                            </div>
+                            <label for="marca" class="col-form-label col-sm-1">Marca</label>
+                            <div class="col-sm-2">
+                                <InputText disabled fluid
+                                    :value="orden.talle_unidad?.talle_marca.marca">
+                                </InputText>
+                            </div>
+                            <label for="marca" class="col-form-label col-sm-1">Modelo</label>
+                            <div class="col-sm-2">
+                                <InputText disabled fluid
+                                    :value="orden.talle_unidad?.talle_modelo.modelo">
+                                </InputText>
+                            </div>
+                            <label for="motor" class="col-form-label col-sm-1">Motor</label>
+                            <div class="col-sm-2">
+                                <InputText disabled fluid
+                                    :value="orden.talle_unidad?.talle_motor.motor">
+                                </InputText>
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <label for="fallas" class="col-form-label col-sm-2">Fallas Reportadas</label>
+                            <div class="col-sm-10">
+                                <Textarea disabled fluid rows="5"
+                                    v-model="orden.fallas_reportadas">
+                                </Textarea>
+                            </div>
+                        </div>
                     </TabPanel>
                 </TabPanels>
             </Tabs>
@@ -1139,6 +1244,92 @@ watch(isError, () => {
                 label="Cerrar"
                 severity="success"
                 icon="pi pi-times"
+                :pt="{
+                    root: { class: 'mt-2'}
+                }"
+            >
+            </Button>
+        </template>
+    </Dialog>
+    <!-- DIALOG ENVIAR EMAIL -->
+    <Dialog
+        v-model:visible="dialogEnviarMail"
+        modal :closable="false"
+        header="Enviar PDF/XML por correo electrónico"
+        :style="{width: '75rem'}"
+        :breakpoints="{ '960px': '75vw', '641px': '100vw' }"
+        :pt = " { 
+                    header: { class: 'bg-secondary' },
+                    // content: { style: 'height: 360px'},
+                    footer: { class: 'bg-secondary' } 
+                }"
+        >
+        <div class="row mt-2 mb-2">
+            <label for="from" class="required col-form-label col-form-label-sm col-sm-2">
+                De:
+            </label>
+            <div class="col-sm-10">
+                <InputText v-model="mailOptions.from" disabled fluid></InputText>
+            </div>
+        </div>
+        <div class="row mt-2 mb-2">
+            <label for="para" class="required col-form-label col-form-label-sm col-sm-2">
+                Para:
+                <i class="pi pi-info-circle" style="font-size: 1rem;"
+                        v-tooltip.top="'Las dirección de correo deben estar separadas por una coma (,)'" ></i>  
+            </label>
+            <div class="col-sm-10">
+                <InputText v-model="mailOptions.to" fluid></InputText>
+            </div>
+        </div>
+        <div class="row mt-2 mb-2">
+            <label for="bcc" class="required col-form-label col-form-label-sm col-sm-2">
+                Con Copia:
+                <i class="pi pi-info-circle" style="font-size: 1rem;"
+                        v-tooltip.top="'Las dirección de correo deben estar separadas por una coma (,)'" ></i>
+            </label>
+            <div class="col-sm-10">
+                <InputText v-model="mailOptions.bcc" fluid></InputText>
+            </div>
+        </div>
+        <div class="row mt-2 mb-2">
+            <label for="asunto" class="required col-form-label col-form-label-sm col-sm-2">Asunto:</label>
+            <div class="col-sm-10">
+                <InputText v-model="mailOptions.subject" fluid></InputText>
+            </div>
+        </div>
+        <div clas="row mb-2">
+            <label for="contenido" class="col-form-label col-form-label-sm col-sm-2">Contenido</label>
+        </div>
+        <div clas="row mb-2">
+            <Editor v-model="mailOptions.htmlBody" editorStyle="height: 320px">
+                <template v-slot:toolbar>
+                    <span class="ql-formats">
+                        <button v-tooltip.bottom="'Bold'" class="ql-bold"></button>
+                        <button v-tooltip.bottom="'Italic'" class="ql-italic"></button>
+                        <button v-tooltip.bottom="'Underline'" class="ql-underline"></button>
+                    </span>
+                </template>
+            </Editor>
+        </div>
+        <template #footer>
+            <Button 
+                raised
+                @click="() => { dialogEnviarMail = false}"
+                label="Cerrar"
+                severity="secondary"
+                icon="pi pi-times"
+                :pt="{
+                    root: { class: 'mt-2'}
+                }"
+            >
+            </Button>
+            <Button 
+                raised
+                label="Enviar PDF/XML"
+                severity="success"
+                icon="pi pi-send"
+                @click="enviarCFDI"
                 :pt="{
                     root: { class: 'mt-2'}
                 }"

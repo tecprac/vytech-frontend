@@ -12,12 +12,14 @@ const useOrdenFormatos = (  ) => {
         fecha_alta:             new Date(),
         folio:                  0,
         fecha_cierre:           null,
+        fecha_cancela:          null,
         serie:                  '',
         folio_documento_id:     0,
         cliente_id:             0,
         tecnico_id:             0,
         usuario_inicia_id:      0,
         usuario_cierra_id:      null,
+        usuario_cancela_id:     null,
         tipo_servicio_id:       0,
         mantenimiento_id:       null,
         unidad_id:              0,
@@ -37,6 +39,7 @@ const useOrdenFormatos = (  ) => {
         nota_proceso:           '',
         nota_cerrada:           '',
         nota_cancelada:         '',
+        motivo_id:              null,
         activo:                 true,
     });
 

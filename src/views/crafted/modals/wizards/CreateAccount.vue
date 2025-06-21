@@ -13,14 +13,12 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import KTModalCard from "@/components/cards/Card.vue";
-import KTCreateAccountModal from "@/components/modals/wizards/CreateAccountModal.vue";
 import { getIllustrationsPath } from "@/core/helpers/assets";
 
 export default defineComponent({
   name: "create-account",
   components: {
     KTModalCard,
-    KTCreateAccountModal,
   },
   setup() {
     return {
