@@ -36,6 +36,7 @@ import Divider from 'primevue/divider';
 import useUtilerias from '@/core/helpers/utilerias';
 import VuePdfEmbed from 'vue-pdf-embed'
 import { PrettyXml } from 'pretty-xml-vue3';
+import Editor from 'primevue/editor';
 
 // optional styles
 import 'vue-pdf-embed/dist/styles/annotationLayer.css'
@@ -100,6 +101,7 @@ const {
     pdfDocumento,
     pdfViewer,
     dialogXMLVisor,
+    dialogEnviarMail,
     dialogMovimientos,
     movtos_cliente,
     dialogAplicaSaldo,
@@ -110,6 +112,13 @@ const {
     selectfactura,
     facturasfiltrados,
     saldoOriginal,
+    mailOptions,
+    consultaSAT,
+    satmotivoscancela,
+    selectmovitocancela,
+    foliosustitucion,
+    dialogCancelacion,
+    dialogConsultaSAT,
 
     cambiaDocumento,
     cambiaMoneda,
@@ -142,11 +151,14 @@ const {
     closeDialogAplicarDet,
     eliminaAplicado,
     aplicarSaldos,
+    openDialogEmail,
+    consultarEstatusSAT,
+    cancelacionSAT,
 } = useDocumento( +route.params.id );
 
 watch(isError, () => {
     if(isError.value)
-        router.push({name: 'factura'});
+        router.push({name: 'notacredito'});
 });
 
 </script>
@@ -549,6 +561,20 @@ watch(isError, () => {
                                     <InputText v-model="documento_cfdi.estatus" fluid disabled>
                                     </InputText>
                                 </div>
+                                <div v-if="documento_cfdi.estatuscancelacion" class="col-sm-2 fv-row">
+                                    <label for="consultar" class="form-label fw-semibold">
+                                        Estatus Cancelación
+                                    </label>
+                                    <InputText v-model="documento_cfdi.estatuscancelacion" fluid disabled>
+                                    </InputText>
+                                </div>
+                                <div v-if="documento_cfdi.fecha_cancelacion" class="col-sm-2 fv-row">
+                                    <label for="consultar" class="form-label fw-semibold">
+                                        Fecha Cancelación
+                                    </label>
+                                    <InputText :value="documento_cfdi.fecha_cancelacion" fluid disabled>
+                                    </InputText>
+                                </div>
                             </div>
                             <div class="row mb-2">
                                 <div class="col-sm-2">
@@ -578,9 +604,26 @@ watch(isError, () => {
                                 <div class="col-sm-2">
                                     <Button
                                         label="Enviar CFDI"
-                                        @click="enviarCFDI"
+                                        @click="openDialogEmail"
                                         icon="pi pi-envelope"
                                         severity="info" size="small" raised>
+                                    </Button>
+                                </div>
+                                <div class="col-sm-2">
+                                    <Button label="Consultar Estatus"
+                                        class="text-black"
+                                        icon="pi pi-search"
+                                        severity="warn" raised size="small"
+                                        @click="consultarEstatusSAT"
+                                        v-tooltip="{ value: 'Consulta el estatus del CFDI en el SAT', showDelay: 1000, hideDelay: 300 }">
+                                    </Button>
+                                </div>
+                                <div v-if="documento_cfdi.filepdf_acuse" class="col-sm-2">
+                                    <Button
+                                        label="Ver Acuse PDF"
+                                        @click="VisualizarPDF(documento_cfdi.filepdf_acuse)"
+                                        icon="pi pi-file-pdf"
+                                        severity="primary" size="small" raised>
                                     </Button>
                                 </div>
                             </div>
@@ -1163,6 +1206,119 @@ watch(isError, () => {
             </Button>
         </template>
     </Dialog>
+    <!-- DIALOG CANCELACION CFDI -->
+    <Dialog
+        v-model:visible="dialogCancelacion"
+        header="Datos para la cancelación del CFDI"
+        :style="{width: '50vw'}"
+        :breakpoints="{ '960px': '75vw', '641px': '100vw' }"
+        :pt = " { 
+                    header: { class: 'bg-secondary' },
+                    // content: { style: 'height: 360px'},
+                    footer: { class: 'bg-secondary' } 
+                }">
+        <div class="row mt-2 mb-2">
+            <label for="motivocancela" class="required col-form-label col-form-label-sm col-sm-3">Motivo Cancelación</label>
+            <div class="col-sm-6">
+                <Select
+                    v-model="selectmovitocancela" :options="satmotivoscancela"
+                    :option-label="(data) => {return (data.c_motivo + ' '+ data.descripcion) }"
+                    fluid placeholder="Seleccione un motivo de cancelación"
+                    variant="filled" id="tiporelacion">
+                </Select>
+            </div>
+        </div>
+        <div class="row mb-2">
+            <label for="foliosustitucion" class="required col-form-label col-form-label-sm col-sm-3">Folio Sustitución</label>
+            <div class="col-sm-6">
+                <InputMask
+                    v-model="foliosustitucion" fluid
+                    mask="********-****-****-****-************"
+                    placeholder="????????-????-????-????-????????????"
+                    :disabled="selectmovitocancela.c_motivo != '01'">
+                </InputMask>
+            </div>
+        </div>
+        <template #footer>
+            <Button 
+                @click="() => { dialogCancelacion = false}"
+                label="Cerrar" raised
+                severity="secondary"
+                icon="pi pi-times"
+                :pt="{ root: { class: 'mt-2'} }">
+            </Button>
+            <Button v-if="tipo_detalle_operacion != 'Show'"
+                label="Solicitar Cancelación" raised
+                severity="success"
+                icon="pi pi-send"
+                @click="cancelacionSAT"
+                :pt="{ root: { class: 'mt-2'} }">
+            </Button>
+        </template>
+
+    </Dialog>    
+    <!-- DIALOGO CONSULTA ESTATUS SAT -->
+    <Dialog
+        v-model:visible="dialogConsultaSAT"
+        modal closable
+        header="Resultado consulta en el SAT"
+        :style="{width: '60vw'}"
+        :breakpoints="{ '960px': '75vw', '641px': '100vw' }"
+        :pt = " { 
+                    header: { class: 'bg-secondary' },
+                    // content: { style: 'height: 360px'},
+                    footer: { class: 'bg-secondary' } 
+                }">
+        <div class="row mt-2 mb-2">
+            <label for="codigoestatus" class="col-form-label col-form-label-sm col-sm-3">Codigo Estatus</label>
+            <div class="col-sm-9">
+                <InputText v-model:value="consultaSAT['a:CodigoEstatus']"
+                    disabled fluid class="fw-bold">
+                </InputText>
+            </div>
+        </div>
+        <div class="row mb-2">
+            <label for="escancelable" class="col-form-label col-form-label-sm col-sm-3">Es Cancelable</label>
+            <div class="col-sm-9">
+                <InputText v-model:value="consultaSAT['a:EsCancelable']"
+                    disabled fluid class="fw-bold">
+                </InputText>
+            </div>
+        </div>
+        <div class="row mb-2">
+            <label for="estado" class="col-form-label col-form-label-sm col-sm-3">Estado</label>
+            <div class="col-sm-9">
+                <InputText v-model:value="consultaSAT['a:Estado']"
+                    disabled fluid class="fw-bold"
+                    :pt="{root: { class:  consultaSAT['a:Estado'] == 'Vigente' ? 'bg-light-info' : 'bg-light-danger'}}">
+                </InputText>
+            </div>
+        </div>
+        <template v-if="consultaSAT['a:EstatusCancelacion']">
+            <div class="row mb-2">
+                <label for="estatuscancelacion" class="col-form-label col-form-label-sm col-sm-3">Estatus Cancelación</label>
+                <div class="col-sm-9">
+                    <InputText v-model:value="consultaSAT['a:EstatusCancelacion']"
+                        disabled fluid class="fw-bold"
+                        :pt="{root: { class: consultaSAT['a:EstatusCancelacion'] == 'En proceso' ? 'bg-light-warning' : 'bg-light-info'}}">
+                    </InputText>
+                </div>
+            </div>
+        </template>
+        <template #footer>
+            <Button 
+                raised
+                @click="() => { dialogConsultaSAT = false}"
+                label="Cerrar"
+                severity="success"
+                icon="pi pi-times"
+                :pt="{
+                    root: { class: 'mt-2'}
+                }"
+            >
+            </Button>
+        </template>
+    </Dialog>        
     <!-- DIALOGO APLICACION DE SALDOS DETALLE-->
     <Dialog 
         v-model:visible="dialogAplicaSaldo_det"
@@ -1370,6 +1526,92 @@ watch(isError, () => {
 
         </template>
     </Dialog>
+    <!-- DIALOG ENVIAR EMAIL -->
+    <Dialog
+        v-model:visible="dialogEnviarMail"
+        modal :closable="false"
+        header="Enviar PDF/XML por correo electrónico"
+        :style="{width: '75rem'}"
+        :breakpoints="{ '960px': '75vw', '641px': '100vw' }"
+        :pt = " { 
+                    header: { class: 'bg-secondary' },
+                    // content: { style: 'height: 360px'},
+                    footer: { class: 'bg-secondary' } 
+                }"
+        >
+        <div class="row mt-2 mb-2">
+            <label for="from" class="required col-form-label col-form-label-sm col-sm-2">
+                De:
+            </label>
+            <div class="col-sm-10">
+                <InputText v-model="mailOptions.from" disabled fluid></InputText>
+            </div>
+        </div>
+        <div class="row mt-2 mb-2">
+            <label for="para" class="required col-form-label col-form-label-sm col-sm-2">
+                Para:
+                <i class="pi pi-info-circle" style="font-size: 1rem;"
+                        v-tooltip.top="'Las dirección de correo deben estar separadas por una coma (,)'" ></i>  
+            </label>
+            <div class="col-sm-10">
+                <InputText v-model="mailOptions.to" fluid></InputText>
+            </div>
+        </div>
+        <div class="row mt-2 mb-2">
+            <label for="bcc" class="required col-form-label col-form-label-sm col-sm-2">
+                Con Copia:
+                <i class="pi pi-info-circle" style="font-size: 1rem;"
+                        v-tooltip.top="'Las dirección de correo deben estar separadas por una coma (,)'" ></i>
+            </label>
+            <div class="col-sm-10">
+                <InputText v-model="mailOptions.bcc" fluid></InputText>
+            </div>
+        </div>
+        <div class="row mt-2 mb-2">
+            <label for="asunto" class="required col-form-label col-form-label-sm col-sm-2">Asunto:</label>
+            <div class="col-sm-10">
+                <InputText v-model="mailOptions.subject" fluid></InputText>
+            </div>
+        </div>
+        <div clas="row mb-2">
+            <label for="contenido" class="col-form-label col-form-label-sm col-sm-2">Contenido</label>
+        </div>
+        <div clas="row mb-2">
+            <Editor v-model="mailOptions.htmlBody" editorStyle="height: 320px">
+                <template v-slot:toolbar>
+                    <span class="ql-formats">
+                        <button v-tooltip.bottom="'Bold'" class="ql-bold"></button>
+                        <button v-tooltip.bottom="'Italic'" class="ql-italic"></button>
+                        <button v-tooltip.bottom="'Underline'" class="ql-underline"></button>
+                    </span>
+                </template>
+            </Editor>
+        </div>
+        <template #footer>
+            <Button 
+                raised
+                @click="() => { dialogEnviarMail = false}"
+                label="Cerrar"
+                severity="secondary"
+                icon="pi pi-times"
+                :pt="{
+                    root: { class: 'mt-2'}
+                }"
+            >
+            </Button>
+            <Button 
+                raised
+                label="Enviar PDF/XML"
+                severity="success"
+                icon="pi pi-send"
+                @click="enviarCFDI"
+                :pt="{
+                    root: { class: 'mt-2'}
+                }"
+            >
+            </Button>
+        </template>
+    </Dialog>    
     <Toast />
     <Toast group="waiting">
         <template #message="slotProps">

@@ -104,6 +104,8 @@ export interface Documento_CFDI {
     cadenaoriginal?: 		string;
     filepdf: 				string;
     filexml: 				string;
+    filepdf_acuse?:         string | null;
+    estatuscancelacion?:    string | null;
     error?: 				string;
     sat_tipodecomprobante?:  sat_tipodecomprobante;
     versioncfdi: 			string | null;
@@ -281,4 +283,26 @@ export interface Factura {
     saldo:          number,
     aplicado:       number,
     adm_cliente?:   adm_cliente | null,
+}
+
+export interface MailOptions {
+    to:         string,
+    from:       string,
+    bcc:        string,
+    subject:    string,
+    htmlBody:   string,
+}
+
+export interface ConsultaCFDIResponse {
+    'a:CodigoEstatus': string;
+    'a:EsCancelable': string;
+    'a:Estado': string;
+    'a:EstatusCancelacion'?: string | null; // puede venir vacío
+    'a:ValidacionEFOS': string;
+}
+
+export interface SatMotivoCancela {
+    id: 			number;
+	c_motivo: 		string;
+	descripcion: 	string;
 }

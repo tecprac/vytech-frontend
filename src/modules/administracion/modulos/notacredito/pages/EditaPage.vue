@@ -104,6 +104,8 @@ const {
     dialogXMLVisor,
     pdfDocumento,
     pdfViewer,
+    dialogEnviarMail,
+    mailOptions,
 
     updateRegistro,
     cambiaDocumento,
@@ -1161,6 +1163,90 @@ const validarDatos = async(data: Documento) => {
             </Button>
         </template>
     </Dialog>
+<!-- DIALOG ENVIAR EMAIL -->
+    <Dialog
+        v-model:visible="dialogEnviarMail"
+        modal :closable="false"
+        header="Enviar PDF/XML por correo electrónico"
+        :style="{width: '75rem'}"
+        :breakpoints="{ '960px': '75vw', '641px': '100vw' }"
+        :pt = " { 
+                    header: { class: 'bg-secondary' },
+                    // content: { style: 'height: 360px'},
+                    footer: { class: 'bg-secondary' } 
+                }"
+        >
+        <div class="row mt-2 mb-2">
+            <label for="from" class="required col-form-label col-form-label-sm col-sm-2">De:</label>
+            <div class="col-sm-10">
+                <InputText v-model="mailOptions.from" disabled fluid></InputText>
+            </div>
+        </div>
+        <div class="row mt-2 mb-2">
+            <label for="para" class="required col-form-label col-form-label-sm col-sm-2">
+                Para:
+                <i class="pi pi-info-circle" style="font-size: 1rem;"
+                        v-tooltip.top="'Las dirección de correo deben estar separadas por una coma (,)'" ></i>  
+            </label>
+            <div class="col-sm-10">
+                <InputText v-model="mailOptions.to" fluid></InputText>
+            </div>
+        </div>
+        <div class="row mt-2 mb-2">
+            <label for="bcc" class="required col-form-label col-form-label-sm col-sm-2">
+                Con Copia:
+                <i class="pi pi-info-circle" style="font-size: 1rem;"
+                        v-tooltip.top="'Las dirección de correo deben estar separadas por una coma (,)'" ></i>  
+            </label>
+            <div class="col-sm-10">
+                <InputText v-model="mailOptions.bcc" fluid></InputText>
+            </div>
+        </div>
+        <div class="row mt-2 mb-2">
+            <label for="asunto" class="required col-form-label col-form-label-sm col-sm-2">Asunto:</label>
+            <div class="col-sm-10">
+                <InputText v-model="mailOptions.subject" fluid></InputText>
+            </div>
+        </div>
+        <div clas="row mb-2">
+            <label for="contenido" class="col-form-label col-form-label-sm col-sm-2">Contenido</label>
+        </div>
+        <div clas="row mb-2">
+            <Editor v-model="mailOptions.htmlBody" editorStyle="height: 320px">
+                <template v-slot:toolbar>
+                    <span class="ql-formats">
+                        <button v-tooltip.bottom="'Bold'" class="ql-bold"></button>
+                        <button v-tooltip.bottom="'Italic'" class="ql-italic"></button>
+                        <button v-tooltip.bottom="'Underline'" class="ql-underline"></button>
+                    </span>
+                </template>
+            </Editor>
+        </div>
+        <template #footer>
+            <Button 
+                raised
+                @click="() => { dialogEnviarMail = false}"
+                label="Cerrar"
+                severity="secondary"
+                icon="pi pi-times"
+                :pt="{
+                    root: { class: 'mt-2'}
+                }"
+            >
+            </Button>
+            <Button 
+                raised
+                label="Enviar PDF/XML"
+                severity="success"
+                icon="pi pi-send"
+                @click="enviarCFDI"
+                :pt="{
+                    root: { class: 'mt-2'}
+                }"
+            >
+            </Button>
+        </template>
+    </Dialog>    
     <Toast />
     <Toast group="waiting">
         <template #message="slotProps">

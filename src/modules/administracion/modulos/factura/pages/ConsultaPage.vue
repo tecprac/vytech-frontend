@@ -102,9 +102,15 @@ const {
     pdfViewer,
     dialogXMLVisor,
     dialogMovimientos,
+    dialogConsultaSAT,
+    dialogCancelacion,
     movtos_cliente,
     orden,
     mailOptions,
+    consultaSAT,
+    satmotivoscancela,
+    selectmovitocancela,
+    foliosustitucion,
 
     cambiaDocumento,
     cambiaMoneda,
@@ -133,6 +139,7 @@ const {
     openDialogMovimientos,
     openDialogEmail,
     consultarEstatusSAT,
+    cancelacionSAT,
 } = useDocumento( +route.params.id );
 
 watch(isError, () => {
@@ -169,7 +176,7 @@ watch(isError, () => {
                         raised icon="pi pi-times-circle" class="ms-2" severity="danger" label="Cancelar"
                         size="small" @click="cancelarFactura" :loading="bTimbrando">
                     </Button>
-                    <Button v-if="registro.id > 0 && registro.saldo != registro.total" label="Movimientos"
+                    <Button v-if="registro.id > 0 && registro.saldo != registro.total && registro.estatus != 'SinAplicar'" label="Movimientos"
                         size="small"  class="ms-2" raised severity="info" icon="pi pi-dollar"
                         @click="openDialogMovimientos">
                     </Button>
@@ -552,19 +559,20 @@ watch(isError, () => {
                                     </label>
                                     <InputText v-model="documento_cfdi.estatus" fluid disabled>
                                     </InputText>
-                                    
                                 </div>
-                                <div class="col-sm-2 fv-row">
+                                <div v-if="documento_cfdi.estatuscancelacion" class="col-sm-2 fv-row">
                                     <label for="consultar" class="form-label fw-semibold">
-                                        ...
+                                        Estatus Cancelación
                                     </label>
-                                    <Button label="Consultar Estatus"
-                                        class="text-black"
-                                        icon="pi pi-search"
-                                        severity="warn" raised
-                                        @click="consultarEstatusSAT">
-
-                                    </Button>
+                                    <InputText v-model="documento_cfdi.estatuscancelacion" fluid disabled>
+                                    </InputText>
+                                </div>
+                                <div v-if="documento_cfdi.fecha_cancelacion" class="col-sm-2 fv-row">
+                                    <label for="consultar" class="form-label fw-semibold">
+                                        Fecha Cancelación
+                                    </label>
+                                    <InputText :value="documento_cfdi.fecha_cancelacion" fluid disabled>
+                                    </InputText>
                                 </div>
                             </div>
                             <div class="row mb-2">
@@ -598,6 +606,24 @@ watch(isError, () => {
                                         @click="openDialogEmail"
                                         icon="pi pi-envelope"
                                         severity="info" size="small" raised>
+                                    </Button>
+                                </div>
+                                <div class="col-sm-2">
+                                    <Button label="Consultar Estatus"
+                                        class="text-black"
+                                        icon="pi pi-search"
+                                        severity="warn" raised size="small"
+                                        @click="consultarEstatusSAT"
+                                        v-tooltip="{ value: 'Consulta el estatus del CFDI en el SAT', showDelay: 1000, hideDelay: 300 }">
+
+                                    </Button>
+                                </div>
+                                <div v-if="documento_cfdi.filepdf_acuse" class="col-sm-2">
+                                    <Button
+                                        label="Ver Acuse PDF"
+                                        @click="VisualizarPDF(documento_cfdi.filepdf_acuse)"
+                                        icon="pi pi-file-pdf"
+                                        severity="primary" size="small" raised>
                                     </Button>
                                 </div>
                             </div>
@@ -788,7 +814,7 @@ watch(isError, () => {
             </div>
         </div>
         <div class="row mb-2">
-            <label for="tiporelacion" class="required col-form-label col-form-label-sm col-sm-2">UUID</label>
+            <label for="uuidrelacionado" class="required col-form-label col-form-label-sm col-sm-2">UUID</label>
             <div class="col-sm-6">
                 <InputMask
                     v-model="documento_relacionado.uuid" fluid
@@ -1206,6 +1232,119 @@ watch(isError, () => {
             </Button>
         </template>
     </Dialog>
+    <!-- DIALOG CANCELACION CFDI -->
+    <Dialog
+        v-model:visible="dialogCancelacion"
+        header="Datos para la cancelación del CFDI"
+        :style="{width: '50vw'}"
+        :breakpoints="{ '960px': '75vw', '641px': '100vw' }"
+        :pt = " { 
+                    header: { class: 'bg-secondary' },
+                    // content: { style: 'height: 360px'},
+                    footer: { class: 'bg-secondary' } 
+                }">
+        <div class="row mt-2 mb-2">
+            <label for="motivocancela" class="required col-form-label col-form-label-sm col-sm-3">Motivo Cancelación</label>
+            <div class="col-sm-6">
+                <Select
+                    v-model="selectmovitocancela" :options="satmotivoscancela"
+                    :option-label="(data) => {return (data.c_motivo + ' '+ data.descripcion) }"
+                    fluid placeholder="Seleccione un motivo de cancelación"
+                    variant="filled" id="tiporelacion">
+                </Select>
+            </div>
+        </div>
+        <div class="row mb-2">
+            <label for="foliosustitucion" class="required col-form-label col-form-label-sm col-sm-3">Folio Sustitución</label>
+            <div class="col-sm-6">
+                <InputMask
+                    v-model="foliosustitucion" fluid
+                    mask="********-****-****-****-************"
+                    placeholder="????????-????-????-????-????????????"
+                    :disabled="selectmovitocancela.c_motivo != '01'">
+                </InputMask>
+            </div>
+        </div>
+        <template #footer>
+            <Button 
+                @click="() => { dialogCancelacion = false}"
+                label="Cerrar" raised
+                severity="secondary"
+                icon="pi pi-times"
+                :pt="{ root: { class: 'mt-2'} }">
+            </Button>
+            <Button v-if="tipo_detalle_operacion != 'Show'"
+                label="Solicitar Cancelación" raised
+                severity="success"
+                icon="pi pi-send"
+                @click="cancelacionSAT"
+                :pt="{ root: { class: 'mt-2'} }">
+            </Button>
+        </template>
+
+    </Dialog>    
+    <!-- DIALOGO CONSULTA ESTATUS SAT -->
+    <Dialog
+        v-model:visible="dialogConsultaSAT"
+        modal closable
+        header="Resultado consulta en el SAT"
+        :style="{width: '60vw'}"
+        :breakpoints="{ '960px': '75vw', '641px': '100vw' }"
+        :pt = " { 
+                    header: { class: 'bg-secondary' },
+                    // content: { style: 'height: 360px'},
+                    footer: { class: 'bg-secondary' } 
+                }">
+        <div class="row mt-2 mb-2">
+            <label for="codigoestatus" class="col-form-label col-form-label-sm col-sm-3">Codigo Estatus</label>
+            <div class="col-sm-9">
+                <InputText v-model:value="consultaSAT['a:CodigoEstatus']"
+                    disabled fluid class="fw-bold">
+                </InputText>
+            </div>
+        </div>
+        <div class="row mb-2">
+            <label for="escancelable" class="col-form-label col-form-label-sm col-sm-3">Es Cancelable</label>
+            <div class="col-sm-9">
+                <InputText v-model:value="consultaSAT['a:EsCancelable']"
+                    disabled fluid class="fw-bold">
+                </InputText>
+            </div>
+        </div>
+        <div class="row mb-2">
+            <label for="estado" class="col-form-label col-form-label-sm col-sm-3">Estado</label>
+            <div class="col-sm-9">
+                <InputText v-model:value="consultaSAT['a:Estado']"
+                    disabled fluid class="fw-bold"
+                    :pt="{root: { class:  consultaSAT['a:Estado'] == 'Vigente' ? 'bg-light-info' : 'bg-light-danger'}}">
+                </InputText>
+            </div>
+        </div>
+        <template v-if="consultaSAT['a:EstatusCancelacion']">
+            <div class="row mb-2">
+                <label for="estatuscancelacion" class="col-form-label col-form-label-sm col-sm-3">Estatus Cancelación</label>
+                <div class="col-sm-9">
+                    <InputText v-model:value="consultaSAT['a:EstatusCancelacion']"
+                        disabled fluid class="fw-bold"
+                        :pt="{root: { class: consultaSAT['a:EstatusCancelacion'] == 'En proceso' ? 'bg-light-warning' : 'bg-light-info'}}">
+                    </InputText>
+                </div>
+            </div>
+        </template>
+        <template #footer>
+            <Button 
+                raised
+                @click="() => { dialogConsultaSAT = false}"
+                label="Cerrar"
+                severity="success"
+                icon="pi pi-times"
+                :pt="{
+                    root: { class: 'mt-2'}
+                }"
+            >
+            </Button>
+        </template>
+    </Dialog>    
     <!-- DIALOGO DOCUMENTO XML -->
     <Dialog
         v-model:visible="dialogXMLVisor" 
@@ -1223,9 +1362,7 @@ watch(isError, () => {
 
         <PrettyXml ref="pdfViewer" :xml="pdfDocumento" :options="{shortRecord:true}">
         </PrettyXml>
-
         <!-- <pre v-if="pdfDocumento">{{ pdfDocumento }}</pre> -->
-        
         <template #footer>
             <Button
                 raised

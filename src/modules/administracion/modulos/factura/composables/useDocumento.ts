@@ -3,8 +3,8 @@ import { useQuery,useMutation } from '@tanstack/vue-query';
 import ApiService from "@/core/services/ApiService";
 import { useToast } from 'primevue/usetoast';
 import type { 
-    Documento, Documento_Detalle, adm_cp_adicionales,
-    adm_cp_mercancia, adm_cp_transporte, MailOptions,
+    Documento, Documento_Detalle, adm_cp_adicionales, ConsultaCFDIResponse,
+    adm_cp_mercancia, adm_cp_transporte, MailOptions, SatMotivoCancela,
     adm_documento_relacionado, Documento_CFDI, MovtoCliente } from '../interfaces/interfaces';
 import type { Cliente } from '@/modules/administracion/catalogos/clientes/interfaces/interfaces';
 import type { FolioDocumento } from '@/modules/configuracion/folioDocumento/interfaces/interfaces';
@@ -360,6 +360,7 @@ const useDocumento = (id: number ) => {
     const dialogPDFVisor        = ref<boolean>(false);
     const dialogXMLVisor        = ref<boolean>(false);
     const dialogEnviarMail      = ref<boolean>(false);
+    const dialogConsultaSAT     = ref<boolean>(false);
     const documento_cfdi        = ref<Documento_CFDI>();
     const pdfDocumento          = ref();
     const filePDF               = ref(null);
@@ -373,6 +374,20 @@ const useDocumento = (id: number ) => {
                                     subject:    '',
                                     htmlBody:   '',
                                 });
+    const consultaSAT           = ref<ConsultaCFDIResponse>({
+                                    'a:CodigoEstatus':      '',
+                                    'a:EsCancelable':       '',
+                                    'a:Estado':             '',
+                                    'a:EstatusCancelacion': '',
+                                    'a:ValidacionEFOS':     '',
+                                });
+    const satmotivoscancela     = ref<SatMotivoCancela[]>([]);
+    const selectmovitocancela   = ref<SatMotivoCancela>({
+                                    id:             0,
+                                    c_motivo:       '',
+                                    descripcion:    '',
+                                });
+    const foliosustitucion      = ref<string>('');
     
     const { formatCurrency, formatNumber2Dec } = useUtilerias();
 
@@ -394,6 +409,7 @@ const useDocumento = (id: number ) => {
         metodospago.value.splice(0);
         usoscfdi.value.splice(0);
         tiporelaciones.value.splice(0);
+        satmotivoscancela.value.splice(0);
         const response  = await ApiService.get2('Modulos/SearchByField/codigo/047',null);
         const modulo = response.data[0];
         const respfoliosdocto = await ApiService.get2(`FolioDocumento/SearchByModuloId/${modulo.id}`,null);
@@ -422,6 +438,8 @@ const useDocumento = (id: number ) => {
                 timer:  5000,
             });
         }
+        const respmotivocancela = await ApiService.get2('SatMotivoCancela/listado',null);
+        satmotivoscancela.value = <SatMotivoCancela[]>respmotivocancela.data;
         const respagente = await ApiService.get2('AdmAgente/listado',null);
         agentes.value = <Agente[]>respagente.data;
         if (agentes.value.length > 0){
@@ -1036,14 +1054,146 @@ const useDocumento = (id: number ) => {
                     }
                 }
                 if (registro.value.estatus == 'Timbrado') {
-                    dialogCancelacion.value = true;
-                    return;
+                    try {
+                        Swal.fire({
+                            title: 'Consultando estatus del documento en el SAT...',
+                            showConfirmButton: false
+                        });
+                        Swal.showLoading();
+                        ApiService.setHeader();
+                        const response = await ApiService.post(`AdmFactura/ConsultarEstatusSAT/${registro.value.id}/I`,null);
+                        consultaSAT.value = <ConsultaCFDIResponse>response.data;
+                        Swal.close();
+                        if (consultaSAT.value['a:Estado'] == 'Cancelado') {
+                            Swal.fire({
+                                icon: 'info',
+                                title: 'Respuesta SAT\nDocumento Cancelado',
+                                html:   consultaSAT.value['a:EstatusCancelacion'] ? consultaSAT.value['a:EstatusCancelacion'] : '',
+                                confirmButtonText: 'Cerrar',
+                                showConfirmButton: true
+                            });
+                            return;
+                        } else if ( consultaSAT.value['a:Estado'] == 'No Encontrado') {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Respuesta SAT\nDocumento no encontrado',
+                                confirmButtonText: 'Cerrar',
+                                showConfirmButton: true
+                            });
+                            return;
+                        } else if (consultaSAT.value['a:Estado'] == 'Vigente' && consultaSAT.value['a:EsCancelable'] == 'No cancelable') {
+                            Swal.fire({
+                                icon: 'info',
+                                title: 'Respuesta SAT\nDocumento Vigente',
+                                html:   '<b>'+consultaSAT.value['a:EsCancelable']+'</b>',
+                                confirmButtonText: 'Cerrar',
+                                showConfirmButton: true
+                            });
+                            return;
+                        } else if (consultaSAT.value['a:Estado'] == 'Vigente' && (consultaSAT.value['a:EsCancelable'] == 'Cancelable con aceptación' || consultaSAT.value['a:EsCancelable'] == 'Cancelable sin aceptación') ) {
+                            if (consultaSAT.value['a:EstatusCancelacion'] == 'En proceso'){
+                                Swal.fire({
+                                    icon: 'info',
+                                    title: 'Respuesta SAT\nDocumento Vigente',
+                                    html:   'El Documento se encuentra en <b>Proceso de Cancelación</b>',
+                                    confirmButtonText: 'Cerrar',
+                                    showConfirmButton: true
+                                });
+                                return;
+                            } else if (consultaSAT.value['a:EstatusCancelacion'] == 'Plazo vencido' || consultaSAT.value['a:EstatusCancelacion'] == 'Solicitud rechazada') {
+                                Swal.fire({
+                                    icon:   'warning',
+                                    title:  'Respuesta SAT\nDocumento Vigente',
+                                    html:   `El estatus de la Cancelación fue: <b>${consultaSAT.value['a:EstatusCancelacion']}</b>`,
+                                    confirmButtonText: 'Cerrar',
+                                    showConfirmButton: true
+                                });
+                                return;
+                            } else {
+                                Swal.fire({
+                                    title: 'Consultando relaciones con otros documentos en el SAT...',
+                                    showConfirmButton: false
+                                });
+                                Swal.showLoading();
+                                const response = await ApiService.post(`AdmFactura/ConsultarRelacionesSAT/${registro.value.id}/I`,null);
+                                Swal.close();
+                                const respuesta = JSON.parse(response.data);
+                                if (respuesta.codStatus == '2000'){
+                                    Swal.fire({
+                                        icon:   'warning',
+                                        title:  'Respuesta SAT\nConsulta Relacionados',
+                                        html:   respuesta.message+'\nNo es posible cancelar el documento',
+                                        confirmButtonText: 'Cerrar',
+                                        showConfirmButton: true,
+                                    });
+                                    return;
+                                }
+                                dialogCancelacion.value = true;
+                            }
+                        }
+                    
+                    } catch (error) {
+                        Swal.close();
+                        toast.add({
+                            severity:   'error',
+                            summary:    'Se genero un error',
+                            detail:     'Se genero el error al intentar consultar \n'+error,
+                            life:       4000,
+                        });
+                    }
                 }
             },
             reject: () => {
                 return;
             }
         });
+    }
+
+    const cancelacionSAT = async () => {
+        if (selectmovitocancela.value.id == 0) {
+            toast.add({
+                severity:   'error',
+                summary:    'Motivo Cancelación',
+                detail:     'Debe selecionar un motivo para la cancelación',
+                life:       4000,
+            });
+            return;
+        }
+        if (selectmovitocancela.value.c_motivo == '01' && foliosustitucion.value.trim().length == 0){
+            toast.add({
+                severity:   'error',
+                summary:    'Folio Sustitución',
+                detail:     'Cuando el motivo es 01 debe capturar un folio de sustituación',
+                life:       4000,
+            });
+            return;
+        }
+        dialogCancelacion.value = false;
+        Swal.fire({
+            title:  'Enviando solicitud de cancelación al SAT',
+            showConfirmButton: false
+        });
+        Swal.showLoading();
+        try {
+            const body = {
+                c_motivo:           selectmovitocancela.value.c_motivo,
+                descripcion:        selectmovitocancela.value.descripcion,
+                foliosustitucion:   foliosustitucion.value,
+                estadocfdi:         consultaSAT.value['a:Estado'],
+                estatuscancelacion: consultaSAT.value['a:EstatusCancelacion'],
+            }
+            const response = await ApiService.post(`AdmFactura/CancelacionSAT/${registro.value.id}/I`,body);
+            console.log(response.data);
+            Swal.close();
+        } catch (error) {
+            Swal.close();
+            toast.add({
+                severity:   "error",
+                summary:    "Envio de cancelación al SAT",
+                detail:     "Se genero un error en la solicitud. \n"+error,
+                life:       3500,
+            });
+        }
     }
 
     const cerrarVisualizarPDF = () => {
@@ -1181,6 +1331,13 @@ const useDocumento = (id: number ) => {
     }
 
     const consultarEstatusSAT = async () => {
+        consultaSAT.value = {
+            "a:CodigoEstatus":      '',
+            "a:EsCancelable":       '',
+            'a:Estado':             '',
+            "a:EstatusCancelacion": '',
+            "a:ValidacionEFOS":     '',
+        };
         toast.add({
             group: 'waiting',
             severity: 'info',
@@ -1188,14 +1345,17 @@ const useDocumento = (id: number ) => {
         });
         try {
             ApiService.setHeader();
-            await ApiService.post(`AdmFactura/ConsultarEstatusSAT/${registro.value.id}/I`,null);
+            const response = await ApiService.post(`AdmFactura/ConsultarEstatusSAT/${registro.value.id}/I`,null);
+            consultaSAT.value = <ConsultaCFDIResponse>response.data;
+            toast.removeGroup('waiting');
+            dialogConsultaSAT.value = true;
             toast.add({
                 severity:   "success",
                 summary:    "Exitoso",
-                detail:     "El CFDI Fue enviando por Email",
+                detail:     "La consulta al SAT fue exitosa",
                 life:       3500,
             });
-            toast.removeGroup('waiting');    
+            
         } catch (error) {
             toast.removeGroup('waiting');
             toast.add({
@@ -1359,7 +1519,7 @@ const useDocumento = (id: number ) => {
                 documento_detalles2.value = response.data;
                 const respcliente       = await ApiService.get2(`AdmClientes/GetById/${registro.value.cliente_id}`,null);
                 selectcliente.value     = <Cliente>respcliente.data;
-                mailOptions.value.to = selectcliente.value.email_adicional
+                mailOptions.value.to    = selectcliente.value.email_adicional
                 const respemisor        = await ApiService.get2(`AdmPropietario/GetById/${registro.value.propietario_id}`,null);
                 selectpropietario.value = <Propietario>respemisor.data;
                 const respalmacen       = await ApiService.get2(`InvAlmacen/GetById/${registro.value.almacen_id}`,null);
@@ -1376,8 +1536,9 @@ const useDocumento = (id: number ) => {
                 if (registro.value.estatus == 'Aplicado' || registro.value.estatus == 'Timbrado' || registro.value.estatus == 'Cancelado' ){
                     const responsecfdi  = await ApiService.get2(`AdmFactura/GetCFDI/${registro.value.id}/I`,null);
                     documento_cfdi.value = <Documento_CFDI>responsecfdi.data;
-                    mailOptions.value.subject = `Comprobante Fiscal: ${registro.value.folio} ${registro.value.serie} UUID: ${documento_cfdi.value.uuid}`
-                    mailOptions.value.htmlBody = `
+                    if (documento_cfdi.value) {
+                        mailOptions.value.subject = `Comprobante Fiscal: ${registro.value.folio} ${registro.value.serie} UUID: ${documento_cfdi.value.uuid}`
+                        mailOptions.value.htmlBody = `
                                                     <b>Estimado cliente</b>,
                                                     <br/>
                                                     <br/>
@@ -1390,6 +1551,7 @@ const useDocumento = (id: number ) => {
                                                     AVISO DE CONFIDENCIALIDAD: Este correo electrónico, incluyendo en su caso, los archivos adjuntos al mismo, pueden contener información de carácter confidencial y/o privilegiada, y se envían a la atención única y exclusivamente de la persona y/o entidad a quien va dirigido. La copia, revisión, uso, revelación y/o distribución de dicha información confidencial sin la autorización por escrito del remitente está prohibida. Si usted no es el destinatario a quien se dirige el presente correo, favor de contactar al remitente respondiendo al presente correo y eliminar el correo original incluyendo sus archivos, así como cualesquiera copia del mismo. Mediante la recepción del presente correo usted reconoce y acepta que en caso de incumplimiento de su parte y/o de sus representantes a los términos antes mencionados, VYTechServices tendrá derecho a los daños y perjuicios que esto le cause.
 
                                                 `
+                    }
                 }
                 if (registro.value.orden_id > 0){
                     const resporden = await ApiService.get2(`Orden/GetById/${registro.value.orden_id}`,null);
@@ -1449,12 +1611,17 @@ const useDocumento = (id: number ) => {
         dialogPDFVisor,
         dialogXMLVisor,
         dialogEnviarMail,
+        dialogConsultaSAT,
         pdfDocumento,
         pdfViewer,
         dialogMovimientos,
         movtos_cliente,
         orden,
         mailOptions,
+        consultaSAT,
+        satmotivoscancela,
+        selectmovitocancela,
+        foliosustitucion,
 
         newRegistro:        dataMutationNew.mutate,
         updateRegistro:     dataMutationUpdate.mutate,
@@ -1495,7 +1662,8 @@ const useDocumento = (id: number ) => {
         enviarCFDI,
         openDialogMovimientos,
         openDialogEmail,
-        consultarEstatusSAT
+        consultarEstatusSAT,
+        cancelacionSAT,
     }
 }
 
