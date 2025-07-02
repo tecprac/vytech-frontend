@@ -55,6 +55,12 @@ const tableHeader   = ref([
         class:          "text-start"
     },
     {
+        columnLabel:    'Emisor',
+        columnField:    'adm_propietario',
+        sortEnabled:    true,
+        class:          "text-start"
+    },
+    {
         columnLabel:    'Cliente',
         columnField:    'adm_cliente',
         sortEnabled:    true,
@@ -95,6 +101,18 @@ const tableHeader   = ref([
         columnField:    'estatus',
         sortEnabled:    true,
         class:          "text-center"
+    },
+    {
+        columnLabel:    'UUID',
+        columnField:    'uuid',
+        sortEnabled:    true,
+        class:          "text-left"
+    },
+    {
+        columnLabel:    'EstatusCFDI',
+        columnField:    'estatuscfdi',
+        sortEnabled:    true,
+        class:          "text-left"
     },
     {
         columnLabel:    "Acciones",
@@ -142,7 +160,7 @@ permisos.value.forEach(element => {
     </div>
     <div class="card-body pt-0 py-0">
         <div class="table-responsive">
-            <table class="table shadow-sm table-sm table-hover table-bordered table-rounded border gy-2 gs-2">
+            <table class="table shadow-sm table-sm table-striped table-hover table-bordered table-rounded border gy-2 gs-2">
                 <thead class="bg-gray-500">
                     <tr class="fw-bolder fs-5 text-gray-200">
                         <th v-for="columna in tableHeader" :key="columna.columnLabel" :class="columna.class" >
@@ -186,8 +204,20 @@ permisos.value.forEach(element => {
                                             : item[col.columnField]!['nombre']
                                 }}
                             </template>
+                            <template v-else-if="col.columnField=='adm_propietario' && item['adm_propietario']">
+                                {{  item[col.columnField]!['tipo_persona'] == 'Moral' 
+                                            ? item[col.columnField]!['razon_social'] 
+                                            : item[col.columnField]!['nombre']
+                                }}
+                            </template>
                             <template v-else-if="col.columnField=='fecha'">
                                 {{  convertTMZdatetime(item[col.columnField].toString() ) }}
+                            </template>
+                            <template v-else-if="col.columnField=='uuid'">
+                                {{  item[col.columnField] ? item[col.columnField].toString() : '' }}
+                            </template>
+                            <template v-else-if="col.columnField=='estatuscfdi'">
+                                {{  item[col.columnField] ? item[col.columnField].toString() : '' }}
                             </template>
                             <template v-else-if="col.columnField=='estatus'">
                                 <Tag :value="item['estatus']"

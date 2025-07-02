@@ -279,3 +279,13 @@ export interface OrdenProducto {
     preciofijo:             number,
     descripcionfija:        string,
 }
+
+export interface OrdenBitacora {
+    orden_id:       number,
+    fecha:          Date,
+    usuario_id:     number,
+    estatus_antes:  string,
+    estatus_nuevo:  string,
+    nota:           string,
+    conf_usuario:   conf_usuario
+}

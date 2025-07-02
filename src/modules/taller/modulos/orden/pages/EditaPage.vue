@@ -39,6 +39,7 @@ import AccordionPanel from 'primevue/accordionpanel';
 import AccordionHeader from 'primevue/accordionheader';
 import AccordionContent from 'primevue/accordioncontent';
 import Divider from 'primevue/divider';
+import DatePicker from 'primevue/datepicker';
 
 // optional styles
 import 'vue-pdf-embed/dist/styles/annotationLayer.css'
@@ -111,6 +112,8 @@ const {
     motivo_cancela,
     agruparDiversos,
     selectclientefact,
+    costo_hora_trabajo,
+    ordenBitacora,
 
     updateRegistro,
     cambiaDocumento,
@@ -139,6 +142,7 @@ const {
     closeDialogFacturar,
     onCellEditComplete,
     abrirOrden,
+    onCellEditTrabajos,
 } = useOrden( +route.params.id );
 
 // watch( isAddingSuccess, () => {
@@ -236,7 +240,17 @@ const validarDatos = async (data: Orden) => {
                             class="ms-2" rounded raised icon="pi pi-lock"
                             @click="openDialogEstatus('Cerrada')">
                         </Button>
-                        <Button v-if="sPermisos.indexOf('AbrirOrdenCerrada') >= 0 && (registro.estatus == 'Cerrada' || registro.estatus == 'ParcialFacturada')"
+                        <Button v-if="sPermisos.indexOf('Cerrar') >= 0 && (registro.estatus == 'Abierta' || registro.estatus == 'EnProceso' || registro.estatus == 'Cerrada')"
+                            severity="warn" label="Garantía" size="small"
+                            class="ms-2 text-black" rounded raised icon="pi pi-lock"
+                            @click="openDialogEstatus('Garantia')">
+                        </Button>
+                        <Button v-if="sPermisos.indexOf('AbrirOrdenCerrada') >= 0 && (registro.estatus == 'Cerrada' )"
+                            severity="success" label="Abrir Orden" size="small"
+                            class="ms-2" rounded raised icon="pi pi-lock-open"
+                            @click="abrirOrden">
+                        </Button>
+                        <Button v-if="sPermisos.indexOf('AbrirOrdenFacturada') >= 0 && (registro.estatus == 'ParcialFacturada' || registro.estatus == 'Facturada')"
                             severity="success" label="Abrir Orden" size="small"
                             class="ms-2" rounded raised icon="pi pi-lock-open"
                             @click="abrirOrden">
@@ -287,7 +301,7 @@ const validarDatos = async (data: Orden) => {
                             size="small"
                             :severity="registro.estatus=='Abierta' ? 'info' : 
                                             registro.estatus=='EnProceso' ? 'success' :
-                                            registro.estatus=='Pausa' ? 'warn' :
+                                            registro.estatus=='Pausa' || registro.estatus=='Garantia' ? 'warn' :
                                             registro.estatus=='Cancelada' ? 'danger' : 'success' "
                             rounded>
                         </Button>
@@ -435,7 +449,8 @@ const validarDatos = async (data: Orden) => {
                                     header="División" :pt="{ headerCell: { class: 'bg-secondary'} }"></Column>
                                 <Column field="talle_trabajo.trabajo"       header="Descripción" :pt="{ headerCell: { class: 'bg-secondary'} }"></Column>
                                 <Column field="talle_tecnico.tecnico"       header="Técnico" :pt="{ headerCell: { class: 'bg-secondary'} }"></Column>
-                                <Column field="horas_estandar"              header="Horas" :pt="{ headerCell: { class: 'bg-secondary'} }"></Column>
+                                <Column field="horas_estandar"              header="Hrs.Estandar" class="text-end" :pt="{ headerCell: { class: 'bg-secondary'} }"></Column>
+                                <Column field="horas_facturadas"            header="Hrs.Facturadas"  class="text-end" :pt="{ headerCell: { class: 'bg-secondary'} }"></Column>
                                 <Column field="estatus"                     header="Estatus" :pt="{ headerCell: { class: 'bg-secondary'} }">
                                     <template #body="{ data }">
                                         <Tag :value="data.estatus"
@@ -1023,7 +1038,8 @@ const validarDatos = async (data: Orden) => {
                         class="p-datatable-sm"
                         stripedRows
                         show-gridlines
-                        scrollable
+                        scrollable editMode="cell"
+                        @cell-edit-complete="onCellEditTrabajos"
                         :pt="{
                             header: {class: 'bg-primary text-center bg-opacity-50'}
                         }">
@@ -1033,8 +1049,26 @@ const validarDatos = async (data: Orden) => {
                                 {{ data.talle_trabajo.trabajo }}
                             </template>
                         </Column>
-                        <Column field="horas_estandar" header="Horas" :pt="{ headerCell: { class: 'bg-light-danger'}, root: {class: 'text-end'} }"></Column>
-                        <Column field="importe" header="Importe" :pt="{ headerCell: { class: 'bg-light-danger'}, root: {class: 'text-end'} }"></Column>
+                        <Column field="horas_estandar" header="Horas Estandar" :pt="{ headerCell: { class: 'bg-light-danger'}, root: {class: 'text-end'} }"></Column>
+                        <Column field="horas_facturadas" header="Horas a Facturar" 
+                            body-class="bg-light-warning"
+                            :pt="{ headerCell: { class: 'bg-light-danger'}, root: {class: 'text-end'} }">
+                            <template #body="{data}">
+                                {{  data.horas_facturadas }}
+                            </template>
+                            <template #editor="{data,field}">
+                                <InputNumber
+                                    v-model="data[field]" autofocus fluid
+                                    highlight-on-focus :min-fraction-digits="2" :max-fraction-digits="2"
+                                    :pt="{ pcInputText: { root:{ class: 'text-end text-primary fw-bold'}} }">
+                                </InputNumber>
+                            </template>
+                        </Column>
+                        <Column field="importe" header="Importe" :pt="{ headerCell: { class: 'bg-light-danger'}, root: {class: 'text-end'} }">
+                            <template #body="{data}">
+                                {{  formatCurrency(data.importe) }}
+                            </template>
+                        </Column>
                         <Column field="estatus" header="Estatus" :pt="{ headerCell: { class: 'bg-light-danger text-center'}, root: {class: 'text-center'} }">
                             <template #body="{ data }">
                                 <Tag :value="data.estatus"
@@ -1209,7 +1243,7 @@ const validarDatos = async (data: Orden) => {
         v-model:visible="dialogEstatus"
         modal :closable="false"
         :header="tipo_estatus == 'Cerrada' ? 'Cerrar Orden' :
-                     'Cancelar Orden'"
+                    tipo_estatus == 'Garantia' ? 'Cerrar como Garantía la orden' : 'Cancelar Orden'"
         :style="{width: '75rem'}"
         :breakpoints="{ '960px': '75vw', '641px': '100vw' }"
         :pt = " { 

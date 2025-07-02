@@ -3,7 +3,8 @@ import { useQuery,useMutation } from '@tanstack/vue-query';
 import ApiService from "@/core/services/ApiService";
 import { useToast } from 'primevue/usetoast';
 import type { Orden, Orden_Trabajo, Orden_Miscelaneo,  TrabajoBitacora,
-    Producto, Requisicion, RequisicionDetalle, Permisos, Motivo, OrdenProducto } from '../interfaces/interfaces';
+    Producto, Requisicion, RequisicionDetalle, Permisos, Motivo, OrdenProducto,
+    OrdenBitacora } from '../interfaces/interfaces';
 import type { Cliente } from '@/modules/administracion/catalogos/clientes/interfaces/interfaces';
 import type { Tecnico } from '@/modules/taller/catalogos/tecnico/interfaces/interfaces';
 import type { Unidad } from '@/modules/taller/catalogos/unidad/interfaces/interfaces';
@@ -12,13 +13,11 @@ import type { FolioDocumento } from '@/modules/configuracion/folioDocumento/inte
 import type { TipoServicio } from '@/modules/taller/catalogos/tiposervicios/interfaces/interfaces';
 import type { Trabajo } from '@/modules/taller/catalogos/trabajos/interfaces/interfaces';
 import Swal from 'sweetalert2';
-import { getAssetPath } from "@/core/helpers/assets";
 import { useConfirm } from 'primevue/useconfirm';
 import { useAuthStore } from '@/stores/auth';
 import useUtilerias from '@/core/helpers/utilerias';
 import useOrdenFormatos from './useOrdenFormatos';
-import { Tooltip } from 'bootstrap';
-import VuePdfEmbed from 'vue-pdf-embed';
+
 
 const getregistro = async( id:number ):Promise<Orden> => {
     if (id > 0){
@@ -269,6 +268,8 @@ const useOrden = ( id: number ) => {
     const usuario_cancela   = ref<string>('');
     const motivo_cancela    = ref<string>('');
     const agruparDiversos   = ref<boolean>(false);
+    const costo_hora_trabajo= ref<number>(0);
+    const ordenBitacora     = ref<OrdenBitacora[]>([]);
 
     const { formatCurrency, formatNumber2Dec } = useUtilerias();
     const { PDFBlanco, PDFDatos, PDFDatosInterno } = useOrdenFormatos();
@@ -306,9 +307,12 @@ const useOrden = ( id: number ) => {
         tecnicos.value.splice(0);
         bahias.value.splice(0);
         motivos.value.splice(0);
+        ordenBitacora.value.splice(0);
         ApiService.setHeader();
         const response  = await ApiService.get2('Modulos/SearchByField/codigo/023',null);
         const modulo = response.data[0];
+        const respparametro = await ApiService.get2(`Parametro/GetByGrupoNombre/TALLER/costo_manoobra`,null);
+        costo_hora_trabajo.value = <number>respparametro.data.valor;
         const respfoliosdocto = await ApiService.get2(`FolioDocumento/SearchByModuloId/${modulo.id}`,null);
         foliosdoctos.value = <FolioDocumento[]>respfoliosdocto.data;
         const respTecnicos = await ApiService.get2('Tecnicos/listado',null);
@@ -484,6 +488,9 @@ const useOrden = ( id: number ) => {
                 const resptra = await ApiService.get2(`Orden/TrabajoByOrden/${registro.value.id}`,null);
                 trabajos_orden.value.splice(0);
                 trabajos_orden.value = <Orden_Trabajo[]>resptra.data;
+                orden_refacciones.value.splice(0);
+                const resprefacciones = await ApiService.get2(`Requisicion/GetOrdenProductosByOrden/${registro.value.id}`,null);
+                orden_refacciones.value = resprefacciones.data;
                 toast.add({
                     severity: 'success',
                     summary:    'Éxito',
@@ -506,6 +513,7 @@ const useOrden = ( id: number ) => {
 
     const closeDialogRefaccionDet = async (accion: string) => {
         if (accion == 'guardar') {
+            console.log(selectproducto.value);
             try {
                 if (selectproducto.value.id == 0) {
                     toast.add({
@@ -528,12 +536,14 @@ const useOrden = ( id: number ) => {
                 });
                 return;
             }
-            refaccion_orden.value.id = refacciones_orden.value.length;
-            refaccion_orden.value.id = Math.round((Math.random() * (300 - 1) + 1));
-            refaccion_orden.value.descripcion = selectproducto.value.descripcion;
-            refaccion_orden.value.codigo = selectproducto.value.codigo;
-            refaccion_orden.value.producto_id = selectproducto.value.id;
-            refaccion_orden.value.descripcion = selectproducto.value.descripcion;
+            refaccion_orden.value.id            = refacciones_orden.value.length;
+            refaccion_orden.value.id            = Math.round((Math.random() * (300 - 1) + 1));
+            refaccion_orden.value.descripcion   = selectproducto.value.descripcion;
+            refaccion_orden.value.codigo        = selectproducto.value.codigo;
+            refaccion_orden.value.producto_id   = selectproducto.value.id;
+            refaccion_orden.value.descripcion   = selectproducto.value.descripcion;
+            refaccion_orden.value.costo         = selectproducto.value.costo_reposicion;
+            refaccion_orden.value.costo_total   = (refaccion_orden.value.cantidad * refaccion_orden.value.costo);
             refacciones_orden.value.push(refaccion_orden.value);
         }
         selectproducto.value = null;
@@ -585,13 +595,14 @@ const useOrden = ( id: number ) => {
                 });
                 return;
             }
-            trabajo_orden.value.orden_id    = registro.value.id;
-            trabajo_orden.value.usuario_id  = store.user.id;
-            trabajo_orden.value.fecha       = new Date(),
-            trabajo_orden.value.trabajo_id  = selecttrabajo.value.id;
-            trabajo_orden.value.descripcion = selecttrabajo.value.descripción;
-            trabajo_orden.value.tecnico_id  = selectecnicotrabajo.value.id;
-            trabajo_orden.value.importe     = (selecttrabajo.value.precio * trabajo_orden.value.horas_estandar);
+            trabajo_orden.value.orden_id        = registro.value.id;
+            trabajo_orden.value.usuario_id      = store.user.id;
+            trabajo_orden.value.fecha           = new Date(),
+            trabajo_orden.value.trabajo_id      = selecttrabajo.value.id;
+            trabajo_orden.value.descripcion     = selecttrabajo.value.descripción;
+            trabajo_orden.value.tecnico_id      = selectecnicotrabajo.value.id;
+            trabajo_orden.value.importe         = (selecttrabajo.value.precio * trabajo_orden.value.horas_estandar);
+            trabajo_orden.value.horas_facturadas = trabajo_orden.value.horas_estandar
             try {
                 if (tipo_operacion_trabajo.value == 'Create') {
                     await ApiService.post('Orden/Trabajo',trabajo_orden.value);
@@ -849,7 +860,7 @@ const useOrden = ( id: number ) => {
             dialogEstatus.value = false;    
             return;
         }
-        if (tipo_estatus.value == 'Cancelada'){
+        if (tipo_estatus.value == 'Cancelada' || tipo_estatus.value == 'Garantia'){
             if (selectmotivo.value.id == 0) {
                 toast.add({
                     severity:   'error',
@@ -869,14 +880,19 @@ const useOrden = ( id: number ) => {
             const body = {
                 estatus:    tipo_estatus.value,
                 usuario_id: store.user.id,
-                motivo_id:  tipo_estatus.value == 'Cancelada' ? selectmotivo.value.id : 0,
-                notas:      tipo_estatus.value == 'Cancelada' ? registro.value.nota_cancelada : registro.value.nota_cerrada,
+                motivo_id:  (tipo_estatus.value == 'Cancelada' || tipo_estatus.value == 'Garantia') ? selectmotivo.value.id : 0,
+                notas:      (tipo_estatus.value == 'Cancelada' || tipo_estatus.value == 'Garantia') ? registro.value.nota_cancelada : registro.value.nota_cerrada,
             }
             await ApiService.put(`Orden/cambiaEstatus/${registro.value.id}`,body);
             const response = await ApiService.get2(`Orden/GetById/${registro.value.id}`,null);
             data.value = response.data;
             registro.value = response.data;
             Swal.close();
+            toast.add({
+                severity:   'success',
+                summary:    'Orden actualizada correctamente',
+                life:       3500,
+            });
         } catch (error) {
             Swal.close();
             toast.add({
@@ -957,6 +973,7 @@ const useOrden = ( id: number ) => {
     }
 
     const closeDialogFacturar = async (caso: string) => {
+        console.log(trabajos_orden_fact.value);
         if (caso == 'cerrar'){
             dialogFacturar.value = false;
             return;
@@ -1056,6 +1073,25 @@ const useOrden = ( id: number ) => {
                 life:       4000
             });
             dialogFacturar.value = false;
+        }
+    }
+
+    const onCellEditTrabajos = (event: any) => {
+        switch(event.field) {
+            case 'horas_facturadas':
+                if (parseFloat(event.newValue) > 0.00) {
+                    event.data[event.field] = event.newValue;
+                    event.data['importe'] = +(+event.newValue * costo_hora_trabajo.value).toFixed(2);
+                } else {
+                    toast.add({
+                        severity: 'warn',
+                        summary: 'Horas Facturadas',
+                        detail: 'Las horas facturadas deben ser mayor a 0',
+                        life: 3500,
+                    })
+                    event.preventDefault();
+                }
+                break;
         }
     }
 
@@ -1205,6 +1241,9 @@ const useOrden = ( id: number ) => {
                 const respmisc = await ApiService.get2(`Orden/MiscelaneoByOrden/${registro.value.id}`,null);
                 miscelaenos_orden.value.splice(0);
                 miscelaenos_orden.value = <Orden_Miscelaneo[]>respmisc.data;
+                const respbitacora = await ApiService.get2(`Orden/BitacoraByOrden/${registro.value.id}`,null);
+                ordenBitacora.value.splice(0);
+                ordenBitacora.value = <OrdenBitacora[]>respbitacora.data;
                 const resptra = await ApiService.get2(`Orden/TrabajoByOrden/${registro.value.id}`,null);
                 trabajos_orden.value.splice(0);
                 trabajos_orden.value = <Orden_Trabajo[]>resptra.data;
@@ -1323,6 +1362,8 @@ const useOrden = ( id: number ) => {
         motivo_cancela,
         agruparDiversos,
         selectclientefact,
+        costo_hora_trabajo,
+        ordenBitacora,
 
         newRegistro:        dataMutationNew.mutate,
         updateRegistro:     dataMutationUpdate.mutate,
@@ -1365,6 +1406,7 @@ const useOrden = ( id: number ) => {
         closeDialogFacturar,
         onCellEditComplete,
         abrirOrden,
+        onCellEditTrabajos
     }
 
 }

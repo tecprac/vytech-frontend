@@ -296,7 +296,7 @@ watch(isError, () => {
                         <i class="pi pi-user-plus" style="color: slateblue"></i>
                         Cliente
                     </Tab>
-                    <Tab v-if="registro.estatus == 'Timbrado' && documento_cfdi" :disabled="registro.id == 0" value="4" as="div" class="flex items-center gap-2" style="border-top-left-radius: 1rem; border-top-right-radius: 1rem;"
+                    <Tab v-if="documento_cfdi" :disabled="registro.id == 0" value="4" as="div" class="flex items-center gap-2" style="border-top-left-radius: 1rem; border-top-right-radius: 1rem;"
                         :pt="{root: { class: tabActiva == '4' ? 'bg-primary bg-opacity-25' : 'bg-secondary'}}" >
                         <i class="pi pi-qrcode" style="color: slateblue"></i>
                         Timbrado

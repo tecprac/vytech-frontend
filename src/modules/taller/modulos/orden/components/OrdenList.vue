@@ -214,7 +214,7 @@ permisos.value.forEach(element => {
                                 <Tag :value="item['estatus']"
                                     :severity="item['estatus'] == 'Cancelada' 
                                     ? 'danger' 
-                                    : item['estatus'] == 'Pausa' 
+                                    : (item['estatus'] == 'Pausa' || item['estatus'] == 'Garantia')
                                         ? 'warn' 
                                         : item['estatus'] == 'Abierta' 
                                             ? 'info' : 'success' ">

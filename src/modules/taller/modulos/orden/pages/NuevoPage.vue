@@ -86,6 +86,7 @@ const {
     refaccion_orden,
     refacciones_orden,
     isLoadingRequi,
+    costo_hora_trabajo,
 
     dataMutationNew,
     newRegistro,
@@ -385,7 +386,7 @@ const validarDatos = async (data: Orden) => {
                                     header="División" :pt="{ headerCell: { class: 'bg-secondary'} }"></Column>
                                 <Column field="talle_trabajo.trabajo"       header="Descripción" :pt="{ headerCell: { class: 'bg-secondary'} }"></Column>
                                 <Column field="talle_tecnico.tecnico"       header="Técnico" :pt="{ headerCell: { class: 'bg-secondary'} }"></Column>
-                                <Column field="horas_estandar"              header="Horas" :pt="{ headerCell: { class: 'bg-secondary'} }"></Column>
+                                <Column field="horas_estandar"              header="Hrs.Estandar" class="text-end" :pt="{ headerCell: { class: 'bg-secondary'} }"></Column>
                                 <Column field="estatus"                     header="Estatus" :pt="{ headerCell: { class: 'bg-secondary'} }"></Column>
                                 <Column class="w-24 !text-center"           header="Acciones" :pt="{ headerCell: { class: 'bg-secondary'} }">
                                     <template #body="{ data }">
