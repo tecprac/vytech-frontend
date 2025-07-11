@@ -198,21 +198,23 @@ const validarDatos = async (data: Orden) => {
             <div class="card-body border-0 pt-0 pb-0">
                 <Toolbar style="border-radius: 1rem; padding: 1rem 1rem 1rem 1.5rem;" class="bg-secondary" size="small" >
                     <template #start>
-                        <Button
-                            severity="secondary" label="Regresar" size="small"
-                            class="ms-2" raised icon="pi pi-arrow-left"
-                            @click="() => { router.push({name: 'orden'})}">
-                        </Button>
-                        <Button v-if="registro.id == 0" raised icon="pi pi-plus" class="ms-2" severity="success" label="Crear"
-                            @click="validarDatos(registro)" size="small" :loading="isAdding">
-                        </Button>
-                        <Button v-if="registro.id > 0" raised icon="pi pi-plus" class="ms-2" severity="success" label="Guardar"
-                            @click="validarDatos(registro)" size="small">
-                        </Button>
-                        <SplitButton v-if="registro.id > 0" raised icon="pi pi-file-pdf" class="ms-2"
-                            @click="generaPDF('Blanco')" severity="info" label="PDF Orden" size="small" :model="botonespdf" >
+                        <div class="flex items-center gap-2">
+                            <Button
+                                severity="secondary" label="Regresar" size="small"
+                                class="ms-2" raised icon="pi pi-arrow-left"
+                                @click="() => { router.push({name: 'orden'})}">
+                            </Button>
+                            <Button v-if="registro.id == 0" raised icon="pi pi-plus" class="ms-2" severity="success" label="Crear"
+                                @click="validarDatos(registro)" size="small" :loading="isAdding">
+                            </Button>
+                            <Button v-if="registro.id > 0" raised icon="pi pi-plus" class="ms-2" severity="success" label="Guardar"
+                                @click="validarDatos(registro)" size="small">
+                            </Button>
+                            <SplitButton v-if="registro.id > 0" raised icon="pi pi-file-pdf" class="ms-2"
+                                @click="generaPDF('Blanco')" severity="info" label="PDF Orden" size="small" :model="botonespdf" >
 
-                        </SplitButton>
+                            </SplitButton>
+                        </div>
                     </template>
                     <template #end></template>
                 </Toolbar>

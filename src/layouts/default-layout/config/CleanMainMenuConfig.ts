@@ -221,7 +221,7 @@ const MainMenuConfig: Array<MenuItem> = [
                         sub:[
                             {
                                 heading:    'Cotizaciones',
-                                route:      '/modules/taller/modulos/cotizaciones',
+                                route:      '/modules/taller/modulos/cotizacion',
                                 codigo:     '022',
                             },
                             {
@@ -406,7 +406,56 @@ const MainMenuConfig: Array<MenuItem> = [
                         route:      "/administracion/reportes",
                         seccion:    "ADMINISTRACION",
                         subseccion: "REPORTES",
-                        sub:[]
+                        sub:[
+                            {
+                                sectionTitle:   "catalogs",
+                                route:          "/modules/administracion/reportes/catalogos",
+                                seccion:        "ADMINISTRACION",
+                                subseccion:     "REPORTES",
+                                sub:[
+                                    {
+                                        heading:    'Emisores',
+                                        route:      '/modules/administracion/reportes/catalogos/emisores',
+                                        codigo:     '055',
+                                    },
+                                    {
+                                        heading:    'Clientes',
+                                        route:      '/modules/administracion/reportes/catalogos/clientes',
+                                        codigo:     '056',
+                                    },
+                                    {
+                                        heading:    'Agentes',
+                                        route:      '/modules/administracion/reportes/catalogos/agentes',
+                                        codigo:     '057',
+                                    },
+                                    {
+                                        heading:    'Unidades de Peso y Medida',
+                                        route:      '/modules/administracion/reportes/catalogos/unidadespeso',
+                                        codigo:     '054',
+                                    }
+                                ]
+                            },
+                            {
+                                heading:    'Factura a Clientes',
+                                route:      '/modules/administracion/reportes/facturaclientes',
+                                codigo:     '058',
+                            },
+                            {
+                                heading:    'Pago de Clientes',
+                                route:      '/modules/administracion/reportes/pagoclientes',
+                                codigo:     '059',
+                            },
+                            {
+                                heading:    'Nota Crédito a Clientes',
+                                route:      '/modules/administracion/reportes/notacreditoclientes',
+                                codigo:     '060',
+                            },
+                            {
+                                heading:    'Estado de Cuenta Cliente',
+                                route:      '/modules/administracion/reportes/estadoctaclientes',
+                                codigo:     '061',
+                            }
+                        ]
                     },
                 ],
             }

@@ -1054,6 +1054,26 @@ const useDocumento = (id: number ) => {
                     }
                 }
                 if (registro.value.estatus == 'Timbrado') {
+                                // Swal.fire({
+                                //     title: 'Consultando relaciones con otros documentos en el SAT...',
+                                //     showConfirmButton: false
+                                // });
+                                // Swal.showLoading();
+                                // const response = await ApiService.post(`AdmFactura/ConsultarRelacionesSAT/${registro.value.id}/I`,null);
+                                // Swal.close();
+                                // const respuesta = JSON.parse(response.data);
+                                // if (respuesta.codStatus == '2000'){
+                                //     Swal.fire({
+                                //         icon:   'warning',
+                                //         title:  'Respuesta SAT\nConsulta Relacionados',
+                                //         html:   respuesta.message+'\nNo es posible cancelar el documento',
+                                //         confirmButtonText: 'Cerrar',
+                                //         showConfirmButton: true,
+                                //     });
+                                //     return;
+                                // }
+                                // return;
+
                     try {
                         Swal.fire({
                             title: 'Consultando estatus del documento en el SAT...',
@@ -1504,6 +1524,11 @@ const useDocumento = (id: number ) => {
         if ( data.value ) {
             registro.value = {...data.value};
             if (id > 0) {
+                // const total:number = registro.value.total;
+                // const saldo:number = registro.value.saldo;
+                // registro.value.total = Math.round(total * 100) / 100;
+                // registro.value.saldo = Math.round(saldo * 100) / 100;
+                // console.log(registro.value);
                 isPending.value = true;
                 const paramemailfrom = await ApiService.get2(`Parametro/GetByGrupoNombre/TIMBRADO/correo_envia`,null);
                 mailOptions.value.from = paramemailfrom.data.valor;
@@ -1532,7 +1557,7 @@ const useDocumento = (id: number ) => {
                 selectmetodopago.value  = <MetodoPago>respmetodopago.data;
                 const respusocfd        = await ApiService.get2(`SatUsoCfdi/GetById/${registro.value.usocfdi_id}`,null);
                 selectusocfdi.value     = <UsoCFDI>respusocfd.data;
-                if (registro.value.estatus != 'Cancelada' && registro.value.estatus == 'Timbrado') await CalcularTototales();
+                if (registro.value.estatus != 'Cancelada' && registro.value.estatus != 'Timbrado') await CalcularTototales();
                 if (registro.value.estatus == 'Aplicado' || registro.value.estatus == 'Timbrado' || registro.value.estatus == 'Cancelado' ){
                     const responsecfdi  = await ApiService.get2(`AdmFactura/GetCFDI/${registro.value.id}/I`,null);
                     documento_cfdi.value = <Documento_CFDI>responsecfdi.data;

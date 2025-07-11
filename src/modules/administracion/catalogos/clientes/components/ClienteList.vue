@@ -55,6 +55,24 @@ const tableHeader   = ref([
         class:          "text-end"
     },
     {
+        columnLabel:    'Condiciones',
+        columnField:    'condiciones',
+        sortEnabled:    true,
+        class:          "text-start"
+    },
+    {
+        columnLabel:    'Dias Crédito',
+        columnField:    'dias_credito',
+        sortEnabled:    true,
+        class:          "text-end"
+    },
+    {
+        columnLabel:    'Limite',
+        columnField:    'limite_credito',
+        sortEnabled:    true,
+        class:          "text-end"
+    },
+    {
         columnLabel:    'Estado',
         columnField:    'activo',
         sortEnabled:    true,
@@ -135,6 +153,9 @@ permisos.value.forEach(element => {
                                 {{  item[col.columnField] ? 'ACTIVO' : 'INACTIVO'  }}
                             </template>
                             <template v-else-if="col.columnField=='saldo'">
+                                {{ formatCurrency(item[col.columnField]) }}
+                            </template>
+                            <template v-else-if="col.columnField=='limite_credito'">
                                 {{ formatCurrency(item[col.columnField]) }}
                             </template>
                             <template v-else-if="col.columnField=='razon_social'">

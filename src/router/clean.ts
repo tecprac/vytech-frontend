@@ -1623,7 +1623,53 @@ const routes: Array<RouteRecordRaw> = [
                         }
                     }
                 ]
-            }
+            },
+            // Menú Taller-Modulos Cotización
+            {
+                path: "/modules/taller/modulos/cotizacion",
+                name: "cotizacion",
+                component: () => import(/* webpackChunkName: "cotizacion" */ "@/modules/taller/modulos/cotizacion/layouts/CotizacionLayout.vue"),
+                meta: {
+                    pageTitle: "Cotización",
+                    breadcrumbs: ["Taller","Modulos","Cotización"],
+                    codigo: '022'
+                },
+                redirect: { name: 'cotizacionlist'},
+                children:[
+                    {
+                        path: 'cotizacionlist',
+                        name: 'cotizacionlist',
+                        component: () => import(/* webpackChunkName: "cotizacionlist" */ "@/modules/taller/modulos/cotizacion/pages/ListPage.vue"),
+                        meta: {
+                            pageTitle: "Cotizacion",
+                        }
+                    },
+                    {
+                        path: 'cotizacion-nuevo/',
+                        name: 'cotizacion-nuevo',
+                        component: () => import(/* webpackChunkName: "cotizacionnuevo" */ "@/modules/taller/modulos/cotizacion/pages/NuevoPage.vue"),
+                        meta: {
+                            pageTitle: "Cotizacion Nueva"
+                        }
+                    },
+                    {
+                        path: 'cotizacion-consulta/:id',
+                        name: 'cotizacion-consulta',
+                        component: () => import(/* webpackChunkName: "cotizacionconsulta" */ "@/modules/taller/modulos/cotizacion/pages/ConsultaPage.vue"),
+                        meta: {
+                            pageTitle: "Cotizacion Consulta"
+                        }
+                    },
+                    {
+                        path: 'cotizacion-edita/:id',
+                        name: 'cotizacion-edita',
+                        component: () => import(/* webpackChunkName: "cotizacionedita" */ "@/modules/taller/modulos/cotizacion/pages/EditaPage.vue"),
+                        meta: {
+                            pageTitle: "Cotizacion Editar"
+                        }
+                    },
+                ]
+            },            
         ],
     },
     {

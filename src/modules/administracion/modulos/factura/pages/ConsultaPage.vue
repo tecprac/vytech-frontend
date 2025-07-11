@@ -156,30 +156,32 @@ watch(isError, () => {
     </div>
     <div v-if="registro">
         <div class="card-body border-0 pt-0 pb-0">
-            <Toolbar style="border-radius: 1rem; padding: 1rem 1rem 1rem 1.5rem;" class="bg-secondary" size="small">
+            <Toolbar style="border-radius: 1rem; padding: 1rem 1rem 1rem 1.5rem;" class="bg-secondary">
                 <template #start>
-                    <Button
-                        severity="secondary" label="Regresar" size="small"
-                        class="ms-2" raised icon="pi pi-arrow-left"
-                        @click="botonRegresar">
-                    </Button>
-                    <Button v-if="registro.id > 0" raised icon="pi pi-sort-alt-slash" class="ms-2" severity="info" label="Relacionar CFDI's"
-                        size="small" @click="openDialogRelacionados"
-                        :badge="documentos_relacionados.length.toString()"
-                        :badge-severity="(documentos_relacionados.length == 0 ? 'info': 'danger')">
-                    </Button>
-                    <Button v-if="registro.id > 0 && registro.estatus != 'Timbrado'" raised icon="pi pi-qrcode" class="ms-2 text-black" severity="warn" label="Timbrar"
-                        size="small" @click="timbrarFactura" :loading="bTimbrando"
-                        :disabled="registro.estatus != 'SinAplicar'">
-                    </Button>
-                    <Button v-if="registro.id > 0 && (registro.estatus == 'SinAplicar' || (registro.estatus == 'Timbrado' && registro.saldo == registro.total)) " 
-                        raised icon="pi pi-times-circle" class="ms-2" severity="danger" label="Cancelar"
-                        size="small" @click="cancelarFactura" :loading="bTimbrando">
-                    </Button>
-                    <Button v-if="registro.id > 0 && registro.saldo != registro.total && registro.estatus != 'SinAplicar'" label="Movimientos"
-                        size="small"  class="ms-2" raised severity="info" icon="pi pi-dollar"
-                        @click="openDialogMovimientos">
-                    </Button>
+                    <div class="flex items-center gap-2">
+                        <Button
+                            severity="secondary" label="Regresar" size="small"
+                            class="ms-2" raised icon="pi pi-arrow-left"
+                            @click="botonRegresar">
+                        </Button>
+                        <Button v-if="registro.id > 0" raised icon="pi pi-sort-alt-slash" class="ms-2" severity="info" label="Relacionar CFDI's"
+                            size="small" @click="openDialogRelacionados"
+                            :badge="documentos_relacionados.length.toString()"
+                            :badge-severity="(documentos_relacionados.length == 0 ? 'info': 'danger')">
+                        </Button>
+                        <Button v-if="registro.id > 0 && registro.estatus != 'Timbrado'" raised icon="pi pi-qrcode" class="ms-2 text-black" severity="warn" label="Timbrar"
+                            size="small" @click="timbrarFactura" :loading="bTimbrando"
+                            :disabled="registro.estatus != 'SinAplicar'">
+                        </Button>
+                        <Button v-if="registro.id > 0 && (registro.estatus == 'SinAplicar' || (registro.estatus == 'Timbrado' && registro.saldo == registro.total)) " 
+                            raised icon="pi pi-times-circle" class="ms-2" severity="danger" label="Cancelar"
+                            size="small" @click="cancelarFactura" :loading="bTimbrando">
+                        </Button>
+                        <Button v-if="registro.id > 0 && registro.saldo != registro.total && registro.estatus != 'SinAplicar'" label="Movimientos"
+                            size="small"  class="ms-2" raised severity="info" icon="pi pi-dollar"
+                            @click="openDialogMovimientos">
+                        </Button>
+                    </div>
                 </template>
                 <template #end>
 
@@ -256,7 +258,7 @@ watch(isError, () => {
                     </InputNumber>
                 </div>
             </div>
-            <Tabs  value="0" @update:value="( value:string | number) => { tabActiva = value.toString() }">
+            <Tabs  value="0" @update:value="( value:string | number) => { tabActiva = value.toString() }" scrollable>
                 <TabList>
                     <Tab :disabled="registro.id == 0" value="0" as="div" class="flex items-center gap-2" style="border-top-left-radius: 1rem; border-top-right-radius: 1rem;"
                         :pt="{root: { class: tabActiva == '0' ? 'bg-primary bg-opacity-25' : 'bg-secondary'}}" >

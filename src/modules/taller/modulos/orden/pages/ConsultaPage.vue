@@ -230,44 +230,46 @@ const validarDatos = async (data: Orden) => {
             <div class="card-body border-0 pt-0 pb-0">
                 <Toolbar style="border-radius: 1rem; padding: 1rem 1rem 1rem 1.5rem;" class="bg-secondary" size="small" >
                     <template #start>
-                        <Button
-                            severity="secondary" label="Regresar" size="small"
-                            class="ms-2" rounded raised icon="pi pi-arrow-left"
-                            @click="() => { router.push({name: 'orden'})}">
-                        </Button>
-                        <SplitButton v-if="registro.id > 0" raised icon="pi pi-file-pdf" class="ms-2"
-                            @click="generaPDF('Blanco')" severity="info" label="PDF Orden" size="small" :model="botonespdf" >
-                        </SplitButton>
-                        <Button v-if="sPermisos.indexOf('Cerrar') >= 0 && (registro.estatus == 'Abierta' || registro.estatus == 'EnProceso')"
-                            severity="contrast" label="Cerrar" size="small"
-                            class="ms-2" rounded raised icon="pi pi-lock"
-                            @click="openDialogEstatus('Cerrada')">
-                        </Button>
-                        <Button v-if="sPermisos.indexOf('Cerrar') >= 0 && (registro.estatus == 'Abierta' || registro.estatus == 'EnProceso' || registro.estatus == 'Cerrada')"
-                            severity="warn" label="Garantía" size="small"
-                            class="ms-2 text-black" rounded raised icon="pi pi-lock"
-                            @click="openDialogEstatus('Garantia')">
-                        </Button>
-                        <Button v-if="sPermisos.indexOf('AbrirOrdenCerrada') >= 0 && (registro.estatus == 'Cerrada' )"
-                            severity="success" label="Abrir Orden" size="small"
-                            class="ms-2" rounded raised icon="pi pi-lock-open"
-                            @click="abrirOrden">
-                        </Button>
-                        <Button v-if="sPermisos.indexOf('AbrirOrdenFacturada') >= 0 && (registro.estatus == 'ParcialFacturada' || registro.estatus == 'Facturada')"
-                            severity="success" label="Abrir Orden" size="small"
-                            class="ms-2" rounded raised icon="pi pi-lock-open"
-                            @click="abrirOrden">
-                        </Button>
-                        <Button v-if="sPermisos.indexOf('Eliminar') >= 0 && (registro.estatus != 'Cancelada' && registro.estatus != 'Facturada' && registro.estatus != 'ParcialFacturada')"
-                            severity="danger" label="Cancelar" size="small"
-                            class="ms-2" rounded raised icon="pi pi-times"
-                            @click="openDialogEstatus('Cancelada')">
-                        </Button>
-                        <Button v-if="sPermisos.indexOf('Facturar') >= 0 &&  (registro.estatus != 'Cancelada' && registro.estatus != 'Facturada' && (registro.estatus == 'Cerrada' || registro.estatus == 'ParcialFacturada'))"
-                            severity="success" label="Facturar" size="small"
-                            class="ms-2" rounded raised icon="pi pi-dollar"
-                            @click="openDialogFacturar">
-                        </Button>
+                        <div class="flex items-center gap-2">
+                            <Button
+                                severity="secondary" label="Regresar" size="small"
+                                class="ms-2" rounded raised icon="pi pi-arrow-left"
+                                @click="() => { router.push({name: 'orden'})}">
+                            </Button>
+                            <SplitButton v-if="registro.id > 0" raised icon="pi pi-file-pdf" class="ms-2"
+                                @click="generaPDF('Blanco')" severity="info" label="PDF Orden" size="small" :model="botonespdf" >
+                            </SplitButton>
+                            <Button v-if="sPermisos.indexOf('Cerrar') >= 0 && (registro.estatus == 'Abierta' || registro.estatus == 'EnProceso')"
+                                severity="contrast" label="Cerrar" size="small"
+                                class="ms-2" rounded raised icon="pi pi-lock"
+                                @click="openDialogEstatus('Cerrada')">
+                            </Button>
+                            <Button v-if="sPermisos.indexOf('Cerrar') >= 0 && (registro.estatus == 'Abierta' || registro.estatus == 'EnProceso' || registro.estatus == 'Cerrada')"
+                                severity="warn" label="Garantía" size="small"
+                                class="ms-2 text-black" rounded raised icon="pi pi-lock"
+                                @click="openDialogEstatus('Garantia')">
+                            </Button>
+                            <Button v-if="sPermisos.indexOf('AbrirOrdenCerrada') >= 0 && (registro.estatus == 'Cerrada' )"
+                                severity="success" label="Abrir Orden" size="small"
+                                class="ms-2" rounded raised icon="pi pi-lock-open"
+                                @click="abrirOrden">
+                            </Button>
+                            <Button v-if="sPermisos.indexOf('AbrirOrdenFacturada') >= 0 && (registro.estatus == 'ParcialFacturada' || registro.estatus == 'Facturada')"
+                                severity="success" label="Abrir Orden" size="small"
+                                class="ms-2" rounded raised icon="pi pi-lock-open"
+                                @click="abrirOrden">
+                            </Button>
+                            <Button v-if="sPermisos.indexOf('Eliminar') >= 0 && (registro.estatus != 'Cancelada' && registro.estatus != 'Facturada' && registro.estatus != 'ParcialFacturada')"
+                                severity="danger" label="Cancelar" size="small"
+                                class="ms-2" rounded raised icon="pi pi-times"
+                                @click="openDialogEstatus('Cancelada')">
+                            </Button>
+                            <Button v-if="sPermisos.indexOf('Facturar') >= 0 &&  (registro.estatus != 'Cancelada' && registro.estatus != 'Facturada' && (registro.estatus == 'Cerrada' || registro.estatus == 'ParcialFacturada'))"
+                                severity="success" label="Facturar" size="small"
+                                class="ms-2" rounded raised icon="pi pi-dollar"
+                                @click="openDialogFacturar">
+                            </Button>
+                        </div>
                     </template>
                     <template #end></template>
                 </Toolbar>
