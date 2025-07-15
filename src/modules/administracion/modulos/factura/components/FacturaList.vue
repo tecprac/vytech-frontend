@@ -103,6 +103,12 @@ const tableHeader   = ref([
         class:          "text-center"
     },
     {
+        columnLabel:    'Metodo Pago',
+        columnField:    'sat_metodopago',
+        sortEnabled:    true,
+        class:          "text-center"
+    },
+    {
         columnLabel:    'UUID',
         columnField:    'uuid',
         sortEnabled:    true,
@@ -212,6 +218,9 @@ permisos.value.forEach(element => {
                             </template>
                             <template v-else-if="col.columnField=='fecha'">
                                 {{  convertTMZdatetime(item[col.columnField].toString() ) }}
+                            </template>
+                            <template v-else-if="col.columnField=='sat_metodopago'">
+                                {{  item[col.columnField]!['c_metodopago'] }}
                             </template>
                             <template v-else-if="col.columnField=='uuid'">
                                 {{  item[col.columnField] ? item[col.columnField].toString() : '' }}

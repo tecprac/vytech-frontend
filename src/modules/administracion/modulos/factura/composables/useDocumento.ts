@@ -1289,6 +1289,47 @@ const useDocumento = (id: number ) => {
         }
     }
 
+    const VistaPreviaPDF = async () => {
+        filePDF.value = null;
+        try {
+            toast.add({
+                severity:   'info',
+                summary:    "Descargando archivo pdf...",
+                group:      'waiting',
+            });
+            const body = {
+                usuario_id: store.user.id,
+                modulo_id:  51
+            }
+            const responsefile = await ApiService.post(`AdmFactura/VistaPrevia/${registro.value.id}`,body);
+            const filename = responsefile.data.filename;
+            const response = await ApiService.get2('download/temp/'+filename,{responseType: 'arraybuffer'});
+            if (response.status == 200) {
+                filePDF.value = response.data;
+                // const blob = new Blob([response.data], { type: 'application/pdf' });
+                pdfDocumento.value = URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+                toast.removeGroup('waiting');
+                dialogPDFVisor.value = true;
+            } else {
+                toast.removeGroup('waiting');
+                toast.add({
+                    severity:   "error",
+                    summary:    "Visualizar PDF",
+                    detail:     "No se logro descargar el archivo solicitado\n. Intentelo mas tarde.",
+                    life:       3500,
+                })
+            }    
+        } catch (error) {
+            toast.removeGroup('waiting');
+            toast.add({
+                severity:   "error",
+                summary:    "Visualizar PDF",
+                detail:     "No se logro descargar el archivo solicitado.\n Intentelo mas tarde.",
+                life:       3500,
+            });
+        }
+    }
+
     const VisualizarPDF = async (filename: string) => {
         if (filename) {
             toast.add({
@@ -1689,6 +1730,7 @@ const useDocumento = (id: number ) => {
         openDialogEmail,
         consultarEstatusSAT,
         cancelacionSAT,
+        VistaPreviaPDF,
     }
 }
 

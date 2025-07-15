@@ -159,9 +159,10 @@ const useUnidad = ( id: number) => {
     const imagenesURL           = ref<string[]>([]);
 
     const { isPending, data, isError } = useQuery({
-        queryKey:    ['unidad', id],
-        queryFn:    () => getregistro(id),
-        retry: false,
+        queryKey:               ['unidad', id],
+        queryFn:                () => getregistro(id),
+        refetchOnWindowFocus:   (id > 0 ? true : false),
+        retry:                  false,
     });
 
     onMounted(async () => {

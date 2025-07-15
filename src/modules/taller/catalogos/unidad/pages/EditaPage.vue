@@ -249,7 +249,7 @@ watch(isError, () => {
         <h2>Editar Unidad</h2>
     </div>
     <div v-if="registro"> 
-        <form @submit="onSubmit">
+        <form @submit.prevent="onSubmit">
             <div class="card-body border-0 pt-0 pb-0">
                 <div class="row mb-2">
                     <label for="id" class="col-form-label col-sm-2">ID</label>
@@ -649,8 +649,9 @@ watch(isError, () => {
                     @click="() => { router.push({name: 'unidad'})}">
                 </Button>
                 <Button
-                    severity="success" label="Guardar" type="submit"
+                    severity="success" label="Guardar"
                     class="me-4" raised icon="pi pi-check" :loading="isUpdating"
+                    @click="onSubmit"
                 >
                 </Button>
             </div>

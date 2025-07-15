@@ -130,6 +130,7 @@ const {
     cerrarVisualizarPDF,
     cerrarVisualizarXML,
     downloadXML,
+    VistaPreviaPDF,
 } = useDocumento(0);
 
 const validarDatos = async(data: Documento) => {
@@ -195,6 +196,9 @@ const validarDatos = async(data: Documento) => {
                             <Button v-if="registro.id > 0" raised icon="pi pi-plus" class="ms-2" severity="success" label="Guardar"
                                 @click="validarDatos(registro)" size="small"
                                 :disabled="registro.estatus != 'SinAplicar'">
+                            </Button>
+                            <Button v-if="registro.id > 0  && registro.estatus != 'Timbrado'" raised icon="pi pi-eye" class="ms-2" severity="help" label="Vista Previa"
+                                size="small" @click="VistaPreviaPDF">
                             </Button>
                             <Button v-if="registro.id > 0" raised icon="pi-sort-alt-slash" class="ms-2" severity="info" label="Relacionar CFDI's"
                                 size="small" @click="openDialogRelacionados"
@@ -1095,7 +1099,7 @@ const validarDatos = async(data: Documento) => {
         <template #footer>
             <Button
                 raised
-                @click="() => { pdfViewer.download(documento_cfdi?.filepdf) }"
+                @click="() => { pdfViewer.download(documento_cfdi ? documento_cfdi.filepdf : `VISTAPREVIA_FACT${registro.folio}${registro.serie}.pdf` ) }"
                 severity="info"
                 label="Descargar PDF"
                 :pt="{

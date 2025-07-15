@@ -420,7 +420,7 @@ const MainMenuConfig: Array<MenuItem> = [
                                     },
                                     {
                                         heading:    'Clientes',
-                                        route:      '/modules/administracion/reportes/catalogos/clientes',
+                                        route:      '/modules/administracion/reportes/catclientes',
                                         codigo:     '056',
                                     },
                                     {

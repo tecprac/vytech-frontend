@@ -277,6 +277,7 @@ const useOrden = ( id: number ) => {
     const { isPending, data, isError } = useQuery({
         queryKey:    ['orden', id],
         queryFn:    () => getregistro(id),
+        refetchOnWindowFocus:   (id > 0 ? true : false),
         retry: false,
     });
 

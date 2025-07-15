@@ -1418,6 +1418,69 @@ const routes: Array<RouteRecordRaw> = [
                     },
                 ]
             },
+            // Menú Administración-Reportes Factura Clientes
+            {
+                path: "/modules/administracion/reportes/facturaclientes",
+                name: "repfacturacliente",
+                component: () => import(/* webpackChunkName: "repfacturacliente" */ "@/modules/administracion/reportes/facturaclientes/layouts/RepFacturaClientes.vue"),
+                meta: {
+                    pageTitle:      'Reporte Facturas Cliente',
+                    breadcrumbs:    ['Reportes','Factura Clientes'],
+                },
+                redirect: { name: 'repfacturaclientesindex'},
+                children: [
+                    {
+                        path: 'repfacturaclientesindex',
+                        name: 'repfacturaclientesindex',
+                        component: () => import(/* webpackChunkName: "repfacturaclientesindex" */ "@/modules/administracion/reportes/facturaclientes/pages/RepFacturaClientesPage.vue"),
+                        meta: {
+                            pageTitle: 'Reporte Facturas de Clientes'
+                        }
+                    }
+                ]
+            },
+            // Menú Administración-Reportes Estado de Cuenta Clientes
+            {
+                path: "/modules/administracion/reportes/estadoctaclientes",
+                name: "repestadoctaclientes",
+                component: () => import(/* webpackChunkName: "repestadoctaclientes" */ "@/modules/administracion/reportes/estadoctaclientes/layouts/RepEdoCtaClientes.vue"),
+                meta: {
+                    pageTitle:      'Reporte Estado de Cuenta Cliente',
+                    breadcrumbs:    ['Reportes','Estado de Cuenta Clientes'],
+                },
+                redirect: { name: 'repestadoctaclientesindex'},
+                children: [
+                    {
+                        path: 'repestadoctaclientesindex',
+                        name: 'repestadoctaclientesindex',
+                        component: () => import(/* webpackChunkName: "repestadoctaclientesindex" */ "@/modules/administracion/reportes/estadoctaclientes/pages/RepEdoCtaClientesPage.vue"),
+                        meta: {
+                            pageTitle: 'Reporte Estado de Cuenta de Clientes'
+                        }
+                    }
+                ]
+            },
+            // Menú Administración-Reportes Catalogo Clientes
+            {
+                path: "/modules/administracion/reportes/catclientes",
+                name: "repcatcliente",
+                component: () => import(/* webpackChunkName: "repcatcliente" */ "@/modules/administracion/reportes/catclientes/layouts/RepCatClientes.vue"),
+                meta: {
+                    pageTitle:      'Reporte Catálogo Clientes',
+                    breadcrumbs:    ['Reportes','Catálogo Clientes'],
+                },
+                redirect: { name: 'repcatclientesindex'},
+                children: [
+                    {
+                        path: 'repcatclientesindex',
+                        name: 'repcatclientesindex',
+                        component: () => import(/* webpackChunkName: "repcatclientesindex" */ "@/modules/administracion/reportes/catclientes/pages/RepCatClientesPage.vue"),
+                        meta: {
+                            pageTitle: 'Reporte Catalogo de Clientes'
+                        }
+                    }
+                ]
+            },
             // Menú Almacén-Catalogos Tipo Inventario
             {
                 path: "/modules/almacen/catalogos/tipoinventario",

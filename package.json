@@ -1,6 +1,6 @@
 {
   "name": "vytechservices",
-  "version": "0.0.80",
+  "version": "0.0.84",
   "private": true,
   "type": "module",
   "scripts": {
@@ -73,6 +73,7 @@
     "vue-pdf-embed": "^2.1.2",
     "vue-router": "^4.5.1",
     "vue3-apexcharts": "^1.8.0",
+    "xlsx": "^0.18.5",
     "yup": "^1.6.1"
   },
   "devDependencies": {
