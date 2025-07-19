@@ -24,7 +24,6 @@ import { useAuthStore } from '@/stores/auth';
 import Toolbar from 'primevue/toolbar';
 import ProgressSpinner from 'primevue/progressspinner';
 import { useConfirm } from 'primevue/useconfirm';
-import ConfirmDialog from 'primevue/confirmdialog';
 import ConfirmPopup from 'primevue/confirmpopup';
 import Dialog from 'primevue/dialog';
 import Textarea from 'primevue/textarea';

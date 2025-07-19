@@ -6,10 +6,12 @@ import type { Cliente } from '@/modules/administracion/catalogos/clientes/interf
 import type { Propietario } from '@/modules/administracion/catalogos/propietario/interfaces/interfaces';
 import { useToast } from 'primevue/usetoast';
 import useUtilerias from '@/core/helpers/utilerias';
+import { parse } from 'date-fns';
 import * as XLSX from 'xlsx';
 
 const { formatNumber, formatCurrency,formatNumber2Dec,
-    formatDateTime,convertTMZtime, convertTMZdate } = useUtilerias();
+    formatDateTime,convertTMZtime, convertTMZdate, convertTMZdatetime,
+    diferenciaEnDias } = useUtilerias();
 
 const useRepEdoCtaClientes = () => {
     const toast             = useToast();
@@ -31,21 +33,18 @@ const useRepEdoCtaClientes = () => {
     const dialogPDFVisor    = ref<boolean>(false);
     const pdfViewer         = ref();
     const columnas          = ref([
-                                { field: 'fecha',               header: 'Fecha Alta'},
                                 { field: 'folio',               header: 'Folio'},
                                 { field: 'serie',               header: 'Serie'},
                                 { field: 'subtotal',            header: 'Subtotal'},
                                 { field: 'impuestos',           header: 'Impuestos'},
                                 { field: 'total',               header: 'Total'},
                                 { field: 'saldo',               header: 'Saldo'},
-                                { field: 'estatus',             header: 'Estatus'},
+                                { field: 'fecha',               header: 'Fecha Alta'},
                                 { field: 'fecha_vence',         header: 'Fecha Vence'},
+                                { field: 'estatus',             header: 'Estatus'},
                                 { field: 'observaciones',       header: 'Observaciones'},
                                 { field: 'adm_cliente',         header: 'Cliente'},
                                 { field: 'adm_propietario',     header: 'Emisor'},
-                                { field: 'conf_usuario',        header: 'Usario Registra'},
-                                { field: 'sat_metodopago',      header: 'Metodo Pago'},
-                                { field: 'sat_formapago',       header: 'Forma Pago'},
                             ]);
 
     onMounted( async () => {
@@ -110,10 +109,6 @@ const useRepEdoCtaClientes = () => {
         loading.value = false;
     }
 
-    const exportarCSV = (event: any) => {
-        dtdatos.value.exportCSV();
-    }
-
     const exportarExcel = async () => {
         try {
             toast.add({
@@ -124,23 +119,23 @@ const useRepEdoCtaClientes = () => {
             const data:any[] =[];
             for (let i = 0; i < registros.value.length; i++) {
                 const item = registros.value[i];
+                const fechaVence:Date = parse(String(item.fecha_vence),'yyyy-MM-dd', new Date());
                 data.push({
-                    Fecha: item.fecha, 
-                    Folio: item.folio,
-                    Serie: item.serie,
-                    Subtotal: item.subtotal,
-                    Impuestos: item.impuestos,
-                    Total: item.total,
-                    Saldo: item.saldo,
-                    Estatus: item.estatus,
-                    Fecha_Vence: item.fecha_vence,
-                    Observaciones: item.observaciones,
+                    Folio: item.folio,                      // 0
+                    Serie: item.serie,                      // 1
+                    Subtotal: item.subtotal,                // 2
+                    Impuestos: item.impuestos,              // 3
+                    Total: item.total,                      // 4
+                    Abonado: (+item.total - +item.saldo),   // 5
+                    Saldo: item.saldo,                      // 6
+                    Fecha: item.fecha,                      // 7
+                    Fecha_Vence: fechaVence.getDate().toString().padStart(2,'0')+'/'+(+fechaVence.getMonth()+1).toString().padStart(2,'0')+'/'+fechaVence.getFullYear(),          // 8
+                    Dias: diferenciaEnDias(parse(String(item.fecha_vence),'yyyy-MM-dd', new Date()), new Date())+1, // 9
+                    Estatus: item.estatus,                  // 10
+                    Observaciones: item.observaciones,      // 11
                     Cliente: item.adm_cliente.tipo_persona == 'Moral' ? item.adm_cliente.razon_social : item.adm_cliente.nombre ,
-                    ClienteRFC : item.adm_cliente.rfc,
+                    ClienteRFC : item.adm_cliente.rfc,      // 13
                     Emisor: item.adm_propietario.tipo_persona == 'Moral' ? item.adm_propietario.razon_social : item.adm_propietario.nombre,
-                    Usuario: item.conf_usuario.usuario,
-                    Metodopago: item.sat_metodopago.c_metodopago+' '+item.sat_metodopago.metodo_pago,
-                    Formapago: item.sat_formapago.c_formapago+' '+item.sat_formapago.forma_pago,
                 });
             }
             const ws = XLSX.utils.json_to_sheet(data);
@@ -149,24 +144,27 @@ const useRepEdoCtaClientes = () => {
             const range = XLSX.utils.decode_range(ws['!ref']!);
             for (let R = range.s.r + 1 ; R <= range.e.r; ++R) {
                 // Columna 'fecha' -convertir a formato de fecha
-                const fechacell = XLSX.utils.encode_cell({r: R, c: 0});
+                const fechacell = XLSX.utils.encode_cell({r: R, c: 7});
                 ws[fechacell].t = 'd';
-                ws[fechacell].z = 'dd/mm/yyy HH:mm';
-                const subtotalcell = XLSX.utils.encode_cell({r: R, c: 3});
+                ws[fechacell].z = 'dd/mm/yyyy HH:mm';
+                // const vencecell = XLSX.utils.encode_cell({r: R, c: 8});
+                // ws[vencecell].t = 'd';
+                // ws[vencecell].z = 'dd/mm/yyyy';
+                const subtotalcell = XLSX.utils.encode_cell({r: R, c: 2});
                 ws[subtotalcell].t = 'n';
                 ws[subtotalcell].z = '$#,##0.00';
-                const impuestoscell = XLSX.utils.encode_cell({r: R, c: 4});
+                const impuestoscell = XLSX.utils.encode_cell({r: R, c: 3});
                 ws[impuestoscell].t = 'n';
                 ws[impuestoscell].z = '$#,##0.00';
-                const totalcell = XLSX.utils.encode_cell({r: R, c: 5});
+                const totalcell = XLSX.utils.encode_cell({r: R, c: 4});
                 ws[totalcell].t = 'n';
                 ws[totalcell].z = '$#,##0.00';
+                const abonadocell = XLSX.utils.encode_cell({r: R, c: 5});
+                ws[abonadocell].t = 'n';
+                ws[abonadocell].z = '$#,##0.00';
                 const saldocell = XLSX.utils.encode_cell({r: R, c: 6});
                 ws[saldocell].t = 'n';
                 ws[saldocell].z = '$#,##0.00';
-                const vencecell = XLSX.utils.encode_cell({r: R, c: 8});
-                ws[vencecell].t = 'd';
-                ws[vencecell].z = 'dd/mm/yyy';
             }
 
             // Establecer ancho de columnas
@@ -175,7 +173,7 @@ const useRepEdoCtaClientes = () => {
             ];
 
             const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, ws, 'FacturaClientes');
+            XLSX.utils.book_append_sheet(workbook, ws, 'EstadoCuenta');
 
             const excelBuffer = XLSX.write(workbook, {
                 bookType: 'xlsx',
@@ -190,7 +188,7 @@ const useRepEdoCtaClientes = () => {
             const link = document.createElement('a');
             link.href = url;
             
-            link.download = `FacturaClientes${convertTMZtime(new Date().toISOString())}.xlsx`;
+            link.download = `EstadoCuenta_${selectcliente.value.rfc}_${convertTMZtime(new Date().toISOString())}.xlsx`;
             link.click();
             URL.revokeObjectURL(url);
             toast.removeGroup('waiting');
@@ -233,6 +231,7 @@ const useRepEdoCtaClientes = () => {
             }
             const responsefile = await ApiService.post(`AdmReportes/edocuentacliente`,body);
             const filename = responsefile.data.filename;
+            registros.value = responsefile.data.registros;
             const response = await ApiService.get2('download/temp/'+filename,{responseType: 'arraybuffer'});
             if (response.status == 200) {
                 filePDF.value = response.data;
@@ -293,7 +292,6 @@ const useRepEdoCtaClientes = () => {
         //Metodos
         GenerarReporte,
         formatNumber,
-        exportarCSV,
         exportarExcel,
         formatDateTime,
         formatNumber2Dec,
@@ -301,6 +299,7 @@ const useRepEdoCtaClientes = () => {
         buscarClientes,
         cerrarVisualizarPDF,
         convertTMZdate,
+        convertTMZdatetime,
         VistaPreviaPDF,
     }
 

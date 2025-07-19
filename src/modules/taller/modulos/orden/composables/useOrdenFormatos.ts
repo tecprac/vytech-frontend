@@ -54,7 +54,7 @@ const useOrdenFormatos = (  ) => {
         });
         // CONSTRUCCION PDF ENCABEZADO
         pdf.setLanguage("es-MX");
-        pdf.addImage(getAssetPath('media/logos/logo_prodiesel_small.png'),'PNG',20,10,150,0,'LogoVyTech');
+        pdf.addImage(getAssetPath('media/logos/logo_small.png'),'PNG',20,10,150,0,'Logo');
         pdf.addImage(getAssetPath('media/logos/tago_taller.jpg'),'jpg',430,10,150,0,'LogoTAGO');
         pdf.setFontSize(16);
         pdf.setTextColor(0,0,0);
@@ -506,7 +506,7 @@ const useOrdenFormatos = (  ) => {
         });
         // CONSTRUCCION PDF ENCABEZADO
         pdf.setLanguage("es-MX");
-        pdf.addImage(getAssetPath('media/logos/logo_prodiesel_small.png'),'PNG',20,10,150,0,'LogoVyTech');
+        pdf.addImage(getAssetPath('media/logos/logo_small.png'),'PNG',20,10,150,0,'Logo');
         pdf.addImage(getAssetPath('media/logos/tago_taller.jpg'),'jpg',430,10,150,0,'LogoTAGO');
         pdf.setFontSize(16);
         pdf.setTextColor(0,0,0);
@@ -573,7 +573,7 @@ const useOrdenFormatos = (  ) => {
         pdf.setFont("helvetica","bold");
         pdf.setFontSize(11);
         pdf.setTextColor(0,0,0);
-        pdf.text(`NOMBRE:     ${(data.adm_cliente!.tipo_persona == 'Moral' ? data.adm_cliente!.razon_social : (data.adm_cliente!.nombre)).substring(0, 48) }`,20,170)
+        pdf.text(`NOMBRE:     ${(data.adm_cliente!.tipo_persona == 'Moral' ? data.adm_cliente!.razon_social : (data.adm_cliente!.nombre)).substring(0, 48) }`,20,168)
         //LINEA NOMBRE
         pdf.setDrawColor(0);
         pdf.setDrawColor(0,0,0);
@@ -979,7 +979,7 @@ const useOrdenFormatos = (  ) => {
         });
         // CONSTRUCCION PDF ENCABEZADO
         pdf.setLanguage("es-MX");
-        pdf.addImage(getAssetPath('media/logos/logo_prodiesel_small.png'),'PNG',20,10,150,0,'LogoVyTech');
+        pdf.addImage(getAssetPath('media/logos/logo_small.png'),'PNG',20,10,150,0,'Logo');
         pdf.addImage(getAssetPath('media/logos/tago_taller.jpg'),'jpg',430,10,150,0,'LogoTAGO');
         pdf.setFontSize(16);
         pdf.setTextColor(0,0,0);
@@ -1104,6 +1104,7 @@ const useOrdenFormatos = (  ) => {
         pdf.setFontSize(10);
         pdf.setTextColor(0,0,0);
         pdf.text("PLACAS:",420,190);
+        pdf.text(`${data.talle_unidad!.placas}`,470,188);
         //LINEA PLACAS
         pdf.setDrawColor(0);
         pdf.setDrawColor(0,0,0);
@@ -1163,6 +1164,7 @@ const useOrdenFormatos = (  ) => {
         pdf.setFontSize(10);
         pdf.setTextColor(0,0,0);
         pdf.text("SERIE DE CHASIS:",20,230);
+        pdf.text(`${data.talle_unidad!.num_serie ? data.talle_unidad!.num_serie : ''}`,115,228);
         // LINEA CHASIS
         pdf.setDrawColor(0);
         pdf.setDrawColor(0,0,0);
@@ -1176,6 +1178,7 @@ const useOrdenFormatos = (  ) => {
         pdf.setFontSize(10);
         pdf.setTextColor(0,0,0);
         pdf.text("SERIE DE MOTOR:",300,230);
+        pdf.text(`${data.talle_unidad!.num_motor ? data.talle_unidad!.num_motor : ''}`,395,228);
         //LINEA SERIE MOTOR
         pdf.setDrawColor(0);
         pdf.setDrawColor(0,0,0);

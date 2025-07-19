@@ -202,7 +202,7 @@ const MainMenuConfig: Array<MenuItem> = [
                                     codigo:     '019',
                                 },
                                 {
-                                    heading:    'Trabajos',
+                                    heading:    'Trabajos/Servicios',
                                     route:      '/modules/taller/catalogos/trabajos',
                                     codigo:     '020',
                                 },

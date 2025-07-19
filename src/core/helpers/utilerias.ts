@@ -133,6 +133,17 @@ const useUtilerias = () => {
         return nuevaFecha;
     }
 
+    const diferenciaEnDias = (fechaInicio: Date, fechaFin: Date): number => {
+        const msPorDia = 1000 * 60 * 60 * 24;
+
+        // Normaliza ambas fechas a medianoche para evitar errores por horas
+        const inicio = new Date(fechaInicio.getFullYear(), fechaInicio.getMonth(), fechaInicio.getDate());
+        const fin = new Date(fechaFin.getFullYear(), fechaFin.getMonth(), fechaFin.getDate());
+
+        const diferenciaMs = fin.getTime() - inicio.getTime();
+        return Math.floor(diferenciaMs / msPorDia);
+    }
+
     const getLocalIP = async ():Promise<string> => {
         let ip = '127.0.0.1';
         await fetch('https://api.ipify.org?format=json')
@@ -158,6 +169,7 @@ const useUtilerias = () => {
         convertTMZdatetime,
         restardias,
         sumarDias,
+        diferenciaEnDias,
         getLocalIP,
     }
 

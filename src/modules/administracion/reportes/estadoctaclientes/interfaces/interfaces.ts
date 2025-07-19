@@ -1,5 +1,6 @@
 export interface Documento {
     id:             number,
+    tipo_documento: string,
     folio:          number,
     serie:          string,
     fecha:          Date,

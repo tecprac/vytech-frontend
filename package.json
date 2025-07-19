@@ -1,6 +1,6 @@
 {
   "name": "vytechservices",
-  "version": "0.0.84",
+  "version": "0.0.85",
   "private": true,
   "type": "module",
   "scripts": {
@@ -38,6 +38,7 @@
     "bootstrap-icons": "^1.13.1",
     "clipboard": "^2.0.11",
     "core-js": "^3.42.0",
+    "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
     "deepmerge": "^4.3.1",
     "dropzone": "^5.9.3",

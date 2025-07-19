@@ -514,7 +514,6 @@ const useOrden = ( id: number ) => {
 
     const closeDialogRefaccionDet = async (accion: string) => {
         if (accion == 'guardar') {
-            console.log(selectproducto.value);
             try {
                 if (selectproducto.value.id == 0) {
                     toast.add({
@@ -974,7 +973,6 @@ const useOrden = ( id: number ) => {
     }
 
     const closeDialogFacturar = async (caso: string) => {
-        console.log(trabajos_orden_fact.value);
         if (caso == 'cerrar'){
             dialogFacturar.value = false;
             return;

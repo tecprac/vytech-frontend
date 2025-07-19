@@ -10,6 +10,7 @@ import Button from 'primevue/button';
 import SplitButton from 'primevue/splitbutton';
 import Toast from 'primevue/toast';
 import Checkbox from 'primevue/checkbox';
+import DatePicker from 'primevue/datepicker';
 import Tabs from 'primevue/tabs';
 import TabList from 'primevue/tablist';
 import Tab from 'primevue/tab';
@@ -45,7 +46,7 @@ const router  = useRouter();
 const toast   = useToast();
 const auth    = useAuthStore();
 
-const { sumarDias,formatCurrency,convertTMZdatetime } = useUtilerias();
+const { sumarDias,formatCurrency,convertTMZdatetime, convertTMZdate } = useUtilerias();
 
 const {
     isPending,
@@ -81,6 +82,10 @@ const {
     pdfDocumento,
     pdfViewer,
     botonespdf,
+    selectunidad,
+    unidadfiltradas,
+    fecha,
+    fecha_vence,
     
     updateRegistro,
     cambiaDocumento,
@@ -88,6 +93,7 @@ const {
     buscarClientes,
     buscarProductos,
     buscarTrabajos,
+    buscarUnidad,
     seleccionCliente,
     seleccionDetalle,
     openDialogDetalle,
@@ -133,7 +139,9 @@ const validarDatos = async(data: Cotizacion) => {
     data.agente_id          = selectagente.value.id;    
     data.moneda_id          = selectmoneda.value.id;
     data.propietario_id     = selectpropietario.value.id;
-    data.fecha              = new Date();
+    data.fecha              = fecha.value;
+    data.fecha_vence        = fecha_vence.value;
+    data.unidad_id          = selectunidad.value ? selectunidad.value.id : 0 ;
     updateRegistro(data);
 }
 
@@ -236,18 +244,50 @@ const validarDatos = async(data: Cotizacion) => {
                     </div>
                 </div>
                 <div class="row mb-2">
-                    <label for="nombrecliente" class="col-form-label col-sm-2">Nombre Cliente</label>
-                    <div class="col-sm-10">
+                    <label for="nombrecliente" class="col-form-label col-sm-1">
+                        Cliente
+                        <i class="pi pi-info-circle" style="font-size: 1rem;"
+                                    v-tooltip.top="'Captura del nombre del cliente no registrado previamente en el catálogo'" />
+                    </label>
+                    <div class="col-sm-5">
                         <InputText
                             v-model="registro.nombre_cliente" fluid>
                         </InputText>
                     </div>
-                </div>
-                <div class="row mb-2">
-                    <label for="atencion" class="col-form-label col-sm-2">Atención a:</label>
-                    <div class="col-sm-10">
+                    <label for="atencion" class="col-form-label col-sm-1">
+                        Atención
+                        <i class="pi pi-info-circle" style="font-size: 1rem;"
+                                    v-tooltip.top="'Nombre de la persona o departamento a quien va dirigida la cotización'" />
+                    </label>
+                    <div class="col-sm-5">
                         <InputText
                             v-model="registro.atencion" fluid>
+                        </InputText>
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <label for="unidad" class="required col-form-label col-sm-1">Unidad</label>
+                    <div class="col-sm-5">
+                        <AutoComplete
+                            v-model="selectunidad"
+                            :option-label="(data) => {return data.numeroeco+' PLACAS:'+data.placas+' Tipo: '+data.talle_tipo_unidad.tipo_unidad+' Marca: '+data.talle_marca.marca}"
+                            :suggestions="unidadfiltradas"
+                            force-selection :chip-Icon="true"
+                            auto-option-focus
+                            empty-search-message="No existen unidades que coincidan"
+                            empty-selection-message="No se ha seleccionado una unidad"
+                            placeholder="Capture una unidad por NoEconomico, Placas o Numero de Serie"
+                            @complete="buscarUnidad" fluid>
+                        </AutoComplete>
+                    </div>
+                    <label for="datos_unidad" class="col-form-label col-sm-1">
+                        Unidad
+                        <i class="pi pi-info-circle" style="font-size: 1rem;"
+                                    v-tooltip.top="'Datos de la unidad no registrada en el catálogo'" />
+                    </label>
+                    <div class="col-sm-5">
+                        <InputText
+                            v-model="registro.datos_unidad" fluid>
                         </InputText>
                     </div>
                 </div>
@@ -399,7 +439,27 @@ const validarDatos = async(data: Cotizacion) => {
                                         :disabled="registro.estatus != 'SinAutorizar'">
                                     </Select>
                                 </div>
-                            </div>
+                                <label for="emisor" class="required col-form-label col-sm-1">
+                                    Fecha
+                                </label>
+                                <div class="col-sm-2">
+                                    <DatePicker
+                                        v-model="fecha" input-id="icondisplay" date-format="dd/mm/yy"
+                                        showIcon fluid :show-on-focus="false" 
+                                        :pt="{ pcInputText: { root:{ class: 'text-end'}} }">
+                                    </DatePicker>
+                                </div>
+                                <label for="emisor" class="col-form-label col-sm-1">
+                                    Vence
+                                </label>
+                                <div class="col-sm-2">
+                                    <DatePicker
+                                        v-model="fecha_vence" input-id="icondisplay" date-format="dd/mm/yy"
+                                        showIcon fluid :show-on-focus="false" 
+                                        :pt="{ pcInputText: { root:{ class: 'text-end'}} }">
+                                    </DatePicker>
+                                </div>
+                            </div>                            
                         </TabPanel>
                     </TabPanels>
                 </Tabs>
@@ -465,7 +525,7 @@ const validarDatos = async(data: Cotizacion) => {
             </div>
         </form>
     </div>
-<!-- DIALOGO DOCUMENTO DETALLE -->
+    <!-- DIALOGO DOCUMENTO DETALLE -->
     <Dialog
         v-model:visible="dialogDetalle"
         modal :closable="false"
@@ -698,7 +758,7 @@ const validarDatos = async(data: Cotizacion) => {
         <template #footer>
             <Button
                 raised
-                @click="() => { pdfViewer.download(registro.filepdf) }"
+                @click="() => { pdfViewer.download(`COT_${registro.folio}${registro.serie}_${convertTMZdate(String(fecha))}`) }"
                 severity="info"
                 label="Descargar PDF"
                 :pt="{

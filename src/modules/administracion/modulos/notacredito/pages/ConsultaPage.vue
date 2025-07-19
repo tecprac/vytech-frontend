@@ -274,7 +274,7 @@ watch(isError, () => {
                     </InputNumber>
                 </div>
             </div>
-            <Tabs  value="0" @update:value="( value:string | number) => { tabActiva = value.toString() }">
+            <Tabs  value="0" @update:value="( value:string | number) => { tabActiva = value.toString() }" scrollable>
                 <TabList>
                     <Tab :disabled="registro.id == 0" value="0" as="div" class="flex items-center gap-2" style="border-top-left-radius: 1rem; border-top-right-radius: 1rem;"
                         :pt="{root: { class: tabActiva == '0' ? 'bg-primary bg-opacity-25' : 'bg-secondary'}}" >
@@ -1318,7 +1318,7 @@ watch(isError, () => {
             >
             </Button>
         </template>
-    </Dialog>        
+    </Dialog>
     <!-- DIALOGO APLICACION DE SALDOS DETALLE-->
     <Dialog 
         v-model:visible="dialogAplicaSaldo_det"
@@ -1611,7 +1611,7 @@ watch(isError, () => {
             >
             </Button>
         </template>
-    </Dialog>    
+    </Dialog>
     <Toast />
     <Toast group="waiting">
         <template #message="slotProps">

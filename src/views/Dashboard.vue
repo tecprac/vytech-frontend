@@ -21,6 +21,7 @@ interface concentrado {
     estatus: string,
     ordenes: number,
 }
+
 interface tecnicos {
     tecnico_id: number,
     nombre:     string,
@@ -532,7 +533,7 @@ export default defineComponent({
                                 <h2 class="fs-2x fw-bold mt-10 text-primary">VYTechServices</h2>
                             </div>
                             <div class="col-sm-6">
-                                <img :src="getAssetPath('media/logos/logo_prodiesel_ok.png')" alt="Logo ProDiesel" width="200px" class="img-fluid">
+                                <img :src="getAssetPath('media/logos/logo_ok.png')" alt="Logo" width="200px" class="img-fluid">
                             </div>
                         </div>
                     </div>
@@ -585,9 +586,6 @@ export default defineComponent({
                         ></StatisticsWidget5>
                         </div>
                     </div>
-                    <!-- <div class="col-sm-12 text-center">
-                        <img :src="getAssetPath('media/logos/logo_prodiesel_ok.png')" alt="Logo ProDiesel" width="800px" class="img-fluid">
-                    </div> -->
                 </div>
             </div>
         </div>

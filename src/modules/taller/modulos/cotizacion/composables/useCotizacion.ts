@@ -10,11 +10,13 @@ import type { Agente } from '@/modules/administracion/catalogos/agente/interface
 import type { Producto } from '@/modules/almacen/catalogos/producto/interfaces/interfaces';
 import type { Trabajo } from '@/modules/taller/catalogos/trabajos/interfaces/interfaces';
 import type { SatMoneda } from '@/modules/sat/catalogos/moneda/interfaces/interfaces';
+import type { Unidad } from '@/modules/taller/catalogos/unidad/interfaces/interfaces';
 import Swal from 'sweetalert2';
 import { useConfirm } from 'primevue/useconfirm';
 import { useAuthStore } from '@/stores/auth';
 import useUtilerias from '@/core/helpers/utilerias';
 import { useRouter } from 'vue-router';
+import { parse } from 'date-fns';
 import useCotizacionFormatos from './useCotizacionFormatos';
 
 const getregistro = async( id:number ):Promise<Cotizacion> => {
@@ -38,6 +40,7 @@ const getregistro = async( id:number ):Promise<Cotizacion> => {
             fecha_vence:        new Date(),
             unidad_registrada:  false,
             unidad_id:          0,
+            datos_unidad:       '',
             email_envio:        '',
             observaciones:      '',
             descuentos:         0,
@@ -99,6 +102,7 @@ const useCotizacion = (id: number) => {
                                     fecha_vence:        new Date(),
                                     unidad_registrada:  false,
                                     unidad_id:          0,
+                                    datos_unidad:       '',
                                     email_envio:        '',
                                     observaciones:      '',
                                     descuentos:         0,
@@ -252,9 +256,13 @@ const useCotizacion = (id: number) => {
     const dialogMovimientos     = ref<boolean>(false);
     const dialogPDFVisor        = ref<boolean>(false);
     const dialogEnviarMail      = ref<boolean>(false);
+    const selectunidad          = ref();
+    const unidadfiltradas       = ref<Unidad[]>([]);
     const pdfDocumento          = ref();
     const filePDF               = ref(null);
     const pdfViewer             = ref();
+    const fecha                 = ref<Date>(new Date());
+    const fecha_vence           = ref<Date>(new Date());
     const mailOptions           = ref<MailOptions>({
                                     to:         '',
                                     from:       '',
@@ -265,8 +273,10 @@ const useCotizacion = (id: number) => {
     const permisos              = ref<Permisos[]>([]);
     const sPermisos             = ref<string>('');
 
-    const { formatCurrency, formatNumber2Dec } = useUtilerias();
-    const { PDFNormal,PDFObservaciones } = useCotizacionFormatos();
+    const { formatCurrency, formatNumber2Dec, 
+        convertTMZdate, convertTMZdatetime, 
+        formatDate, formatDateTime } = useUtilerias();
+    const { PDFNormal } = useCotizacionFormatos();
     
     const { isPending, data, isError } = useQuery({
             queryKey:               ['cotizacion', id],
@@ -368,6 +378,14 @@ const useCotizacion = (id: number) => {
             clientesfiltrados.value = clientes;
         }
     }
+
+    const buscarUnidad = async (event:any) => {
+        if (event.query.trim().length) {
+            const response = await ApiService.get2(`Unidades/SearchByText/${event.query}`,null);
+            const unidades:Unidad[] = response.data;
+            unidadfiltradas.value = unidades;
+        }
+    }    
 
     const buscarProductos = async (event:any) => {
         if (event.query.trim().length) {
@@ -876,6 +894,10 @@ const useCotizacion = (id: number) => {
             registro.value = {...data.value};
             if (id > 0) {
                 isPending.value = true;
+                fecha.value = registro.value.fecha;
+                fecha_vence.value = registro.value.fecha_vence;
+                const aFecha:string[] = String(fecha_vence.value).split('-');
+                fecha_vence.value = new Date(parseInt(aFecha[0]),parseInt(aFecha[1])-1,parseInt(aFecha[2]));
                 const paramemailfrom = await ApiService.get2(`Parametro/GetByGrupoNombre/TIMBRADO/correo_envia`,null);
                 mailOptions.value.from = paramemailfrom.data.valor;
                 const paramemailbbc = await ApiService.get2(`Parametro/GetByGrupoNombre/TIMBRADO/correo_confirmacion`,null);
@@ -890,6 +912,10 @@ const useCotizacion = (id: number) => {
                 selectpropietario.value = <Propietario>respemisor.data;
                 const respagente        = await ApiService.get2(`AdmAgente/GetById/${registro.value.agente_id}`,null);
                 selectagente.value      = <Agente>respagente.data;
+                if (registro.value.unidad_id! > 0){
+                    const respunidad = await ApiService.get2(`Unidades/GetById/${registro.value.unidad_id}`,null);
+                    selectunidad.value = <Unidad>respunidad.data;
+                }
                 if (registro.value.estatus != 'Cancelada' ) await CalcularTototales();
                 isPending.value = false;                
             }
@@ -902,13 +928,25 @@ const useCotizacion = (id: number) => {
             summary:    `Generando documento ...`,
             group:      'waiting',
         });
-        generandopdf.value = true;
-        const response = await ApiService.get2(`Cotizacion/GetByIdFormato/${registro.value.id}`,null);
-        pdfDocumento.value = tipo == 'Normal' ? PDFNormal(response.data)
-                                                : PDFObservaciones(response.data);
-        toast.removeGroup('waiting');
-        dialogPDFVisor.value = true;
-        generandopdf.value = false;
+        try {
+            generandopdf.value = true;
+            const response = await ApiService.get2(`Cotizacion/GetByIdFormato/${registro.value.id}`,null);
+            const resunidad = registro.value.unidad_id == 0 ? null : await ApiService.get2(`Unidades/GetById/${registro.value.unidad_id}`,null);
+            pdfDocumento.value = tipo == 'Normal' ? PDFNormal(response.data,resunidad,false)
+                                                    : PDFNormal(response.data,resunidad,true);
+            toast.removeGroup('waiting');
+            dialogPDFVisor.value = true;
+            generandopdf.value = false;    
+        } catch (error) {
+            toast.removeGroup('waiting');
+            toast.add({
+                severity:   'error',
+                summary:    `Se genero un error al consultar los datos`,
+                detail:     error,
+                life:       3500,
+            });            
+        }
+        
     }
 
     return {
@@ -945,6 +983,10 @@ const useCotizacion = (id: number) => {
         dialogMovimientos,
         mailOptions,
         botonespdf,
+        selectunidad,
+        unidadfiltradas,
+        fecha,
+        fecha_vence,
 
         newRegistro:        dataMutationNew.mutate,
         updateRegistro:     dataMutationUpdate.mutate,
@@ -961,6 +1003,7 @@ const useCotizacion = (id: number) => {
         cambiaDocumento,
         cambiaMoneda,
         buscarClientes,
+        buscarUnidad,
         buscarProductos,
         buscarTrabajos,
         generaPDF,

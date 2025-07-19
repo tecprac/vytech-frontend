@@ -5,11 +5,9 @@ import type { Cotizacion } from '@/modules/taller/modulos/cotizacion/interfaces/
 import useCotizacion from '../composables/useCotizacion';
 import InputText from 'primevue/inputtext';
 import InputNumber from 'primevue/inputnumber';
-import InputMask from 'primevue/inputmask';
 import Button from 'primevue/button';
 import SplitButton from 'primevue/splitbutton';
 import Toast from 'primevue/toast';
-import Checkbox from 'primevue/checkbox';
 import Tabs from 'primevue/tabs';
 import TabList from 'primevue/tablist';
 import Tab from 'primevue/tab';
@@ -19,6 +17,7 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import AutoComplete from 'primevue/autocomplete';
 import Select from 'primevue/select';
+import DatePicker from 'primevue/datepicker';
 import { useToast } from 'primevue/usetoast';
 import { useAuthStore } from '@/stores/auth';
 import Toolbar from 'primevue/toolbar';
@@ -79,6 +78,10 @@ const {
     pdfDocumento,
     pdfViewer,
     botonespdf,
+    selectunidad,
+    unidadfiltradas,
+    fecha,
+    fecha_vence,
     
     newRegistro,
     updateRegistro,
@@ -87,6 +90,7 @@ const {
     buscarClientes,
     buscarProductos,
     buscarTrabajos,
+    buscarUnidad,
     seleccionCliente,
     seleccionDetalle,
     openDialogDetalle,
@@ -127,7 +131,9 @@ const validarDatos = async(data: Cotizacion) => {
     data.agente_id          = selectagente.value.id;    
     data.moneda_id          = selectmoneda.value.id;
     data.propietario_id     = selectpropietario.value.id;
-    data.fecha              = new Date();
+    data.fecha              = fecha.value;
+    data.fecha_vence        = fecha_vence.value;
+    data.unidad_id          = selectunidad.value ? selectunidad.value.id : 0 ;
     if (data.id == 0)
         newRegistro(data);
     if (data.id > 0)
@@ -237,18 +243,50 @@ const validarDatos = async(data: Cotizacion) => {
                     </div>
                 </div>
                 <div class="row mb-2">
-                    <label for="nombrecliente" class="col-form-label col-sm-2">Nombre Cliente</label>
-                    <div class="col-sm-10">
+                    <label for="nombrecliente" class="col-form-label col-sm-1">
+                        Cliente
+                        <i class="pi pi-info-circle" style="font-size: 1rem;"
+                                    v-tooltip.top="'Captura del nombre del cliente no registrado previamente en el catálogo'" />
+                    </label>
+                    <div class="col-sm-5">
                         <InputText
                             v-model="registro.nombre_cliente" fluid>
                         </InputText>
                     </div>
-                </div>
-                <div class="row mb-2">
-                    <label for="atencion" class="col-form-label col-sm-2">Atención a:</label>
-                    <div class="col-sm-10">
+                    <label for="atencion" class="col-form-label col-sm-1">
+                        Atención
+                        <i class="pi pi-info-circle" style="font-size: 1rem;"
+                                    v-tooltip.top="'Nombre de la persona o departamento a quien va dirigida la cotización'" />
+                    </label>
+                    <div class="col-sm-5">
                         <InputText
                             v-model="registro.atencion" fluid>
+                        </InputText>
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <label for="unidad" class="required col-form-label col-sm-1">Unidad</label>
+                    <div class="col-sm-5">
+                        <AutoComplete
+                            v-model="selectunidad"
+                            :option-label="(data) => {return data.numeroeco+' PLACAS:'+data.placas+' Tipo: '+data.talle_tipo_unidad.tipo_unidad+' Marca: '+data.talle_marca.marca}"
+                            :suggestions="unidadfiltradas"
+                            force-selection :chip-Icon="true"
+                            auto-option-focus
+                            empty-search-message="No existen unidades que coincidan"
+                            empty-selection-message="No se ha seleccionado una unidad"
+                            placeholder="Capture una unidad por NoEconomico, Placas o Numero de Serie"
+                            @complete="buscarUnidad" fluid>
+                        </AutoComplete>
+                    </div>
+                    <label for="datos_unidad" class="col-form-label col-sm-1">
+                        Unidad
+                        <i class="pi pi-info-circle" style="font-size: 1rem;"
+                                    v-tooltip.top="'Datos de la unidad no registrada en el catálogo'" />
+                    </label>
+                    <div class="col-sm-5">
+                        <InputText
+                            v-model="registro.datos_unidad" fluid>
                         </InputText>
                     </div>
                 </div>
@@ -399,6 +437,16 @@ const validarDatos = async(data: Cotizacion) => {
                                         placeholder="Seleccione un Almacén"
                                         :disabled="registro.estatus != 'SinAutorizar'">
                                     </Select>
+                                </div>
+                                <label for="emisor" class="required col-form-label col-sm-2">
+                                    Fecha
+                                </label>
+                                <div class="col-sm-2">
+                                    <DatePicker
+                                        v-model="fecha" input-id="icondisplay" date-format="dd/mm/yy"
+                                        showIcon fluid :show-on-focus="false" 
+                                        :pt="{ pcInputText: { root:{ class: 'text-end'}} }">
+                                    </DatePicker>
                                 </div>
                             </div>
                         </TabPanel>

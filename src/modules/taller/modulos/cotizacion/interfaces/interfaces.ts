@@ -12,6 +12,7 @@ export interface Cotizacion {
     atencion?:          string,
     unidad_registrada:  boolean,
     unidad_id?:         number,
+    datos_unidad:       string,
     email_envio:        string,
     fecha_vence:        Date,
     observaciones?:     string,

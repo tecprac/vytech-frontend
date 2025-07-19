@@ -57,13 +57,9 @@ provide(THEME_KEY,'light');
 const {
     // Propiedades
     loading,
-    fechaini,
-    fechafin,
     dtdatos,
     selectcliente,
     clientesfiltrados,
-    filtro_saldo,
-    filtros_saldo,
     tabActiva,
     registros,
     columnas,
@@ -74,9 +70,7 @@ const {
     pdfViewer,
 
     //Metodos
-    GenerarReporte,
     formatNumber,
-    exportarCSV,
     exportarExcel,
     formatDateTime,
     formatNumber2Dec,
@@ -84,6 +78,7 @@ const {
     buscarClientes,
     cerrarVisualizarPDF,
     convertTMZdate,
+    convertTMZdatetime,
     VistaPreviaPDF,
 } = useRepEdoCtaClientes();
 
@@ -182,10 +177,10 @@ const {
                                         {{ formatCurrency(+data[col.field]) }}
                                 </template>
                                 <template v-else-if="col.field == 'fecha'">
-                                        {{ formatDateTime(data[col.field]) }}
+                                        {{ convertTMZdatetime(data[col.field]) }}
                                 </template>
-                                <template v-else-if="col.field == 'fecha_vende'">
-                                        {{ formatDateTime(data[col.field],'SHOWNOTIME') }}
+                                <template v-else-if="col.field == 'fecha_vence'">
+                                        {{ convertTMZdate(data[col.field]) }}
                                 </template>
                                 <template v-else-if="col.field == 'adm_cliente'">
                                         {{ data[col.field]['tipo_persona'] == 'Moral' ?  data[col.field]['razon_social'] : data[col.field]['nombre'] }}

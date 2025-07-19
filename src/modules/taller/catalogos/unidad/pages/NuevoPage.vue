@@ -22,7 +22,7 @@ import { useToast } from 'primevue/usetoast';
 import { useAuthStore } from '@/stores/auth';
 import FileUpload from 'primevue/fileupload';
 import ProgressSpinner from 'primevue/progressspinner';
-import { Form, useForm } from 'vee-validate';
+import { useForm } from 'vee-validate';
 import * as yup from 'yup';
 
 const router = useRouter();

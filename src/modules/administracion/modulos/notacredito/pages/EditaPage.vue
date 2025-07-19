@@ -1163,7 +1163,7 @@ const validarDatos = async(data: Documento) => {
             </Button>
         </template>
     </Dialog>
-<!-- DIALOG ENVIAR EMAIL -->
+    <!-- DIALOG ENVIAR EMAIL -->
     <Dialog
         v-model:visible="dialogEnviarMail"
         modal :closable="false"

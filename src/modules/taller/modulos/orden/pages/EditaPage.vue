@@ -16,17 +16,13 @@ import TabPanels from 'primevue/tabpanels';
 import TabPanel from 'primevue/tabpanel';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
-import Row from 'primevue/row';
 import AutoComplete from 'primevue/autocomplete';
 import Select from 'primevue/select';
-import Message from 'primevue/message';
 import { useToast } from 'primevue/usetoast';
 import { useAuthStore } from '@/stores/auth';
-import FileUpload from 'primevue/fileupload';
 import Toolbar from 'primevue/toolbar';
 import ProgressSpinner from 'primevue/progressspinner';
 import { useConfirm } from 'primevue/useconfirm';
-import ConfirmDialog from 'primevue/confirmdialog';
 import ConfirmPopup from 'primevue/confirmpopup';
 import Dialog from 'primevue/dialog';
 import SplitButton from 'primevue/splitbutton';
@@ -38,7 +34,6 @@ import Accordion from 'primevue/accordion';
 import AccordionPanel from 'primevue/accordionpanel';
 import AccordionHeader from 'primevue/accordionheader';
 import AccordionContent from 'primevue/accordioncontent';
-import Divider from 'primevue/divider';
 import DatePicker from 'primevue/datepicker';
 
 // optional styles
