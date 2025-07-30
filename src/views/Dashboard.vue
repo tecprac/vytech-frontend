@@ -667,6 +667,11 @@ export default defineComponent({
                     {{ convertTMZdatetime(data.fecha_alta) }}
                 </template>
             </Columna>
+            <Columna field="talle_tipo_servicio" header="Tipo Servicio" class="text-star">
+                <template #body="{data}">
+                    {{ data.talle_tipo_servicio.tipo_servicio }}
+                </template>
+            </Columna>
             <Columna field="adm_cliente" header="Cliente" class="text-star">
                 <template #body="{data}">
                     {{ data.adm_cliente.tipo_persona == 'Moral' ? data.adm_cliente.razon_social : data.adm_cliente.nombre }}

@@ -5,7 +5,10 @@ import { useToast } from 'primevue/usetoast';
 import type { 
     Documento, Documento_Detalle, adm_cp_adicionales, ConsultaCFDIResponse,
     adm_cp_mercancia, adm_cp_transporte, MailOptions, SatMotivoCancela,
-    adm_documento_relacionado, Documento_CFDI, MovtoCliente } from '../interfaces/interfaces';
+    adm_documento_relacionado, Documento_CFDI, MovtoCliente,
+    Permisos } from '../interfaces/interfaces';
+import type { AdmCtaBanco } from '../../pago/interfaces/interfaces';
+import type { Documento as Pago } from '../../pago/interfaces/interfaces';
 import type { Cliente } from '@/modules/administracion/catalogos/clientes/interfaces/interfaces';
 import type { FolioDocumento } from '@/modules/configuracion/folioDocumento/interfaces/interfaces';
 import type { Propietario } from '@/modules/administracion/catalogos/propietario/interfaces/interfaces';
@@ -276,6 +279,17 @@ const useDocumento = (id: number ) => {
                                         fin_vigencia:   null,
                                         activo:        true,
                                 });
+    const selectusocfdi_pago    = ref<UsoCFDI>({
+                                        id:             0,
+                                        c_usocfdi:      '',
+                                        descripcion:    '',
+                                        fisica:         '',
+                                        moral:          '',
+                                        regimen_receptor: '',
+                                        ini_vigencia:   null,
+                                        fin_vigencia:   null,
+                                        activo:        true,
+                                });
     const selectcliente         = ref();
     const clientesfiltrados     = ref<Cliente[]>([]);
     const selectproducto        = ref();
@@ -388,6 +402,84 @@ const useDocumento = (id: number ) => {
                                     descripcion:    '',
                                 });
     const foliosustitucion      = ref<string>('');
+    const dialogPago            = ref<boolean>(false);
+    const pago                  = ref<Pago>({
+                                    id: 				    0,
+                                    folio_documento_id:     0,
+                                    folio: 				    0,
+                                    serie: 				    ',',
+                                    ctabanco_id: 		    0,
+                                    formapago_id: 		    0,
+                                    moneda_id: 			    0,
+                                    tipocambio: 		    1.0000,
+                                    propietario_id: 	    0,
+                                    cliente_id: 		    0,
+                                    ctaordenante: 		    '',
+                                    id_bancoordenante: 	    0,
+                                    fecha_registro: 	    new Date(),
+                                    fecha_pago: 		    new Date(),
+                                    saldoafavor: 		    0,
+                                    doctosaldoafavor_id:    0,
+                                    importe: 			    0,
+                                    saldo: 				    0,
+                                    usuario_id: 		    0,
+                                    referencia: 		    '',
+                                    concepto: 			    '',
+                                    observaciones: 	        '',
+                                    estatus: 			    'Aplicado',
+                                    errortimbrado: 		    '',
+                                    filepdf: 			    '',
+                                    usocfdi_id: 		    0,
+                                    activo:                 true,
+                                });
+    const formaspago_pago       = ref<FormaPago[]>([]);
+    const selectformapago_pago  = ref<FormaPago>({
+                                        id: 0,
+                                        c_formapago: '',
+                                        descripcion: '',
+                                        bancarizado: '',
+                                        numerooperacion: '',
+                                        rfccuentaordenante: '',
+                                        cuentaordenante: '',
+                                        patronctaordenante: '',
+                                        rfccuentabeneficiario: '',
+                                        cuentabeneficiario: '',
+                                        patronctabeneficiario: '',
+                                        tipocadenapago: '',
+                                        bancoemisor: '',
+                                        ini_vigencia: null,
+                                        fin_vigencia:  null,
+                                        activo: true,
+                                });
+    const selectmoneda_pago     = ref<SatMoneda>({
+                                    id:         0,
+                                    c_moneda:   '',
+                                    descripcion: '',
+                                    decimales:  0,
+                                    activo:     true,
+                                });
+    const cuentasbanco          = ref<AdmCtaBanco[]>([]);
+    const selectcuentabanco     = ref<AdmCtaBanco>({
+                                    id:             0,
+                                    banco_id:       0,
+                                    descripcion:    '',
+                                    cuenta:         '',
+                                    clabe:          '',
+                                    propietario_id: 0,
+                                    titular:        '',
+                                    saldo:          0
+                                });
+    const foliosdoctos_pago     = ref<FolioDocumento[]>([]);
+    const selecfoliodocto_pago  = ref<FolioDocumento>({
+                                        id:             0,
+                                        modulo_id:      0,
+                                        folio_siguiente: 0,
+                                        documento:      '',
+                                        serie:          '',
+                                        activo:         true
+                                    });
+    const permisos              = ref<Permisos[]>([]);
+    const sPermisos             = ref<string>('');
     
     const { formatCurrency, formatNumber2Dec } = useUtilerias();
 
@@ -400,6 +492,10 @@ const useDocumento = (id: number ) => {
 
     onMounted(async () => {
         isPending.value = true;
+        permisos.value = store.permisos.filter((element: any) => element.codigo == '047'); // Administración->Modulos->Factura a Clientes
+        permisos.value.forEach(element => {
+            sPermisos.value += element.permiso+',';
+        });        
         foliosdoctos.value.splice(0);
         propietarios.value.splice(0);
         agentes.value.splice(0);
@@ -503,6 +599,10 @@ const useDocumento = (id: number ) => {
 
     const cambiaMoneda = () => {
         registro.value.moneda_id = selectmoneda.value.id;
+    }
+
+    const cambiaMoneda_pago = () => {
+        pago.value.moneda_id = selectmoneda_pago.value.id;
     }
 
     const buscarClientes = async (event:any) => {
@@ -1479,6 +1579,156 @@ const useDocumento = (id: number ) => {
         
     }
 
+    const openDialogPago = async () => {
+        toast.add({
+            severity:   'info',
+            summary:    `Consultando información de pagos...`,
+            group:      'waiting',    
+        });
+        pago.value = {
+                        id: 				    0,
+                        folio_documento_id:     0,
+                        folio: 				    0,
+                        serie: 				    ',',
+                        ctabanco_id: 		    0,
+                        formapago_id: 		    0,
+                        moneda_id: 			    0,
+                        tipocambio: 		    1.0000,
+                        propietario_id: 	    0,
+                        cliente_id: 		    0,
+                        ctaordenante: 		    '',
+                        id_bancoordenante: 	    0,
+                        fecha_registro: 	    new Date(),
+                        fecha_pago: 		    new Date(),
+                        saldoafavor: 		    0,
+                        doctosaldoafavor_id:    0,
+                        importe: 			    0,
+                        saldo: 				    0,
+                        usuario_id: 		    0,
+                        referencia: 		    '',
+                        concepto: 			    '',
+                        observaciones: 	        '',
+                        estatus: 			    'Aplicado',
+                        errortimbrado: 		    '',
+                        filepdf: 			    '',
+                        usocfdi_id: 		    0,
+                        activo:                 true,
+        };
+        formaspago_pago.value.splice(0);
+        foliosdoctos_pago.value.splice(0);
+        cuentasbanco.value.splice(0);
+        const response  = await ApiService.get2('Modulos/SearchByField/codigo/052',null);
+        const modulo = response.data[0];
+        const respfoliosdocto = await ApiService.get2(`FolioDocumento/SearchByModuloId/${modulo.id}`,null);
+        foliosdoctos_pago.value = <FolioDocumento[]>respfoliosdocto.data;
+        if (foliosdoctos_pago.value.length > 0 ) {
+            selecfoliodocto_pago.value = foliosdoctos_pago.value[0];
+            pago.value.folio  = selecfoliodocto.value.folio_siguiente;
+            pago.value.serie  = selecfoliodocto.value.serie;
+        } else {
+            Swal.fire({
+                title:  'No existe Folio',
+                html:   'No se encontraron Folios para este tipo de Documento.<br>Consulte a su Administrador',
+                icon:   "warning",
+                timer:  5000,
+            });
+        }
+        const resformaspago = await ApiService.get2('SatFormaPago/listado',null);
+        formaspago_pago.value = <FormaPago[]>resformaspago.data;
+        selectformapago_pago.value = formaspago_pago.value[0];
+        const respcuentasbanco = await ApiService.get2('AdmCtaBanco/listado',null);
+        cuentasbanco.value = <AdmCtaBanco[]>respcuentasbanco.data;
+        selectusocfdi_pago.value = usoscfdi.value.find(item => item.c_usocfdi == 'CP01')!;
+        if (cuentasbanco.value.length > 0) {
+            selectcuentabanco.value = cuentasbanco.value[0];
+        } else {
+            Swal.fire({
+                title:  'No existen Cuentas Bancarias',
+                html:   'No se encontraron Cuentas Bancarias registradas.<br>Consulte a su Administrador',
+                icon:   "warning",
+                timer:  5000,
+            });
+        }
+        selectmoneda_pago.value = monedas.value[0];
+        toast.removeGroup('waiting');
+        dialogPago.value = true;
+    }
+
+    const closeDialogPago = async (tipo:string) => {
+        if(tipo == 'cerrar') {
+            dialogPago.value = false;
+        } else {
+            if (pago.value.fecha_pago > new Date()) {
+                toast.add({
+                    severity:   'error', life:       3500,
+                    summary:    'La fecha de pago no puede ser futura',
+                });
+                return;
+            }
+            if (selectformapago_pago.value.id == 0) {
+                toast.add({
+                    severity:   'error', life:       3500,
+                    summary:    'Debe seleccionar una forma de pago',
+                });
+                return;
+            }
+            if (pago.value.importe > registro.value.saldo) {
+                toast.add({
+                    severity:   'error',life:       3500,
+                    summary:    'El Importe del pago es mayor al saldo',
+                });
+                return;
+            }
+            if (pago.value.importe == 0) {
+                toast.add({
+                    severity:   'error',life:       3500,
+                    summary:    'El Importe del pago debe ser mayor a 0',
+                });
+                return;
+            }
+            pago.value.folio_documento_id   = selecfoliodocto_pago.value.id;
+            pago.value.cliente_id           = registro.value.cliente_id;
+            pago.value.usuario_id           = store.user.id;
+            pago.value.formapago_id         = selectformapago_pago.value.id;
+            pago.value.usocfdi_id           = selectusocfdi_pago.value.id;
+            pago.value.moneda_id            = selectmoneda_pago.value.id;
+            pago.value.propietario_id       = registro.value.propietario_id;
+            pago.value.ctabanco_id          = selectcuentabanco.value.id;
+            pago.value.saldo                = pago.value.importe - registro.value.saldo;
+            pago.value.fecha_registro       = new Date();
+            try {
+                Swal.fire({
+                    title:  'Creando pago...',
+                    html:   'Aplicando saldo al documento y cliente...',
+                    showConfirmButton: false,
+                })
+                Swal.showLoading();                
+                const body = {
+                    registro_pago:  pago.value,
+                    detalle_pago:   registro.value,
+                    modulo_id:      52
+                }
+                const resppago = await ApiService.post(`AdmPago/PagarFactura`,body);
+                Swal.close();
+                Swal.fire({
+                    icon:   'success',
+                    title:  'Pago generado correctamente',
+                    html:   `Datos del pago Folio: ${resppago.data.folio} ${resppago.data.serie}`
+                });
+                const resdocto = await ApiService.get2(`AdmFactura/${id}`,null);
+                registro.value = resdocto.data;
+            } catch (error) {
+                toast.add({
+                    severity:   'error',
+                    summary:    'Error',
+                    detail:     'Se genero un error al generar el pago \n'+error,
+                    life: 3500,
+                });
+            }
+            dialogPago.value = false;
+        }
+    }
+
     const dataMutationNew = useMutation( { mutationFn: newRegistro,
                                                         onSuccess(data: Documento) {
                                                             toast.add({
@@ -1663,6 +1913,14 @@ const useDocumento = (id: number ) => {
         satmotivoscancela,
         selectmovitocancela,
         foliosustitucion,
+        dialogPago,
+        pago,
+        formaspago_pago,
+        selectformapago_pago,
+        selectmoneda_pago,
+        cuentasbanco,
+        selectcuentabanco,
+        sPermisos,
 
         newRegistro:        dataMutationNew.mutate,
         updateRegistro:     dataMutationUpdate.mutate,
@@ -1706,6 +1964,9 @@ const useDocumento = (id: number ) => {
         consultarEstatusSAT,
         cancelacionSAT,
         VistaPreviaPDF,
+        openDialogPago,
+        closeDialogPago,
+        cambiaMoneda_pago,
     }
 }
 

@@ -224,6 +224,7 @@ const usePago = (id: number) => {
                                         id:             0,
                                         pago_id:        0,
                                         documento_id:   0,
+                                        c_metodopago:   '',
                                         parcialidad:    0,
                                         importe:        0,
                                         saldoant:       0,
@@ -532,12 +533,85 @@ const usePago = (id: number) => {
         }
     }
 
+    const aplicar = async () => {
+        try {
+            bTimbrando.value = true;
+            toast.add({
+                severity:   'info',
+                summary:    `Aplicando documento...`,
+                group:      'waiting',    
+            });
+            Swal.fire({
+                title: 'Aplicando..',
+                html:   'Aplicando saldos en documentos y client...',
+                showConfirmButton: false
+            });
+            Swal.showLoading();
+            const body = {
+                usuario_id: store.user.id,
+                modulo_id:  56 // Pago a Clientes
+            }
+            const response = await ApiService.post(`AdmPago/Aplicar/${registro.value.id}`,body);
+            toast.removeGroup('waiting');
+            Swal.close();
+            if (response.status == 201 || response.status == 403) {
+                Swal.fire({
+                    title: 'Error al Aplicar Documento',
+                    icon:   'error',
+                    html:   response.data.message+
+                                '\n'+response.data.messageDetail,
+                    showCancelButton: false,
+                    showConfirmButton: true,
+                    confirmButtonColor: "#E10000",
+                    confirmButtonText:  "Aceptar"
+                });
+            } 
+            if (response.status == 200) {
+                Swal.fire({
+                    title: 'Documento Aplicado Correctamente',
+                    icon:   "success",
+                    showCancelButton: false,
+                    showConfirmButton: true,
+                    confirmButtonColor: "#E10000",
+                    confirmButtonText:  "Aceptar"
+                });
+                const responseregistro = await ApiService.get2(`AdmPago/${id}`,null);
+                registro.value = {...responseregistro.data};
+            }
+            bTimbrando.value = false;
+        } catch (error: any) {
+            Swal.close();
+            toast.removeGroup('waiting');
+            bTimbrando.value = false;
+            toast.add({
+                severity:   'error',
+                summary:    'Error al ntentar aplicar el documento\n'+error,
+                detail:     'Se genero el error '+error,
+                life:       4000
+            });
+        }
+    }
+
     const timbrarFactura = async () => {
         if (documento_detalles.value.length == 0){
             toast.add({
                 severity:'error', 
                 summary: 'Sin Conceptos',
                 detail: 'Debe agregar uno o mas conceptos al documento', life: 3500,
+            });
+            return;
+        }
+        let pue:number = 0;
+        for (let i = 0; i < documento_detalles.value.length; i++) {
+            const item = documento_detalles.value[i];
+            pue = +pue + (item.adm_documentos![0].sat_metodopago.c_metodopago == 'PUE' ? 1 : 0);
+        }
+        if (pue > 0) {
+            toast.add({
+                severity:   'error',
+                summary:    'No se puede Timbrar',
+                detail:     'Existen documento con Metodo de Pago PUE.\nElimine el documento para que pueda timbrar el pago',
+                life:       5000
             });
             return;
         }
@@ -935,7 +1009,6 @@ const usePago = (id: number) => {
                 const response = await ApiService.get2(`AdmPago/DetalleByDocumento/${registro.value.id}`,null)
                 documento_detalles.value.splice(0);
                 documento_detalles.value = <Documento_Detalle[]>response.data;
-                console.log(documento_detalles.value);
                 await CalcularTototales();
                 isUpdatingDetalle.value = false;
                 toast.add({
@@ -961,6 +1034,7 @@ const usePago = (id: number) => {
                                 id:             0,
                                 pago_id:        0,
                                 documento_id:   0,
+                                c_metodopago:   '',
                                 parcialidad:    0,
                                 importe:        0,
                                 saldoant:       0,
@@ -1007,6 +1081,47 @@ const usePago = (id: number) => {
             },
         });
     }
+
+    const VistaPreviaPDF = async () => {
+        filePDF.value = null;
+        try {
+            toast.add({
+                severity:   'info',
+                summary:    "Descargando archivo pdf...",
+                group:      'waiting',
+            });
+            const body = {
+                usuario_id: store.user.id,
+                modulo_id:  52
+            }
+            const responsefile = await ApiService.post(`AdmPago/VistaPrevia/${registro.value.id}`,body);
+            const filename = responsefile.data.filename;
+            const response = await ApiService.get2('download/temp/'+filename,{responseType: 'arraybuffer'});
+            if (response.status == 200) {
+                filePDF.value = response.data;
+                // const blob = new Blob([response.data], { type: 'application/pdf' });
+                pdfDocumento.value = URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+                toast.removeGroup('waiting');
+                dialogPDFVisor.value = true;
+            } else {
+                toast.removeGroup('waiting');
+                toast.add({
+                    severity:   "error",
+                    summary:    "Visualizar PDF",
+                    detail:     "No se logro descargar el archivo solicitado\n. Intentelo mas tarde.",
+                    life:       3500,
+                })
+            }    
+        } catch (error) {
+            toast.removeGroup('waiting');
+            toast.add({
+                severity:   "error",
+                summary:    "Visualizar PDF",
+                detail:     "No se logro descargar el archivo solicitado.\n Intentelo mas tarde.",
+                life:       3500,
+            });
+        }
+    }    
 
     const cerrarVisualizarPDF = () => {
         if (pdfDocumento.value) {
@@ -1447,6 +1562,8 @@ const usePago = (id: number) => {
         openDialogEmail,
         consultarEstatusSAT,
         cancelacionSAT,
+        aplicar,
+        VistaPreviaPDF,
     }
 
 }

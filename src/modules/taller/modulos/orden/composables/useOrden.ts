@@ -4,7 +4,7 @@ import ApiService from "@/core/services/ApiService";
 import { useToast } from 'primevue/usetoast';
 import type { Orden, Orden_Trabajo, Orden_Miscelaneo,  TrabajoBitacora,
     Producto, Requisicion, RequisicionDetalle, Permisos, Motivo, OrdenProducto,
-    OrdenBitacora } from '../interfaces/interfaces';
+    OrdenBitacora, Documento } from '../interfaces/interfaces';
 import type { Cliente } from '@/modules/administracion/catalogos/clientes/interfaces/interfaces';
 import type { Tecnico } from '@/modules/taller/catalogos/tecnico/interfaces/interfaces';
 import type { Unidad } from '@/modules/taller/catalogos/unidad/interfaces/interfaces';
@@ -270,6 +270,7 @@ const useOrden = ( id: number ) => {
     const agruparDiversos   = ref<boolean>(false);
     const costo_hora_trabajo= ref<number>(0);
     const ordenBitacora     = ref<OrdenBitacora[]>([]);
+    const documentos        = ref<Documento[]>([]);
 
     const { formatCurrency, formatNumber2Dec } = useUtilerias();
     const { PDFBlanco, PDFDatos, PDFDatosInterno } = useOrdenFormatos();
@@ -1276,6 +1277,9 @@ const useOrden = ( id: number ) => {
                     const respmotivo = await ApiService.get2(`Motivo/GetById/${registro.value.motivo_id}`,null);
                     motivo_cancela.value = respmotivo.data.descripcion;
                 }
+                const respdocumentos = await ApiService.get2(`AdmFactura/GetRegistrosByOrden/${id}`,null);
+                documentos.value.splice(0);
+                documentos.value = respdocumentos.data;
                 isPending.value = false;
             }
         }
@@ -1363,6 +1367,7 @@ const useOrden = ( id: number ) => {
         selectclientefact,
         costo_hora_trabajo,
         ordenBitacora,
+        documentos,
 
         newRegistro:        dataMutationNew.mutate,
         updateRegistro:     dataMutationUpdate.mutate,

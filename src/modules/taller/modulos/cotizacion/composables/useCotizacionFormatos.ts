@@ -76,7 +76,7 @@ const useCotizacionFormatos = () => {
         pdf.setLanguage("es-MX");
 
         autoTable(pdf,{
-            margin: { top: 185,left: 14,right: 14, bottom: 220 },
+            margin: { top: 185,left: 14,right: 14, bottom: 230 },
             headStyles: {
                 fillColor: [164,22,22],
                 fontSize: 9,

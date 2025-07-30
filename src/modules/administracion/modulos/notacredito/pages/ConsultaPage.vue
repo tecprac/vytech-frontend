@@ -154,6 +154,7 @@ const {
     openDialogEmail,
     consultarEstatusSAT,
     cancelacionSAT,
+    VistaPreviaPDF,
 } = useDocumento( +route.params.id );
 
 watch(isError, () => {
@@ -176,6 +177,9 @@ watch(isError, () => {
                         severity="secondary" label="Regresar" size="small"
                         class="ms-2" raised icon="pi pi-arrow-left"
                         @click="botonRegresar">
+                    </Button>
+                    <Button v-if="registro.id > 0  && registro.estatus != 'Timbrado'" raised icon="pi pi-eye" class="ms-2" severity="help" label="Vista Previa"
+                        size="small" @click="VistaPreviaPDF">
                     </Button>
                     <Button v-if="registro.id > 0" raised icon="pi pi-sort-alt-slash" class="ms-2" severity="info" label="Relacionar CFDI's"
                         size="small" @click="openDialogRelacionados"

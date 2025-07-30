@@ -114,6 +114,7 @@ const {
     agruparDiversos,
     selectclientefact,
     ordenBitacora,
+    documentos,
 
     newRegistro,
     updateRegistro,
@@ -409,6 +410,11 @@ const validarDatos = async (data: Orden) => {
                             <i class="pi pi-list-check" style="color: slateblue"></i>
                             Bitacora
                         </Tab>
+                        <Tab v-if="documentos" value="5" as="div" class="flex items-center gap-2" style="border-top-left-radius: 1rem; border-top-right-radius: 1rem;"
+                            :pt="{root: { class: tabActiva == '5' ? 'bg-primary bg-opacity-25' : 'bg-secondary'}}" >
+                            <i class="pi pi-folder-plus" style="color: slateblue"></i>
+                            Facturas
+                        </Tab>
                     </TabList>
                     <TabPanels>
                         <!-- Generales -->
@@ -662,6 +668,32 @@ const validarDatos = async (data: Orden) => {
                                     </template>
                                 </Column>
                                 <Column field="nota" header="Notas" :pt="{ headerCell: { class: 'bg-secondary'} }" />
+                            </DataTable>
+                         </TabPanel>
+                         <!-- Facturas/Documentos -->
+                         <TabPanel value="5">
+                            <DataTable :value="documentos"
+                                show-gridlines  
+                                scroll-height="300px" size="small" scrollable>
+                                <Column field="tipo_documento" header="Tipo Documento" :pt="{ headerCell: { class: 'bg-secondary'} }" ></Column>
+                                <Column field="folio" header="Folio" :pt="{ headerCell: { class: 'bg-secondary'} }" ></Column>
+                                <Column field="serie" header="Serie" :pt="{ headerCell: { class: 'bg-secondary'} }" ></Column>
+                                <Column field="estatus" header="Estatus" :pt="{ headerCell: { class: 'bg-secondary'} }" ></Column>
+                                <Column field="fecha" header="Fecha" :pt="{ headerCell: { class: 'bg-secondary'} }" >
+                                    <template #body="{data}">
+                                        {{  convertTMZdatetime(data.fecha)  }}
+                                    </template>
+                                </Column>
+                                <Column field="total" header="Total" class="text-end" :pt="{ headerCell: { class: 'bg-secondary'} }" >
+                                    <template #body="{data}">
+                                        {{  formatCurrency(data.total)  }}
+                                    </template>
+                                </Column>
+                                <Column field="saldo" header="Saldo" class="text-end" :pt="{ headerCell: { class: 'bg-secondary'} }" >
+                                    <template #body="{data}">
+                                        {{  formatCurrency(data.saldo)  }}
+                                    </template>
+                                </Column>
                             </DataTable>
                          </TabPanel>
                     </TabPanels>

@@ -130,6 +130,7 @@ const {
     cerrarVisualizarPDF,
     cerrarVisualizarXML,
     downloadXML,
+    VistaPreviaPDF,
 } = useDocumento(0);
 
 const validarDatos = async(data: Documento) => {
@@ -195,6 +196,9 @@ const validarDatos = async(data: Documento) => {
                             @click="validarDatos(registro)" size="small"
                             :disabled="registro.estatus != 'SinAplicar'">
                         </Button>
+                        <Button v-if="registro.id > 0  && registro.estatus != 'Timbrado'" raised icon="pi pi-eye" class="ms-2" severity="help" label="Vista Previa"
+                            size="small" @click="VistaPreviaPDF">
+                        </Button>                        
                         <Button v-if="registro.id > 0" raised icon="pi-sort-alt-slash" class="ms-2" severity="info" label="Relacionar CFDI's"
                             size="small" @click="openDialogRelacionados"
                             :badge="documentos_relacionados.length.toString()"

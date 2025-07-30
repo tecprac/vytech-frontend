@@ -292,3 +292,8 @@ export interface SatMotivoCancela {
 	c_motivo: 		string;
 	descripcion: 	string;
 }
+
+export interface Permisos {
+    modulo: string,
+    permiso: string,
+}

@@ -39,6 +39,10 @@ npm run dev
 npm run build
 ```
 
+### Para actualizar paquetes Node.js
+
+ncu -i
+
 ### Lint with [ESLint](https://eslint.org/)
 
 ```sh

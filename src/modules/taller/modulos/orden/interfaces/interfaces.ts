@@ -289,3 +289,35 @@ export interface OrdenBitacora {
     nota:           string,
     conf_usuario:   conf_usuario
 }
+
+export interface Documento {
+    id: number,
+    folio: number,
+    serie: string,
+    estatus: string,
+    tipo_documento: string,
+    fecha: string,
+    fecha_vence: string,
+    total: number,
+    saldo: number,
+    numparcialidad: number,
+    parcialidades: number,
+    adm_cliente: adm_cliente,
+    sat_metodopago: sat_metodopago,
+}
+
+interface adm_cliente {
+    tipo_persona:   string,
+    razon_social:   string,
+    nombres:        string,
+    apaterno:       string,
+    amaterno:       string,
+    rfc:            string
+}
+
+interface sat_metodopago {
+    c_metodopago:   string,
+    descripcion:    string
+}
+
+

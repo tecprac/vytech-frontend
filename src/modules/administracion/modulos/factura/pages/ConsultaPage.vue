@@ -36,6 +36,7 @@ import useUtilerias from '@/core/helpers/utilerias';
 import VuePdfEmbed from 'vue-pdf-embed'
 import { PrettyXml } from 'pretty-xml-vue3';
 import Editor from 'primevue/editor';
+import DatePicker from 'primevue/datepicker';
 
 // optional styles
 import 'vue-pdf-embed/dist/styles/annotationLayer.css'
@@ -111,6 +112,14 @@ const {
     satmotivoscancela,
     selectmovitocancela,
     foliosustitucion,
+    dialogPago,
+    pago,
+    formaspago_pago,
+    selectformapago_pago,
+    selectmoneda_pago,
+    cuentasbanco,
+    selectcuentabanco,
+    sPermisos,
 
     cambiaDocumento,
     cambiaMoneda,
@@ -141,6 +150,9 @@ const {
     consultarEstatusSAT,
     cancelacionSAT,
     VistaPreviaPDF,
+    openDialogPago,
+    closeDialogPago,
+    cambiaMoneda_pago,
 } = useDocumento( +route.params.id );
 
 watch(isError, () => {
@@ -180,6 +192,10 @@ watch(isError, () => {
                         <Button v-if="registro.id > 0 && (registro.estatus == 'SinAplicar' || (registro.estatus == 'Timbrado' && registro.saldo == registro.total)) " 
                             raised icon="pi pi-times-circle" class="ms-2" severity="danger" label="Cancelar"
                             size="small" @click="cancelarFactura" :loading="bTimbrando">
+                        </Button>
+                        <Button v-if="sPermisos.indexOf('Pagar') >= 0 && registro.id > 0 && registro.saldo > 0 && registro.estatus == 'Timbrado'" label="Pagar"
+                            size="small"  class="ms-2" raised severity="contrast" icon="pi pi-wallet"
+                            @click="openDialogPago">
                         </Button>
                         <Button v-if="registro.id > 0 && registro.saldo != registro.total && registro.estatus != 'SinAplicar'" label="Movimientos"
                             size="small"  class="ms-2" raised severity="info" icon="pi pi-dollar"
@@ -1477,6 +1493,97 @@ watch(isError, () => {
                     root: { class: 'mt-2'}
                 }"
             >
+            </Button>
+        </template>
+    </Dialog>
+    <!-- DIALOGO PAGO DE FACTURA -->
+    <Dialog
+        v-model:visible="dialogPago"
+        modal :closable="false"
+        header="Aplicación de Pago"
+        :style="{width: '75rem'}"
+        :breakpoints="{ '960px': '75vw', '641px': '100vw' }"
+        :pt = " { 
+                    header: { class: 'bg-secondary' },
+                    // content: { style: 'height: 360px'},
+                    footer: { class: 'bg-secondary' } 
+                }">
+        <div class="row mt-4 mb-2">
+            <label for="fechapago" class="col-form-label col-sm-2">Fecha Pago</label>
+            <div class="col-sm-2">
+                <DatePicker v-model="pago.fecha_pago"
+                    show-icon :show-on-focus="false" fluid
+                    :pt = "{ pcInputText: { root: {  class: 'text-end' } } }">
+                </DatePicker>
+            </div>
+            <label for="formapago" class="col-form-label col-sm-1">
+                
+            </label>
+            <label for="formapago" class="required col-form-label col-sm-2">
+                Forma Pago
+            </label>
+            <div class="col-sm-4">
+                <Select
+                    v-model="selectformapago_pago"
+                    fluid 
+                    :options="formaspago_pago" variant="filled"
+                    :option-label="(data) => data.c_formapago+' '+data.descripcion"
+                    placeholder="Seleccione una Forma de Pago">
+                </Select>                                                
+            </div>
+        </div>
+        <div class="row mb-2">
+            <label for="moneda" class="col-form-label col-sm-2">Moneda</label>
+            <div class="col-sm-3">
+                <Select
+                    v-model="selectmoneda_pago" :options="monedas"
+                    option-label="descripcion" fluid 
+                    @change="cambiaMoneda_pago" variant="filled">
+                </Select>
+            </div>
+            <label for="tipocambio" class="col-form-label col-sm-2">Tipo Cambio</label>
+            <div class="col-sm-2">
+                <InputNumber v-model="pago.tipocambio" :min="0.0000" :max="99.9999" 
+                    mode="currency" currency="USD" locale="en-US" fluid 
+                    :min-fraction-digits="4" :max-fraction-digits="4" disabled
+                    :pt="{ pcInputText: { root:{ class: 'text-end'}} }">
+                </InputNumber>
+            </div>
+        </div>
+        <div class="row mb-2">
+            <label for="cuenta_banco" class="col-form-label col-sm-2">Cuenta Bancaria</label>
+            <div class="col-sm-3">
+                <Select
+                    v-model="selectcuentabanco" :options="cuentasbanco"
+                    option-label="descripcion" fluid variant="filled">
+                </Select>
+            </div>
+            <label for="importe" class="required col-form-label col-sm-2">
+                Importe
+            </label>
+            <div class="col-sm-2">
+                <InputNumber id="importe" v-model="pago.importe" 
+                    :min="0" :max="9999999.99" :max-fraction-digits="2" :min-fraction-digits="2" fluid
+                    mode="currency" currency="MXN" locale="es-MX" highlight-on-focus
+                    :pt="{ pcInputText: { root:{ class: 'text-end text-primary'}}}">
+                </InputNumber>
+            </div>
+        </div>
+        <template #footer>
+            <Button 
+                @click="closeDialogPago('cerrar')"
+                label="Cerrar" raised
+                severity="secondary"
+                icon="pi pi-times"
+                :pt="{ root: { class: 'mt-2'} }">
+            </Button>
+            <Button v-if="tipo_detalle_operacion != 'Show'"
+                label="Aplicar Pago" raised
+                severity="success"
+                :loading="isUpdatingDetalle"
+                icon="pi pi-check"
+                @click="closeDialogPago('guardar')"
+                :pt="{ root: { class: 'mt-2'} }">
             </Button>
         </template>
     </Dialog>

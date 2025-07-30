@@ -41,12 +41,13 @@ export interface Documento_Detalle {
     id:             number;
 	pago_id:        number;
 	documento_id:   number;
+    c_metodopago:   string;
 	parcialidad:    number;
 	importe:        number;
 	saldoant:       number;
 	saldoinsoluto?: number | null;
 	notas?:         string | null;
-    adm_documento?: adm_documento | null;
+    adm_documentos?: adm_documento | null;
 }
 
 export interface Documento_CFDI {
@@ -79,22 +80,28 @@ export interface Documento_CFDI {
 }
 
 export interface Factura {
-    id:             number,
-    folio:          number,
-    serie:          string,
-    estatus:        string,
-    tipo_documento: string,
-    fecha:          Date,
-    fecha_vence:    Date,
-    total:          number,
-    saldo:          number,
-    adm_cliente?:   adm_cliente | null,
+    id:                 number,
+    folio:              number,
+    serie:              string,
+    estatus:            string,
+    tipo_documento:     string,
+    fecha:              Date,
+    fecha_vence:        Date,
+    total:              number,
+    saldo:              number,
+    adm_cliente?:       adm_cliente | null,
+    sat_metodopago?:    sat_metodopago | null,
 }
 
 interface sat_tipodecomprobante {
     id:                     number;
 	c_tipodecomprobante:    string;
 	descripcion:            string;
+}
+
+interface sat_metodopago {
+    c_metodopago:   string,
+    descripcion:    string,
 }
 
 interface adm_cliente {

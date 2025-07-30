@@ -128,6 +128,7 @@ const {
     openDialogEmail,
     consultarEstatusSAT,
     cancelacionSAT,
+    VistaPreviaPDF,
 } = usePago( +route.params.id );
 
 watch(isError, () => {
@@ -151,15 +152,18 @@ watch(isError, () => {
                         class="ms-2" raised icon="pi pi-arrow-left"
                         @click="botonRegresar">
                     </Button>
-                    <Button v-if="registro.id > 0" raised icon="pi-sort-alt-slash" class="ms-2" severity="info" label="Relacionar CFDI's"
+                    <Button v-if="registro.id > 0  && registro.estatus != 'Timbrado' && registro.estatus != 'Cancelado'" raised icon="pi pi-eye" class="ms-2" severity="help" label="Vista Previa"
+                            size="small" @click="VistaPreviaPDF">
+                    </Button>
+                    <Button v-if="registro.id > 0" raised icon="pi pi-sort-alt-slash" class="ms-2" severity="info" label="Relacionar CFDI's"
                         size="small" @click="openDialogRelacionados"
                         :badge="documentos_relacionados.length.toString()"
                         :badge-severity="(documentos_relacionados.length == 0 ? 'info': 'danger')">
                     </Button>
-                    <Button v-if="registro.id > 0 && (registro.estatus == 'Aplicado')" raised icon="pi-qrcode" class="ms-2 text-black" severity="success" label="Des-Aplicar"
+                    <Button v-if="registro.id > 0 && (registro.estatus == 'Aplicado')" raised icon="pi pi-sync" class="ms-2 text-black" severity="success" label="Des-Aplicar"
                         size="small" @click="desAplicar" :loading="bTimbrando">
                     </Button>
-                    <Button v-if="registro.id > 0" raised icon="pi-qrcode" class="ms-2 text-black" severity="warn" label="Timbrar"
+                    <Button v-if="registro.id > 0" raised icon="pi pi-qrcode" class="ms-2 text-black" severity="warn" label="Timbrar"
                         size="small" @click="timbrarFactura" :loading="bTimbrando"
                         :disabled="registro.estatus == 'Timbrado' || registro.estatus == 'Cancelado'">
                     </Button>
@@ -327,6 +331,11 @@ watch(isError, () => {
                             <Column header="Documento" :pt="{ headerCell: { class: 'bg-secondary'} }">
                                 <template #body="slotProps">
                                     {{ slotProps.data.adm_documentos[0].tipo_documento+' '+slotProps.data.adm_documentos[0].folio+' '+slotProps.data.adm_documentos[0].serie }}
+                                </template>
+                            </Column>
+                            <Column header="MetodoPago" class="text-center" :pt="{ headerCell: { class: 'bg-secondary'} }">
+                                <template #body="slotProps">
+                                    {{ slotProps.data.adm_documentos[0].sat_metodopago.c_metodopago }}
                                 </template>
                             </Column>
                             <Column header="Fecha.Docto" :pt="{ headerCell: { class: 'bg-secondary'} }">
