@@ -236,7 +236,7 @@ const MainMenuConfig: Array<MenuItem> = [
                             },
                             {
                                 heading:    'Bitacora de Unidad',
-                                route:      '/modules/taller/modulos/bitacora',
+                                route:      '/modules/taller/modulos/bitacoraunidad',
                                 codigo:     '024',
                             },
                         ]

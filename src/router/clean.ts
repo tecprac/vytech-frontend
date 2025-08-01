@@ -1732,7 +1732,29 @@ const routes: Array<RouteRecordRaw> = [
                         }
                     },
                 ]
-            },            
+            },
+            // Menú Taller-Modulos Bitacora Unidad
+            {
+                path: "/modules/taller/modulos/bitacoraunidad",
+                name: "bitacoraunidad",
+                component: () => import(/* webpackChunkName: "bitacoraunidad" */ "@/modules/taller/modulos/bitracoraunidad/layouts/BitacoraLayout.vue"),
+                meta: {
+                    pageTitle:      'Bitácora de Unidad',
+                    breadcrumbs:    ['Taller','Bitácora de Unidad'],
+                    codigo: '024'
+                },
+                redirect: { name: 'bitacoraunidadindex'},
+                children: [
+                    {
+                        path: 'bitacoraunidadindex',
+                        name: 'bitacoraunidadindex',
+                        component: () => import(/* webpackChunkName: "bitacoraunidadindex" */ "@/modules/taller/modulos/bitracoraunidad/pages/IndexPage.vue"),
+                        meta: {
+                            pageTitle: 'Bitácora de Unidad'
+                        }
+                    }
+                ]
+            },
         ],
     },
     {

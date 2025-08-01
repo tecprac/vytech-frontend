@@ -1,0 +1,30 @@
+export interface BitTrabajo {
+    id:                 number,
+    fecha:              Date,
+    estatus:            string,
+    horas_estandar:     number,
+    horas_facturadas:   number,
+    notas:              string,
+    trabajo:            string,
+    codigo_trabajo:     string,
+    tecnico:            string,
+    fecha_orden:        Date,
+    folio:              number,
+    estatus_orden:      string,
+}
+
+export interface BitRefaccion {
+    id:             number,
+    requisicion_id: number,
+    producto_id:    number,
+    cantidad:       number,
+    costo:          number,
+    costo_total:    number,
+    precio:         number,
+    importe:        number,
+    descripcion:    string,
+    codigo:         string,
+    costo_alterno:  string,
+    folio:          number,
+    fecha_alta:     Date,
+}
